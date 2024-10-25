@@ -2,11 +2,11 @@ import pygame
 import random
 import math
 
-from piece import Piece
-from button import Button
-from node import Node
-from player import Player
-from board import Board
+from classes.piece import Piece
+from classes.button import Button
+from classes.node import Node
+from classes.player import Player
+from classes.board import Board
 
 #initialize game
 pygame.init()

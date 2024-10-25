@@ -3,7 +3,7 @@ import math
 import random
 
 from node import Node
-from tile import Tile
+from classes.tile import Tile
 
 
 
