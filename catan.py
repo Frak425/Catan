@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+import numpy
 
 from piece import Piece
 from button import Button
