@@ -62,7 +62,7 @@ class Board:
         pygame.draw.polygon(self.city_green, (0, 255, 0), city_points)
         pygame.draw.polygon(self.city_yellow, (200, 200, 0), city_points)
 
-    def midpoint(point1: tuple[int], point2: tuple[int]) -> tuple:
+    def midpoint(self, point1: tuple[int], point2: tuple[int]) -> tuple:
         return ((point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2)
 
     def assign_tile_locations(self) -> None:
@@ -128,7 +128,7 @@ class Board:
 
             #Find the center of each tile
             center = (top[0], top[1] + self.radius_corner)
-            self.tiles.append(Tile(self.tiles_names[i], nodes_on_hex, color, center, self.numbers[self.number_indicies[i] - 1], points))
+            self.tiles.append(Tile(self.tiles_names[i], nodes_on_hex, color, center, self.numbers[self.number_indicies[i] - 1], points, self.screen))
 
     """def flatten_nodes(self) -> None:
         i = 0
