@@ -2,7 +2,7 @@ import pygame
 import math
 import random
 
-from node import Node
+from classes.node import Node
 from classes.tile import Tile
 
 
