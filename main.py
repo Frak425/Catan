@@ -17,9 +17,9 @@ screen_h = screen_info.current_h
 screen = pygame.display.set_mode((screen_w, screen_h))
 
 #set caption and icon
-"""pygame.display.set_caption("Space Invaders")
-icon = pygame.image.load('Downloads/ufo.png')
-pygame.display.set_icon(icon)"""
+pygame.display.set_caption("Catan")
+icon = pygame.image.load('')
+pygame.display.set_icon(icon)
 
 clock = pygame.time.Clock()
 
