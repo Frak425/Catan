@@ -2,7 +2,7 @@ import pygame
 import math
 import random
 
-from node import Node
+from classes.node import Node
 
 class Tile:
     def __init__(self, resource_type: str, nodes: list[list[Node]], color: tuple, center: tuple, number: int, points: list[tuple], screen) -> None:

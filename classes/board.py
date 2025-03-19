@@ -15,13 +15,13 @@ settlement_sprite_names_forward = ["s_red_f", "s_blue_f", "s_white_f", "s_yellow
 settlement_sprite_names_left = ["s_red_l", "s_blue_l", "s_white_l", "s_yellow_l", "s_green_l", "s_brown_l"]
 settlement_sprite_names_right = ["s_red_r", "s_blue_r", "s_white_r", "s_yellow_r", "s_green_r", "s_brown_r"]
 
-city_sprite_names_forward = ["c_red_f", "c_blue_f", "c_white_f", "c_yellow_f", "c_green_f", "c_brown_f"]
-city_sprite_names_left = ["c_red_l", "c_blue_l", "c_white_l", "c_yellow_l", "c_green_l", "c_brown_l"]
-city_sprite_names_right = ["c_red_r", "c_blue_r", "c_white_r", "c_yellow_r", "c_green_r", "c_brown_r"]
+#city_sprite_names_forward = ["c_red_f", "c_blue_f", "c_white_f", "c_yellow_f", "c_green_f", "c_brown_f"]
+#city_sprite_names_left = ["c_red_l", "c_blue_l", "c_white_l", "c_yellow_l", "c_green_l", "c_brown_l"]
+#city_sprite_names_right = ["c_red_r", "c_blue_r", "c_white_r", "c_yellow_r", "c_green_r", "c_brown_r"]
 
-road_sprite_names_forward = ["c_red_f", "c_blue_f", "c_white_f", "c_yellow_f", "c_green_f", "c_brown_f"]
+#road_sprite_names_forward = ["c_red_f", "c_blue_f", "c_white_f", "c_yellow_f", "c_green_f", "c_brown_f"]
 road_sprite_names_left = ["c_red_l", "c_blue_l", "c_white_l", "c_yellow_l", "c_green_l", "c_brown_l"]
-road_sprite_names_right = ["c_red_r", "c_blue_r", "c_white_r", "c_yellow_r", "c_green_r", "c_brown_r"]
+#road_sprite_names_right = ["c_red_r", "c_blue_r", "c_white_r", "c_yellow_r", "c_green_r", "c_brown_r"]
 
 sprites = {}
 
@@ -85,7 +85,7 @@ class Board:
         other_sxs = 29
         total_sxs = number_sxs + text_sxs + other_sxs
 
-        sprite_sheet = pygame.image.load('Assets/New Piskel (2).png')
+        sprite_sheet = pygame.image.load('Assets/New Piskel (6).png')
         top_left_offset_x, top_left_offset_y = (3, 3)
         sprite_sheet_w, sprite_sheet_h = sprite_sheet.get_size()
         section_size = 64
@@ -94,18 +94,9 @@ class Board:
         assignment_mode = "number"
         row_counter = 1
 
+        change_mode_at_idx = [5, 18, 26, 31, 36] #needs to change as sprite sheets change
         for sxs_idx in range(total_sxs):
-            change_mode_at_idx = [6, 19, 1, 1] #needs to change as sprite sheets change
             item_counter = sxs_idx % (sprite_sheet_w / 64) #currently goes up to 7. last row (row 3) should stop at 6
-            #Chage logic in future to add
-            if item_counter == change_mode_at_idx[0]: #after the 6th 64x64, the sprite sheet reads letters. Doesn't matter if repeated bc the counter doesn't return to this number
-                assignment_mode = "text"
-            if item_counter == change_mode_at_idx[1]:
-                assignment_mode = "settlement_forward"
-            if item_counter == change_mode_at_idx[2]:
-                assignment_mode = "settlement_forward"
-            if item_counter == change_mode_at_idx[3]:
-                assignment_mode = "settlement_right"
 
             temp_surface = pygame.Surface((64, 64))
             x = section_size * (item_counter - 1)
@@ -149,12 +140,13 @@ class Board:
                 temp_surface_bottom_right.blit(temp_surface, (0, 0), [top_left_offset_x + half_surface_length, top_left_offset_y + half_surface_length, subsurface_length, subsurface_width])
 
                 sxs_idx_offset = change_mode_at_idx[0]
-                sprites[text_sprite_names[sxs_idx - sxs_idx_offset]] = temp_surface_top_left
-                sprites[text_sprite_names[sxs_idx - sxs_idx_offset + 1]] = temp_surface_bottom_left
-                sprites[text_sprite_pressed_names[sxs_idx - sxs_idx_offset]] = temp_surface_top_right
-                sprites[text_sprite_pressed_names[sxs_idx - change_mode_at_idx[0] + 1]] = temp_surface_bottom_right
+                sprites[text_sprite_names[sxs_idx - sxs_idx_offset - 1]] = temp_surface_top_left
+                sprites[text_sprite_names[sxs_idx - sxs_idx_offset]] = temp_surface_bottom_left
+                sprites[text_sprite_pressed_names[sxs_idx - sxs_idx_offset - 1]] = temp_surface_top_right
+                sprites[text_sprite_pressed_names[sxs_idx - sxs_idx_offset]] = temp_surface_bottom_right
 
             elif assignment_mode == "settlement_forward":
+                return
                 sxs_idx_offset = change_mode_at_idx[1]
                 sprites[settlement_sprite_names_forward[sxs_idx - sxs_idx_offset]]
 
@@ -166,30 +158,39 @@ class Board:
                 sxs_idx_offset = change_mode_at_idx[3]
                 sprites[settlement_sprite_names_right[sxs_idx - sxs_idx_offset]]
 
-            elif assignment_mode == "city_forward":
-                sxs_idx_offset = change_mode_at_idx[4]
-                sprites[city_sprite_names_forward[sxs_idx - sxs_idx_offset]]
+                """
+                elif assignment_mode == "city_forward":
+                    sxs_idx_offset = change_mode_at_idx[4]
+                    sprites[city_sprite_names_forward[sxs_idx - sxs_idx_offset]]
 
-            elif assignment_mode == "city_left":
-                sxs_idx_offset = change_mode_at_idx[5]
-                sprites[city_sprite_names_left[sxs_idx - sxs_idx_offset]]
+                elif assignment_mode == "city_left":
+                    sxs_idx_offset = change_mode_at_idx[5]
+                    sprites[city_sprite_names_left[sxs_idx - sxs_idx_offset]]
 
-            elif assignment_mode == "city_right":
-                sxs_idx_offset = change_mode_at_idx[6]
-                sprites[city_sprite_names_right[sxs_idx - sxs_idx_offset]]
-
-            elif assignment_mode == "road_forward":
+                elif assignment_mode == "city_right":
+                    sxs_idx_offset = change_mode_at_idx[6]
+                    sprites[city_sprite_names_right[sxs_idx - sxs_idx_offset]]"""
+                """elif assignment_mode == "road_forward":
                 sxs_idx_offset = change_mode_at_idx[7]
                 sprites[road_sprite_names_forward[sxs_idx - sxs_idx_offset]]
-
+"""
+            
             elif assignment_mode == "road_left":
-                sxs_idx_offset = change_mode_at_idx[8]
+                sxs_idx_offset = change_mode_at_idx[4]
                 sprites[road_sprite_names_left[sxs_idx - sxs_idx_offset]]
-
+                """
             elif assignment_mode == "road_right":
                 sxs_idx_offset = change_mode_at_idx[9]
-                sprites[road_sprite_names_right[sxs_idx - sxs_idx_offset]]
-            
+                sprites[road_sprite_names_right[sxs_idx - sxs_idx_offset]]"""
+            #Chage logic in future to add
+            if sxs_idx == change_mode_at_idx[0]: #after the 6th 64x64, the sprite sheet reads letters. Doesn't matter if repeated bc the counter doesn't return to this number
+                assignment_mode = "text"
+            elif sxs_idx == change_mode_at_idx[1]:
+                assignment_mode = "settlement_forward"
+            elif sxs_idx == change_mode_at_idx[2]:
+                assignment_mode = "settlement_forward"
+            elif sxs_idx == change_mode_at_idx[3]:
+                assignment_mode = "settlement_right"
 
     def midpoint(self, point1: tuple[int], point2: tuple[int]) -> tuple:
         return ((point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2)
@@ -229,8 +230,6 @@ class Board:
             city4 = Node("city", points[3])
             city5 = Node("city", points[4])
             city6 = Node("city", points[5])
-
-            print((points[0], points[1]))
 
             road1 = Node("road", self.midpoint(points[0], points[1]))
             road2 = Node("road", self.midpoint(points[1], points[2]))
