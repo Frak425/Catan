@@ -1,32 +1,34 @@
 import pygame
-import pytweening as tween
+from classes.toggle import Toggle
+from helperFunctions import *
 
 pygame.init()
-screen = pygame.display.set_mode((800, 600))
+#set resolution
+screen_info = pygame.display.Info()
+screen_w = screen_info.current_w
+screen_h = screen_info.current_h
+screen = pygame.display.set_mode((screen_w, screen_h))
+
 clock = pygame.time.Clock()
 
-start_pos = (100, 100)
-end_pos = (400, 300)
-duration = 2  # seconds
-elapsed_time = 0
+l = 25
+w = l
+toggle = Toggle(screen, (screen_w / 2, screen_h / 2), size = (l, w), checked = False)
+#slider = Slider(screen, (screen_w / 2, screen_h / 2), 200)
 
 running = True
 while running:
-    dt = clock.tick(60) / 1000
+    toggle.draw()
+    clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = pygame.mouse.get_pos()
 
-    elapsed_time = min(elapsed_time + dt, duration)
-    t = elapsed_time / duration
-    eased_t = tween.easeInOutQuad(t)
-    current_pos = (
-        start_pos[0] + (end_pos[0] - start_pos[0]) * eased_t,
-        start_pos[1] + (end_pos[1] - start_pos[1]) * eased_t,
-    )
+            if check_point_in_rect(toggle.rect, (x, y)):
+                toggle.handle_click()
 
-    screen.fill((0, 0, 0))
-    pygame.draw.rect(screen, (255, 0, 0), (*current_pos, 100, 50))
     pygame.display.flip()
 
 pygame.quit()
