@@ -4,12 +4,12 @@ import math
 
 from helperFunctions import *
 
-from classes.piece import Piece
-from classes.button import Button
-from classes.node import Node
-from classes.player import Player
-from classes.board import Board
-from classes.menu import Menu
+from src.entities.piece import Piece
+from src.ui.button import Button
+from src.entities.node import Node
+from src.entities.player import Player
+from src.entities.board import Board
+from src.ui.menu import Menu
 
 #initialize game
 pygame.init()

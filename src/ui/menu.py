@@ -1,5 +1,5 @@
 import pygame
-from classes.button import Button
+from src.ui.button import Button
 import pytweening as tween
 from helperFunctions import *
 
@@ -13,7 +13,7 @@ class Menu:
         self.game_font = game_font
         # IN PROGRESS: adding tabs to the settings menu to further organize the settings
         self.tabs = [] #[input, accessibility, gameplay, audio, graphics]
-        self.selected_tab = self.tabs[0]
+        #self.selected_tab = self.tabs[0]
 
         self.buttons = self.create_buttons()
 

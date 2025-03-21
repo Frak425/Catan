@@ -1,5 +1,5 @@
 import pygame
-from classes.button import Button
+from src.ui.button import Button
 
 #global functions
 def midpoint(point1: tuple[int], point2: tuple[int]) -> tuple:

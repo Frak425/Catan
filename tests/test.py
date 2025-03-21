@@ -1,5 +1,5 @@
 import pygame
-from classes.toggle import Toggle
+from src.ui.toggle import Toggle
 from helperFunctions import *
 
 pygame.init()

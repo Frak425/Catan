@@ -2,8 +2,8 @@ import pygame
 import math
 import random
 
-from classes.node import Node
-from classes.tile import Tile
+from src.entities.node import Node
+from src.entities.tile import Tile
 
 number_sprite_names = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 number_sprite_pressed_names = ["0_p", "1_p", "2_p", "3_p", "4_p", "5_p", "6_p", "7_p", "8_p", "9_p"]

@@ -1,7 +1,7 @@
 import pygame
 import random
 
-from classes.button import Button
+from src.ui.button import Button
 
 class Drag_n_drop(Button):
     def __init__(self, layer: str, color: tuple[int], text: str, rect: list[int], var_name: str, screen, font) -> None:
