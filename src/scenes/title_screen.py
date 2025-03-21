@@ -3,14 +3,15 @@ from ui.button import Button
 from managers.game_manager import GameManager
 
 class TitleScreen:
-    def __init__(self):
+    def __init__(self, game_manager: GameManager):
         self.buttons = self.create_buttons()
+        self.game_manager = game_manager
 
     def create_buttons(self):
         play_b_w = 200
         play_b_h = 75
-        play_button = Button("main_menu", (0, 100, 0), "PLAY", [screen_w / 2 - play_b_w / 2, screen_h / 2 - play_b_h / 1.75, play_b_w, play_b_h], "play", screen, game_font, (0, 0))
-        quit_button = Button("main_menu", (100, 0, 0), "QUIT", [screen_w / 2 - play_b_w / 2, screen_h / 2 + play_b_h / 1.75, play_b_w, play_b_h], "quit", screen, game_font, (0, 0))
+        play_button = Button("main_menu", (0, 100, 0), "PLAY", [self.game_manager.screen_size[0] / 2 - play_b_w / 2, self.game_manager.screen_size[1] / 2 - play_b_h / 1.75, play_b_w, play_b_h], "play", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        quit_button = Button("main_menu", (100, 0, 0), "QUIT", [self.game_manager.screen_size[0] / 2 - play_b_w / 2, self.game_manager.screen_size[1] / 2 + play_b_h / 1.75, play_b_w, play_b_h], "quit", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         title_screen_buttons = [play_button, quit_button]
 
 
