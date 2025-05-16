@@ -1,7 +1,8 @@
 import pygame
+from src.managers import *
 from src.ui.button import Button
+
 import pytweening as tween
-from helperFunctions import *
 
 class Menu:
     def __init__(self, screen: pygame.Surface, game_font: pygame.Font , type: str,  menu_size: tuple[int], init_location: tuple = None, final_location: tuple = None, backdrop: pygame.Surface = None, bckg_color: tuple[int] = None, anim_length: int = None, start_time: float = None) -> None:
@@ -102,21 +103,7 @@ class Menu:
                 
             else:
                 print("Error: incorrect tab name")
-
-        """ settings_frame_rate_increase_button = Button("settings", (0, 0, 0), "->", [10, 10, 10, 10], "settings_frame_rate_increase", self.screen, self.game_font, (0, 0))
-        settings_frame_rate_decrease_button = Button("settings", (0, 0, 0), "<-", [10, 10, 10, 10], "settings_frame_rate_decrease", self.screen, self.game_font, (0, 0))
-        settings_audio_on_off_button = Button("settings", (0, 0, 0), "on", [10, 10, 10, 10], "settings_audio_on_off", self.screen, self.game_font, (0, 0))
-        
-        settings_close_button_size = (100, 50)
-        settings_close_button_offset = 30
-        settings_close_button_x = self.menu_size[0] - settings_close_button_size[0] - settings_close_button_offset
-        settings_close_button_y = settings_close_button_offset
-        settings_close_button = Button("settings", (100, 0, 0), "X", [settings_close_button_x, settings_close_button_y, settings_close_button_size[0], settings_close_button_size[1]], "settings_close", self.screen, self.game_font, (0, 0))
-        
-        
-        settings_buttons = [settings_frame_rate_increase_button, settings_frame_rate_decrease_button, settings_audio_on_off_button, settings_close_button]
-        """
-        
+     
         return settings_buttons
 
     #TODO: Find a way to deal with buttons' functions. How do they interact with the game as a whole?
@@ -153,7 +140,7 @@ class Menu:
         self.open = False
         self.location = self.init_location
 
-    def draw_menu(self, time):
+    def draw(self, time):
         if self.type == "animated":
             self.update_offset(time)
         self.screen.blit(self.menu_surface, self.location)

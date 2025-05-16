@@ -1,6 +1,5 @@
 import pygame
-from entities.player import Player
-pygame.draw.rect()
+from src.entities.player import Player
 
 class PlayerManager:
     def __init__(self, player_list: list[Player]):

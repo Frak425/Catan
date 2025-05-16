@@ -1,5 +1,5 @@
 import pygame
-from ui.button import Button
+from src.ui.button import Button
 
 class HelperManager:
     def __init__(self):

@@ -1,9 +1,9 @@
 from pygame import *
 import pygame
-from helperFunctions import *
+from managers.helper_manager import HelperManager
 
 class Toggle:
-    def __init__(self, screen: Surface, location: tuple[int], unchecked_box: Surface=None, checkmark: Surface=None, size: tuple[int]=(25, 25), checked=False) -> None:
+    def __init__(self, screen: Surface, helper_manager: HelperManager, location: tuple[int], unchecked_box: Surface=None, checkmark: Surface=None, size: tuple[int]=(25, 25), checked=False) -> None:
         #TODO: Create assets for box and checkmark
         self.screen = screen
         self.location = location
