@@ -5,16 +5,24 @@ if TYPE_CHECKING:
     from graphics_manager import GraphicsManager
     from helper_manager import HelperManager
 
-from ui.button import Button
-from entities.node import Node
+from src.ui.button import Button
+from src.entities.node import Node
 
 class InputManager:
-    def __init__(self, game_manager: GameManager, graphics_manager: GraphicsManager, helper_manager: HelperManager):
-        self.game_manager = game_manager
-        self.graphics_manager = graphics_manager
-        self.helper_manager = helper_manager
+    def __init__(self):
+        self.game_manager = None
+        self.graphics_manager = None
+        self.helper_manager = None
         self.buttons = self.create_buttons()
-        pass
+
+    def set_game_manager(self, game_manager: 'GameManager'):
+        self.game_manager = game_manager
+
+    def set_graphics_manager(self, graphics_manager: 'GraphicsManager'):
+        self.graphics_manager = graphics_manager
+
+    def set_helper_manager(self, helper_manager: 'HelperManager'):
+        self.helper_manager = helper_manager
 
     def create_buttons(self) -> object:
         #create title screen

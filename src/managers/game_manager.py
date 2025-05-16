@@ -1,9 +1,9 @@
 import pygame
 from pygame import *
 
-from entities.player import Player
-from entities.board import Board
-from ui.menu import Menu
+from src.entities.player import Player
+from src.entities.board import Board
+from src.ui.menu import Menu
 
 class GameManager:
     def __init__(self, screen: Surface) -> None:

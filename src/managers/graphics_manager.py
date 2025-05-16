@@ -3,12 +3,22 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from game_manager import GameManager
     from input_manager import InputManager
+    from helper_manager import HelperManager
 
 class GraphicsManager:
-    def __init__(self, game_manager: GameManager, input_manager: InputManager):
-        self.game_manager = game_manager
-        self.input_manager = input_manager
+    def __init__(self):
+        self.game_manager = None
+        self.input_manager = None
         self.menu_open = False
+
+    def set_game_manager(self, game_manager: 'GameManager'):
+        self.game_manager = game_manager
+
+    def set_helper_manager(self, helper_manager: 'HelperManager'):
+        self.helper_manager = helper_manager
+
+    def set_input_manager(self, input_manager: 'InputManager'):
+        self.input_manager = input_manager
 
     def draw_screen(self):
         if (self.game_manager.game_state == "main_menu"):

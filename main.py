@@ -30,10 +30,20 @@ pygame.display.set_icon(icon)"""
 
 clock = pygame.time.Clock()
 
+#managers act in a circular way, every one except game_manager calls every other one
+#dependencies are installed after initialization
 game_manager = GameManager(screen)
-graphics_manager = GraphicsManager(game_manager)
-input_manager = InputManager(game_manager)
+graphics_manager = GraphicsManager()
+input_manager = InputManager()
 helper_manager = HelperManager()
+
+graphics_manager.set_game_manager(game_manager)
+graphics_manager.set_input_manager(input_manager)
+graphics_manager.set_helper_manager(helper_manager)
+
+input_manager.set_game_manager(game_manager)
+input_manager.set_graphics_manager(graphics_manager)
+input_manager.set_helper_manager(helper_manager)
 
 #create scenes
 title_screen = TitleScreen(game_manager)
@@ -42,15 +52,12 @@ game_setup = GameSetup(game_manager)
 game_over = GameOver(game_manager)
 #list_scenes = [title_screen, game_setup, board, game_over]
 
+#game loop
 running = True
 while running:
 
     clock.tick(game_manager.framerates[game_manager.framerate_index])
     screen.fill((30, 80, 150))
-
-    #determine what to draw on the screen based on the game's state
-    graphics_manager.draw_screen()
-    graphics_manager.draw_menu()
 
     #handles events
     for event in pygame.event.get():
@@ -78,5 +85,7 @@ while running:
                 input_manager.handle_game(x, y)
 
             
+    graphics_manager.draw_screen()
+    graphics_manager.draw_menu()
 
     pygame.display.update()
