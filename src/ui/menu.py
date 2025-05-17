@@ -112,32 +112,11 @@ class Menu:
             #check to close menu
             if button.check_clicked(coordinates) and button.var_name == "X":
                 self.close_menu()
-
-    def update_offset(self, time: float):
-        dt = time - self.start_time
-        if not reverse:
-            elapsed_time += dt
-            if elapsed_time >= self.anim_length:  # Switch direction at the end
-                elapsed_time = self.anim_length
-                reverse = True
-        else:
-            elapsed_time -= dt
-            if elapsed_time <= 0:  # Switch direction at the start
-                elapsed_time = 0
-                reverse = False
-
-        t = elapsed_time / self.anim_length  # Normalize time to [0, 1]
-        eased_t = tween.easeInOutQuad(t)  # Use an easing function
-
-        self.init_location[0] + (self.final_location[0] - self.init_location[0]) * eased_t,
-        self.init_location[1] + (self.final_location[1] - self.init_location[1]) * eased_t,
     
     def open_menu(self):
-        self.open = True
         self.location = self.final_location
 
     def close_menu(self):
-        self.open = False
         self.location = self.init_location
 
     def draw(self, time):

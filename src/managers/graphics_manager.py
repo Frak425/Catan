@@ -6,10 +6,11 @@ if TYPE_CHECKING:
     from helper_manager import HelperManager
 
 class GraphicsManager:
-    def __init__(self):
+    def __init__(self, time):
         self.game_manager = None
         self.input_manager = None
         self.menu_open = False
+        self.time = time
 
     def set_game_manager(self, game_manager: 'GameManager'):
         self.game_manager = game_manager
@@ -22,26 +23,26 @@ class GraphicsManager:
 
     def draw_screen(self):
         if (self.game_manager.game_state == "main_menu"):
-            for button in self.input_manager.buttons["title_screen"]:
+            for button in self.input_manager.buttons["main_menu"]:
                 button.draw_button()
 
-        elif (self.game_manager.game_state == "game_setup"):       
+        elif (self.game_manager.game_state == "setup"):       
             for button in self.input_manager.buttons["setup"]:
                 button.draw_button()
 
         elif (self.game_manager.game_state == "init"):
             self.game_manager.init_board()
-            self.game_manager.game_state = "game_ongoing"
+            self.game_manager.game_state = "game"
 
-        elif (self.game_manager.game_state == "game_ongoing"):
+        elif (self.game_manager.game_state == "game"):
             self.game_manager.board.draw_board()
-            for button in self.input_manager.buttons["board"]:
+            for button in self.input_manager.buttons["game"]:
                 button.draw_button()
 
         else:
             print("wrong game state")
-            running = False
+            self.game_manager.running = False
             
     def draw_menu(self):
         if self.menu_open:
-            self.game_manager.menu.draw()
+            self.game_manager.menu.draw(self.time)

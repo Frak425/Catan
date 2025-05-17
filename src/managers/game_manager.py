@@ -28,9 +28,8 @@ class GameManager:
         self.num_tiles = 19
         self.points_to_win = 10
         self.game_difficulty = "easy"
-        board: Board = self.init_board()
-        menu: Menu = self.create_menu()
-        test = 1
+        self.board = self.init_board()
+        self.menu = self.create_menu()
 
     def init_board(self) -> Board:
         for i in range(self.players_num):
@@ -51,18 +50,3 @@ class GameManager:
         background_color = (100, 100, 100)
         menu = Menu(self.screen, self.game_font, "static", menu_size, init_location, final_location, bckg_color=background_color)
         return menu
-
-
-    def set_game_difficulty(self, new_diff: str) -> None:
-        """Updated the games difficulty when playing against AI"""
-        self.game_difficulty = new_diff
-
-    def set_points_to_win(self, new_points: int) -> None:
-        """Changes the points required to win"""
-        self.points_to_win = new_points
-
-    def update_state(self, new_state):
-        self.game_state = new_state
-
-    def quit(self):
-        pygame.quit()
