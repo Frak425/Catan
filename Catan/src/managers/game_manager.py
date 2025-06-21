@@ -28,8 +28,8 @@ class GameManager:
         self.num_tiles = 19
         self.points_to_win = 10
         self.game_difficulty = "easy"
+        
         self.board = self.init_board()
-        self.menu = self.create_menu()
 
     def init_board(self) -> Board:
         for i in range(self.players_num):
@@ -42,11 +42,5 @@ class GameManager:
         board.assign_tile_classes()
         return board
 
-    def create_menu(self) -> Menu:
-        menu_margins = (50, 50) #top, bottom
-        menu_size = (self.screen_w - 2 * menu_margins[0], self.screen_h - 2 * menu_margins[1])
-        init_location = (self.screen_w + menu_margins[0], menu_margins[1]) #of top left corner
-        final_location = menu_margins #of top left corner
-        background_color = (100, 100, 100)
-        menu = Menu(self.screen, self.game_font, "static", menu_size, init_location, final_location, bckg_color=background_color)
-        return menu
+    def set_menu(self, menu):
+        self.menu = menu

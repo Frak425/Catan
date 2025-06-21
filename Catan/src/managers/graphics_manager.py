@@ -45,4 +45,4 @@ class GraphicsManager:
             
     def draw_menu(self):
         if self.menu_open:
-            self.game_manager.menu.draw(self.time)
+            self.input_manager.menu.draw(self.time)

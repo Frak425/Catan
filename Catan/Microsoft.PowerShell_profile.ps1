@@ -1,0 +1,1 @@
+$env:Path += ";C\Users\fortusky0\AppData\Local\Programs\Python\Python313;;C\Users\fortusky0\AppData\Local\Programs\Python\Python313/Scrpits"

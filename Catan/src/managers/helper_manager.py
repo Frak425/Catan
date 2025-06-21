@@ -50,7 +50,7 @@ class HelperManager:
             # Return the value of the inside flag
             return inside
 
-    def check_button_list_clicked(self, buttons: list[Button], mouse_location: tuple[int]) -> Button:
+    def check_button_list_clicked(self, buttons: list[Button], mouse_location: tuple[int], menu_offset_x = 0, menu_offset_y = 0) -> Button:
         for i in range(len(buttons)):
-            if (self.check_point_in_rect(buttons[i].rect, mouse_location)):
+            if (self.check_point_in_rect(buttons[i].rect, (mouse_location[0] + menu_offset_x, mouse_location[1] + menu_offset_y))):
                 return buttons[i]
