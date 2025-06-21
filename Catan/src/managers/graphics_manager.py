@@ -23,11 +23,11 @@ class GraphicsManager:
 
     def draw_screen(self):
         if (self.game_manager.game_state == "main_menu"):
-            for button in self.input_manager.buttons["main_menu"]:
+            for button_name, button in self.input_manager.buttons["main_menu"].items():
                 button.draw_button()
 
         elif (self.game_manager.game_state == "setup"):       
-            for button in self.input_manager.buttons["setup"]:
+            for button_name, button in self.input_manager.buttons["setup"].items():
                 button.draw_button()
 
         elif (self.game_manager.game_state == "init"):
@@ -36,7 +36,7 @@ class GraphicsManager:
 
         elif (self.game_manager.game_state == "game"):
             self.game_manager.board.draw_board()
-            for button in self.input_manager.buttons["game"]:
+            for button_name, button in self.input_manager.buttons["game"].items():
                 button.draw_button()
 
         else:

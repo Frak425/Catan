@@ -1,11 +1,12 @@
 import pygame
+from typing import Dict
 from src.managers import *
 from src.ui.button import Button
 
 #import pytweening as tween
 
 class Menu:
-    def __init__(self, screen: pygame.Surface, game_font: pygame.font.Font , type: str, buttons: object, menu_size: tuple[int], init_location: tuple = None, final_location: tuple = None, backdrop: pygame.Surface = None, bckg_color: tuple[int] = None, anim_length: int = None, start_time: float = None) -> None:
+    def __init__(self, screen: pygame.Surface, game_font: pygame.font.Font , type: str, buttons: Dict[str, Button], menu_size: tuple[int], init_location: tuple = None, final_location: tuple = None, backdrop: pygame.Surface = None, bckg_color: tuple[int] = None, anim_length: int = None, start_time: float = None) -> None:
         self.menu_size = menu_size #(length, width)
         self.type = type #"animated" or "static"
         self.backdrop = backdrop #defaults to backdrop if both are provided
@@ -39,13 +40,6 @@ class Menu:
         self.update_menu()
 
         pygame.draw.rect(self.screen, (100, 200, 200), [100, 100, 50, 50])
-
-    #TODO: Find a way to deal with buttons' functions. How do they interact with the game as a whole?
-    def clicked(self, coordinates: tuple[int]) -> None:
-        for button in self.buttons:
-            #check to close menu
-            if button.check_clicked(coordinates) and button.var_name == "X":
-                self.close_menu()
     
     def open_menu(self):
         self.location = self.final_location
@@ -63,11 +57,11 @@ class Menu:
         self.menu_surface.fill((self.bckg_color))
 
         # Blit tabs on the menu surface
-        for button in self.buttons["tabs"]:
+        for button_name, button in self.buttons["tabs"].items():
             button.draw_button(self.menu_surface)
 
         # Blit the active tab's buttons on the menu surface
-        for button in self.buttons[self.active_tab]:
+        for button_name, button in self.buttons[self.active_tab].items():
             button.draw_button(self.menu_surface)
 
     def draw(self, time):

@@ -1,4 +1,5 @@
 import pygame
+from typing import Dict
 from src.ui.button import Button
 
 class HelperManager:
@@ -50,7 +51,7 @@ class HelperManager:
             # Return the value of the inside flag
             return inside
 
-    def check_button_list_clicked(self, buttons: list[Button], mouse_location: tuple[int], menu_offset_x = 0, menu_offset_y = 0) -> Button:
-        for i in range(len(buttons)):
-            if (self.check_point_in_rect(buttons[i].rect, (mouse_location[0] + menu_offset_x, mouse_location[1] + menu_offset_y))):
-                return buttons[i]
+    def check_button_list_clicked(self, buttons: Dict[str, Button], mouse_location: tuple[int], menu_offset_x = 0, menu_offset_y = 0) -> Button:
+        for button_name, button in buttons.items():
+            if (self.check_point_in_rect(button.rect, (mouse_location[0] + menu_offset_x, mouse_location[1] + menu_offset_y))):
+                return button

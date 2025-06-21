@@ -1,4 +1,5 @@
 import pygame
+from typing import Dict
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from game_manager import GameManager
@@ -98,10 +99,13 @@ class InputManager:
     def open_menu(self):
         self.menu.open_menu()
         self.graphics_manager.menu_open = True
+        print(self.buttons["setup"])
+        self.buttons["setup"]["settings_menu_button"].hide()
 
     def close_menu(self):
         self.menu.close_menu()
         self.graphics_manager.menu_open = False
+        self.buttons["setup"]["settings_menu_button"].show()
 
     def set_game_state(self, state: str):
         self.game_manager.game_state = state
@@ -126,7 +130,7 @@ class InputManager:
         menu = Menu(self.game_manager.screen, self.game_manager.game_font, "static", self.buttons['menu'], self.game_manager.menu_size, self.game_manager.init_location, self.game_manager.final_location, bckg_color=self.game_manager.menu_background_color)
         return menu
     
-    def create_buttons(self) -> object:
+    def create_buttons(self) -> Dict[str, Dict[str, Button]]:
         return {
             "main_menu": self.create_title_buttons(),
             "setup": self.create_setup_buttons(),
@@ -134,13 +138,16 @@ class InputManager:
             "menu": self.create_menu_buttons()
         }
 
-    def create_title_buttons(self) -> list[Button]:
+    def create_title_buttons(self) -> Dict[str, Button]:
         #create title screen
         play_button = Button("main_menu", (0, 100, 0), "PLAY", pygame.rect.Rect(self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 - self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height), "play", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.set_game_state("setup"))
         quit_button = Button("main_menu", (100, 0, 0), "QUIT", pygame.rect.Rect(self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 + self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height), "quit", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.quit)
-        return [play_button, quit_button]
+        return {
+            "play_button": play_button, 
+            "quit_button": quit_button
+        }
 
-    def create_setup_buttons(self) -> list[Button]:
+    def create_setup_buttons(self) -> Dict[str, Button]:
         #create game setup buttons
         game_setup_back_button = Button("game_setup", (100, 0, 0), "Back", [self.game_manager.screen_w / 4 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2, 200, 100], "game_setup_back", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         game_start_button = Button("game_setup", (100, 0, 0), "Start", [self.game_manager.screen_w / 4 * 3 - self.game_manager.game_start_button_width / 2, self.game_manager.screen_h / 8 * 6, self.game_manager.game_start_button_width, self.game_manager.game_start_button_height], "game_start", self.game_manager.screen, self.game_manager.game_font, (0, 0))
@@ -156,9 +163,19 @@ class InputManager:
         
         settings_menu_button = Button("game_setup", (100, 0, 0), "image", [self.game_manager.screen_w - self.game_manager.settings_open_button_offset - self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_offset, self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_size], "settings_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         
-        return [player_num_increase_button, player_num_decrease_button, difficulty_level_easy_button, difficulty_level_medium_button, difficulty_level_hard_button, settings_menu_button, player_choose_color_cycle_button, game_start_button, game_setup_back_button]
+        return {
+            "player_num_increase_button": player_num_increase_button, 
+            "player_num_decrease_button": player_num_decrease_button, 
+            "difficulty_level_easy_button": difficulty_level_easy_button, 
+            "difficulty_level_medium_button": difficulty_level_medium_button, 
+            "difficulty_level_hard_button": difficulty_level_hard_button, 
+            "settings_menu_button": settings_menu_button, 
+            "player_choose_color_cycle_button": player_choose_color_cycle_button, 
+            "game_start_button": game_start_button, 
+            "game_setup_back_button": game_setup_back_button
+        }
 
-    def create_game_buttons(self) -> list[Button]:
+    def create_game_buttons(self) -> Dict[str, Button]:
         #create board buttons
         board_buy_settlement_button = Button("board", (0, 0, 0), "image", [10, 10, 10, 10], "board_buy_settlement", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         board_buy_city_button = Button("board", (0, 0, 0), "image", [10, 10, 10, 10], "board_buy_city", self.game_manager.screen, self.game_manager.game_font, (0, 0))
@@ -166,9 +183,16 @@ class InputManager:
         board_buy_development_button = Button("board", (0, 0, 0), "image", [10, 10, 10, 10], "board_buy_development", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         board_roll_dice_button = Button("board", (0, 0, 0), "image", [10, 10, 10, 10], "board_roll_dice", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         settings_menu_button = Button("game_setup", (100, 0, 0), "image", [self.game_manager.screen_w - self.game_manager.settings_open_button_offset - self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_offset, self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_size], "settings_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        return [board_buy_settlement_button, board_buy_city_button, board_buy_road_button, board_buy_development_button, board_roll_dice_button, settings_menu_button]
+        return {
+            "board_buy_settlement_button": board_buy_settlement_button, 
+            "board_buy_city_button": board_buy_city_button, 
+            "board_buy_road_button": board_buy_road_button, 
+            "board_buy_development_button": board_buy_development_button, 
+            "board_roll_dice_button": board_roll_dice_button, 
+            "settings_menu_button": settings_menu_button
+        }
         
-    def create_menu_buttons(self) -> list[Button]:    
+    def create_menu_buttons(self) -> Dict[str, Dict[str, Button]]:    
         """
         Tabs:
         -Input
@@ -179,13 +203,14 @@ class InputManager:
         """
 
         #TODO: fill with buttons
-        tabs = [
-            Button("menu", (100, 0, 0), "Input", pygame.rect.Rect(50, 10, 40, 20), "input", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.menu.change_tab("input")),
-            Button("menu", (100, 0, 0), "Accessibility", pygame.rect.Rect(100, 10, 100, 20), "accessibility", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.menu.change_tab("accessibility")),
-            Button("menu", (100, 0, 0), "Gameplay", pygame.rect.Rect(150, 10, 60, 20), "gameplay", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.menu.change_tab("gameplay")),
-            Button("menu", (100, 0, 0), "Audio", pygame.rect.Rect(200, 10, 40, 20), "audio", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.menu.change_tab("audio")),
-            Button("menu", (100, 0, 0), "Graphics", pygame.rect.Rect(250, 10, 70, 20), "graphics", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.menu.change_tab("graphics"))
-        ] 
+        tabs = {
+            "input": Button("menu", (100, 0, 0), "Input", pygame.rect.Rect(50, 10, 40, 20), "input", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.menu.change_tab("input")),
+            "accessibility": Button("menu", (100, 0, 0), "Accessibility", pygame.rect.Rect(100, 10, 100, 20), "accessibility", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.menu.change_tab("accessibility")),
+            "gameplay": Button("menu", (100, 0, 0), "Gameplay", pygame.rect.Rect(150, 10, 60, 20), "gameplay", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.menu.change_tab("gameplay")),
+            "audio": Button("menu", (100, 0, 0), "Audio", pygame.rect.Rect(200, 10, 40, 20), "audio", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.menu.change_tab("audio")),
+            "graphics": Button("menu", (100, 0, 0), "Graphics", pygame.rect.Rect(250, 10, 70, 20), "graphics", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.menu.change_tab("graphics")),
+            "settings_close": Button("menu", (100, 0, 0), "Close", pygame.rect.Rect(300, 10, 50, 20), "settings_close", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.close_menu())
+        } 
 
         """
         Input (keyboard and controller):
@@ -196,9 +221,9 @@ class InputManager:
         -Sensitivities (sliders TBD)
         """
         #TODO: fill with buttons
-        input_buttons = [
-            Button("menu", (200, 50, 100), "test1", pygame.rect.Rect(200, 100, 100, 50), "test1", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        ] 
+        input_buttons = {
+            "test1": Button("menu", (200, 50, 100), "test1", pygame.rect.Rect(200, 100, 100, 50), "test1", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        }
 
     
         """
@@ -209,9 +234,9 @@ class InputManager:
         -TTS: Hesitant to implement because limited usage and maximal time to produce
         """
         #TODO: fill with buttons
-        accessability_buttons = [
-            Button("menu", (200, 50, 100), "test2", pygame.rect.Rect(200, 100, 100, 50), "test2", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        ] 
+        accessability_buttons = {
+            "test2": Button("menu", (200, 50, 100), "test2", pygame.rect.Rect(200, 100, 100, 50), "test2", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        }
 
     
         """
@@ -226,9 +251,9 @@ class InputManager:
         -V-sync (toggle)
         """
         #TODO: fill with buttons
-        graphics_buttons = [
-            Button("menu", (200, 50, 100), "test3", pygame.rect.Rect(200, 100, 100, 50), "test3", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        ] 
+        graphics_buttons = {
+            "test3": Button("menu", (200, 50, 100), "test3", pygame.rect.Rect(200, 100, 100, 50), "test3", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        }
 
     
         """
@@ -238,9 +263,9 @@ class InputManager:
         -SFX (toggle)
         """
         #TODO: fill with buttons
-        audio_buttons = [
-            Button("menu", (200, 50, 100), "test4", pygame.rect.Rect(200, 100, 100, 50), "test4", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        ] 
+        audio_buttons = {
+            "test4": Button("menu", (200, 50, 100), "test4", pygame.rect.Rect(200, 100, 100, 50), "test4", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        }
 
     
         """
@@ -249,9 +274,9 @@ class InputManager:
         -Language (multi-choice select box)
         """ 
         #TODO: fill with buttons
-        gameplay_buttons = [
-            Button("menu", (200, 50, 100), "test5", pygame.rect.Rect(200, 100, 100, 50), "test5", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        ] 
+        gameplay_buttons = {
+            "test5": Button("menu", (200, 50, 100), "test5", pygame.rect.Rect(200, 100, 100, 50), "test5", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        } 
         
         return {
             "tabs": tabs,

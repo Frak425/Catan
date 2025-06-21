@@ -11,6 +11,7 @@ class Button:
         self.surface = surface
         self.game_font = font
         self.location = location
+        self.shown = True
         self.callback = callback
             
     def handle_click(self, event) -> None:
@@ -22,6 +23,8 @@ class Button:
                     print("Error: button callback not defined")
 
     def draw_button(self, surface=None) -> None:
+        if not self.shown:
+            return
         if surface:
             pygame.draw.rect(surface, self.color, self.rect) #change this to include backgrounds
             text = self.game_font.render(self.text, False, (0, 0, 0))
@@ -30,3 +33,9 @@ class Button:
             pygame.draw.rect(self.surface, self.color, self.rect) #change this to include backgrounds
             text = self.game_font.render(self.text, False, (0, 0, 0))
             self.surface.blit(text, (self.rect[0], self.rect[1]))
+
+    def hide(self) -> None:
+        self.shown = False
+
+    def show(self) -> None:
+        self.shown = True
