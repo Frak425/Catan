@@ -111,19 +111,8 @@ class InputManager:
 
     ## --- ON INIT --- ##
 
-    def create_menu(self) -> Menu:
-        menu_margins = (50, 50) #top, bottom
-        menu_size = (self.game_manager.screen_w - 2 * menu_margins[0], self.game_manager.screen_h - 2 * menu_margins[1])
-        init_location = (self.game_manager.screen_w + menu_margins[0], menu_margins[1]) #of top left corner
-        final_location = menu_margins #of top left corner
-        background_color = (100, 100, 100)
-        menu = Menu(self.game_manager.screen, self.game_manager.game_font, "static", self.buttons['menu'], menu_size, init_location, final_location, bckg_color=background_color)
-        return menu
-
     def set_game_manager(self, game_manager: 'GameManager') -> None:
         self.game_manager = game_manager
-        self.sob_size = self.game_manager.screen_w / 12 / 1.5
-        self.sob_offset = self.game_manager.screen_h / 24 / 1.5
         self.buttons = self.create_buttons()
         self.menu = self.create_menu()
 
@@ -132,7 +121,11 @@ class InputManager:
 
     def set_helper_manager(self, helper_manager: 'HelperManager') -> None:
         self.helper_manager = helper_manager
-
+    
+    def create_menu(self) -> Menu:
+        menu = Menu(self.game_manager.screen, self.game_manager.game_font, "static", self.buttons['menu'], self.game_manager.menu_size, self.game_manager.init_location, self.game_manager.final_location, bckg_color=self.game_manager.menu_background_color)
+        return menu
+    
     def create_buttons(self) -> object:
         return {
             "main_menu": self.create_title_buttons(),
@@ -143,28 +136,26 @@ class InputManager:
 
     def create_title_buttons(self) -> list[Button]:
         #create title screen
-        play_b_w = 200
-        play_b_h = 75
-        play_button = Button("main_menu", (0, 100, 0), "PLAY", pygame.rect.Rect(self.game_manager.screen_w / 2 - play_b_w / 2, self.game_manager.screen_h / 2 - play_b_h / 1.75, play_b_w, play_b_h), "play", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.set_game_state("setup"))
-        quit_button = Button("main_menu", (100, 0, 0), "QUIT", pygame.rect.Rect(self.game_manager.screen_w / 2 - play_b_w / 2, self.game_manager.screen_h / 2 + play_b_h / 1.75, play_b_w, play_b_h), "quit", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.quit)
+        play_button = Button("main_menu", (0, 100, 0), "PLAY", pygame.rect.Rect(self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 - self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height), "play", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.set_game_state("setup"))
+        quit_button = Button("main_menu", (100, 0, 0), "QUIT", pygame.rect.Rect(self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 + self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height), "quit", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.quit)
         return [play_button, quit_button]
 
     def create_setup_buttons(self) -> list[Button]:
         #create game setup buttons
-        play_b_w = 200
-        play_b_h = 75
-        game_setup_back_button = Button("game_setup", (100, 0, 0), "Back", [self.game_manager.screen_w / 4 - play_b_w / 2, self.game_manager.screen_h / 2, 200, 100], "game_setup_back", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        gsb_w = 150
-        gsb_h = 50
-        game_start_button = Button("game_setup", (100, 0, 0), "Start", [self.game_manager.screen_w / 4 * 3 - gsb_w / 2, self.game_manager.screen_h / 8 * 6, gsb_w, gsb_h], "game_start", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        pnidb_size = self.game_manager.screen_h / 20
-        player_num_increase_button = Button("game_setup", (0, 100, 0), "+", [self.game_manager.screen_w / 4 - pnidb_size / 2 + 100, self.game_manager.screen_h / 4 * 2.5, pnidb_size, pnidb_size], "player_num_increase", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        player_num_decrease_button = Button("game_setup", (0, 100, 0), "-", [self.game_manager.screen_w / 4 - pnidb_size / 2 - 100, self.game_manager.screen_h / 4 * 2.5, pnidb_size, pnidb_size], "player_num_decrease", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        game_setup_back_button = Button("game_setup", (100, 0, 0), "Back", [self.game_manager.screen_w / 4 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2, 200, 100], "game_setup_back", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        game_start_button = Button("game_setup", (100, 0, 0), "Start", [self.game_manager.screen_w / 4 * 3 - self.game_manager.game_start_button_width / 2, self.game_manager.screen_h / 8 * 6, self.game_manager.game_start_button_width, self.game_manager.game_start_button_height], "game_start", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        
+        player_num_increase_button = Button("game_setup", (0, 100, 0), "+", [self.game_manager.screen_w / 4 - self.game_manager.player_number_incease_decrease_button_size / 2 + 100, self.game_manager.screen_h / 4 * 2.5, self.game_manager.player_number_incease_decrease_button_size, self.game_manager.player_number_incease_decrease_button_size], "player_num_increase", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        player_num_decrease_button = Button("game_setup", (0, 100, 0), "-", [self.game_manager.screen_w / 4 - self.game_manager.player_number_incease_decrease_button_size / 2 - 100, self.game_manager.screen_h / 4 * 2.5, self.game_manager.player_number_incease_decrease_button_size, self.game_manager.player_number_incease_decrease_button_size], "player_num_decrease", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        
         player_choose_color_cycle_button = Button("game_setup", (0, 0, 0), "->", [10, 10, 10, 10], "player_choose_color_cycle", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        
         difficulty_level_easy_button = Button("game_setup", (0, 0, 0), "easy", [10, 10, 10, 10], "difficulty_level_easy", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         difficulty_level_medium_button = Button("game_setup", (0, 0, 0), "medium", [10, 10, 10, 10], "difficulty_level_medium", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         difficulty_level_hard_button = Button("game_setup", (0, 0, 0), "hard", [10, 10, 10, 10], "difficulty_level_hard", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        settings_menu_button = Button("game_setup", (100, 0, 0), "image", [self.game_manager.screen_w - self.sob_offset - self.sob_size, self.sob_offset, self.sob_size, self.sob_size], "settings_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        
+        settings_menu_button = Button("game_setup", (100, 0, 0), "image", [self.game_manager.screen_w - self.game_manager.settings_open_button_offset - self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_offset, self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_size], "settings_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        
         return [player_num_increase_button, player_num_decrease_button, difficulty_level_easy_button, difficulty_level_medium_button, difficulty_level_hard_button, settings_menu_button, player_choose_color_cycle_button, game_start_button, game_setup_back_button]
 
     def create_game_buttons(self) -> list[Button]:
@@ -174,7 +165,7 @@ class InputManager:
         board_buy_road_button = Button("board", (0, 0, 0), "image", [10, 10, 10, 10], "board_buy_road", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         board_buy_development_button = Button("board", (0, 0, 0), "image", [10, 10, 10, 10], "board_buy_development", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         board_roll_dice_button = Button("board", (0, 0, 0), "image", [10, 10, 10, 10], "board_roll_dice", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        settings_menu_button = Button("game_setup", (100, 0, 0), "image", [self.game_manager.screen_w - self.sob_offset - self.sob_size, self.sob_offset, self.sob_size, self.sob_size], "settings_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        settings_menu_button = Button("game_setup", (100, 0, 0), "image", [self.game_manager.screen_w - self.game_manager.settings_open_button_offset - self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_offset, self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_size], "settings_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         return [board_buy_settlement_button, board_buy_city_button, board_buy_road_button, board_buy_development_button, board_roll_dice_button, settings_menu_button]
         
     def create_menu_buttons(self) -> list[Button]:    

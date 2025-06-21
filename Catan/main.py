@@ -68,7 +68,6 @@ while game_manager.running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = pygame.mouse.get_pos()
 
-            #click in main menu
             input_manager.handle_input(x, y)
 
     graphics_manager.draw_screen()

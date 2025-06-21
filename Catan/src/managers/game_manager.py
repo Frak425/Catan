@@ -28,6 +28,18 @@ class GameManager:
         self.num_tiles = 19
         self.points_to_win = 10
         self.game_difficulty = "easy"
+        self.menu_margins = (50, 50) #top, bottom
+        self.menu_size = (self.screen_w - 2 * self.menu_margins[0], self.screen_h - 2 * self.menu_margins[1])
+        self.init_location = (self.screen_w + self.menu_margins[0], self.menu_margins[1]) #of top left corner
+        self.final_location = self.menu_margins #of top left corner
+        self.menu_background_color = (100, 100, 100)
+        self.play_button_width = 200
+        self.play_button_height = 75
+        self.game_start_button_width = 150
+        self.game_start_button_height = 50
+        self.player_number_incease_decrease_button_size = self.screen_h / 20
+        self.settings_open_button_size = self.screen_w / 12 / 1.5
+        self.settings_open_button_offset = self.screen_h / 24 / 1.5
         
         self.board = self.init_board()
 
