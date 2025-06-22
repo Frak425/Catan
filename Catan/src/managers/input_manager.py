@@ -75,7 +75,7 @@ class InputManager:
                     handler()
 
             if toggle_clicked:
-                toggle_clicked.draw(self.menu.menu_surface)
+                toggle_clicked.set_animating(self.graphics_manager.time)
 
         else:
             # If the menu is not open, we check the buttons for the current game state
@@ -135,7 +135,7 @@ class InputManager:
         for tab_name, button in self.buttons["menu"]["tabs"].items():
             if tab_name != new_tab:
                 button.color = (100, 0, 0)
-        self.menu.update_menu()
+        self.menu.update_menu(self.graphics_manager.time)
 
     def toggle_start_animation(self, toggle_name):
         self.toggles[toggle_name].set_animating(self.game_manager.time)
@@ -150,11 +150,10 @@ class InputManager:
         self.buttons = self.create_buttons()
         self.toggles = self.create_menu_toggles()
         self.menu = self.create_menu()
-        self.change_tab("input")  # Set the initial active tab
-
 
     def set_graphics_manager(self, graphics_manager: 'GraphicsManager') -> None:
         self.graphics_manager = graphics_manager
+        self.change_tab("input")  # Set the initial active tab
 
     def set_helper_manager(self, helper_manager: 'HelperManager') -> None:
         self.helper_manager = helper_manager
@@ -376,7 +375,7 @@ class InputManager:
         """
         toggle1 = Toggle(
             time=0,
-            time_to_flip=0.5,
+            time_to_flip=0.25,
             location=(100, 200),
             height=25,
             center_width=50,
@@ -385,6 +384,7 @@ class InputManager:
             toggle_gap=2,
             on=False, 
             toggle_name="toggle1",
+            guiding_lines=True,
             callback=lambda: self.toggle_start_animation("toggle1")
         )
         return {

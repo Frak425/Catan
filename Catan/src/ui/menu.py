@@ -7,7 +7,7 @@ from src.ui.toggle import Toggle
 #import pytweening as tween
 
 class Menu:
-    def __init__(self, screen: pygame.Surface, game_font: pygame.font.Font , type: str, buttons: Dict[str, Button], toggles: Dict[str, Toggle], menu_size: tuple[int], init_location: tuple = None, final_location: tuple = None, backdrop: pygame.Surface = None, bckg_color: tuple[int] = None, anim_length: int = None, start_time: float = None) -> None:
+    def __init__(self, screen: pygame.Surface, game_font: pygame.font.Font , type: str, buttons: Dict[str, Button], toggles: Dict[str, Toggle], menu_size: tuple[int], init_location: tuple = None, final_location: tuple = None, backdrop: pygame.Surface = None, bckg_color: tuple[int] = None, anim_length: int = None, start_time: float = None, time: int = 0) -> None:
         self.menu_size = menu_size #(length, width)
         self.type = type #"animated" or "static"
         self.backdrop = backdrop #defaults to backdrop if both are provided
@@ -39,7 +39,7 @@ class Menu:
         else:
             self.menu_surface.fill(self.bckg_color)
 
-        self.update_menu()
+        self.update_menu(time)
 
         pygame.draw.rect(self.screen, (100, 200, 200), [100, 100, 50, 50])
     
@@ -49,7 +49,7 @@ class Menu:
     def close_menu(self):
         self.location = self.init_location
 
-    def update_menu(self):
+    def update_menu(self, time: int = None):
         # When refreshing the menu...
         # Refresh the background and cover everything previously
         self.menu_surface.fill((self.bckg_color))
@@ -64,9 +64,10 @@ class Menu:
 
         # Blit toggles on the menu surface
         for toggle_name, toggle in self.toggles.items():
-            toggle.draw(self.menu_surface)
+            toggle.draw(self.menu_surface, time)
 
     def draw(self, time):
         if self.type == "animated":
             self.update_offset(time)
+        self.update_menu(time)
         self.screen.blit(self.menu_surface, self.location)

@@ -72,6 +72,6 @@ while game_manager.running:
 
     graphics_manager.draw_screen()
     graphics_manager.draw_menu()
-    graphics_manager.time = clock.get_time()
+    graphics_manager.time = pygame.time.get_ticks()
 
     pygame.display.update()
