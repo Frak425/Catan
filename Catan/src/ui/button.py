@@ -7,7 +7,7 @@ class Button:
         self.color = color
         self.text = text
         self.rect = rect #includes location and size data
-        self.button_name = button_name
+        self.name = button_name
         self.surface = surface
         self.game_font = font
         self.location = location

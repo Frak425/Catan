@@ -9,7 +9,7 @@ class HelperManager:
     def midpoint(self, point1: tuple[int], point2: tuple[int]) -> tuple:
         return ((point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2)
 
-    def check_point_in_rect(self, rect: list[int], point: tuple[int]) -> bool:
+    def check_point_in_rect(self, rect: pygame.Rect, point: tuple[int]) -> bool:
         x, y, w, h = rect
         px, py = point
         if (px > x and px < (x + w)) and \
@@ -51,7 +51,9 @@ class HelperManager:
             # Return the value of the inside flag
             return inside
 
-    def check_button_list_clicked(self, buttons: Dict[str, Button], mouse_location: tuple[int], menu_offset_x = 0, menu_offset_y = 0) -> Button:
-        for button_name, button in buttons.items():
-            if (self.check_point_in_rect(button.rect, (mouse_location[0] + menu_offset_x, mouse_location[1] + menu_offset_y))):
-                return button
+    def check_clickable_from_dict(self, clickables: Dict[str, any], mouse_location: tuple[int], offset_x = 0, offset_y = 0) -> Button:
+        for name, class_instance in clickables.items():
+            if (self.check_point_in_rect(class_instance.rect, (mouse_location[0] - offset_x, mouse_location[1] - offset_y))):
+                print(class_instance.name)
+                return class_instance
+        return None

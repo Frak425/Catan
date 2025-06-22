@@ -40,6 +40,14 @@ class GameManager:
         self.player_number_incease_decrease_button_size = self.screen_h / 20
         self.settings_open_button_size = self.screen_w / 12 / 1.5
         self.settings_open_button_offset = self.screen_h / 24 / 1.5
+        self.menu_tab_margin_top = 20
+        self.close_menu_margins = (50, 50)
+        self.close_menu_size = (100, 50)
+        self.menu_input_tab_size = (60, 35)
+        self.menu_accessibility_tab_size = (130, 35)
+        self.menu_gameplay_tab_size = (95, 35)
+        self.menu_audio_tab_size = (65, 35)
+        self.menu_graphics_tab_size = (90, 35)
         
         self.board = self.init_board()
 

@@ -1,1 +1,1 @@
-$env:Path += ";C\Users\fortusky0\AppData\Local\Programs\Python\Python313;;C\Users\fortusky0\AppData\Local\Programs\Python\Python313/Scrpits"
+$env:Path += ";C\Users\fortusky0\AppData\Local\Programs\Python\Python313;C\Users\fortusky0\AppData\Local\Programs\Python\Python313\Scripts;C\users\fortusky0\appdata\local\programs\python\python313\lib\site-packages"
