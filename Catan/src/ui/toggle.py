@@ -64,11 +64,11 @@ class Toggle:
         # Draw the toggle on the background and then the background to the surface 
         if self.animating:
             self.update(time)
-        # Redraw the toggle background
-        self.surface.fill((0, 0, 0, 0))  # Transparent background
-        pygame.draw.circle(self.surface, self.fill_color, (self.radius, self.height // 2), self.radius)
-        pygame.draw.circle(self.surface, self.fill_color, (self.center_width + self.height - self.radius, self.height // 2), self.radius)
-        pygame.draw.rect(self.surface, self.fill_color, (self.height / 2, 0, self.center_width, self.height))
+            # Redraw the toggle background
+            self.surface.fill((0, 0, 0, 0))  # Transparent background
+            pygame.draw.circle(self.surface, self.fill_color, (self.radius, self.height // 2), self.radius)
+            pygame.draw.circle(self.surface, self.fill_color, (self.center_width + self.height - self.radius, self.height // 2), self.radius)
+            pygame.draw.rect(self.surface, self.fill_color, (self.height / 2, 0, self.center_width, self.height))
         if self.guiding_lines:
             pygame.draw.line(self.surface, (100, 100, 200), (0, self.height / 2), (self.height + self. center_width, self.height / 2), 1)
             pygame.draw.line(self.surface, (100, 100, 200), ((self.height + self.center_width) / 2, 0), ((self.height + self.center_width) / 2, self.height), 1)

@@ -65,7 +65,7 @@ class InputManager:
             button_clicked: Button | None = self.helper_manager.check_clickable_from_dict(self.buttons["menu"][self.menu.active_tab], (x, y), self.game_manager.menu_margins[0], self.game_manager.menu_margins[1])
             toggle_clicked: Toggle | None = self.helper_manager.check_clickable_from_dict(self.toggles, (x, y), self.game_manager.menu_margins[0], self.game_manager.menu_margins[1])
             if not button_clicked:
-                # If not, check the tabs for the menu
+                # If not, check the tabs of the menu
                 button_clicked = self.helper_manager.check_clickable_from_dict(self.buttons["menu"]["tabs"], (x, y), self.game_manager.menu_margins[0], self.game_manager.menu_margins[1])
             # If a button was clicked, handle it
             if button_clicked:
