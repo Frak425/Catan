@@ -34,6 +34,19 @@ class Slider:
         # Calculate the position based on the value
         return int(self.bar_rect.x + (value - self.min_value) / (self.max_value - self.min_value) * (self.bar_rect.width - self.bar_rect.height) + self.bar_rect.height / 2)
 
+    def set_value(self, value: int):
+        # Update the value and recalculate the slider position
+        self.value = value
+        self.slider_position = self.calculate_slider_position(value)
+
+    def update_location(self, mouse_x: int):
+        # Update the slider position based on mouse input
+        #TODO: change offset constant (+ self.bar_rect.height // 2)
+        if self.wrapper_rect.collidepoint(mouse_x, self.bar_rect.y + self.bar_rect.height // 2):
+            # Calculate the new value based on mouse position
+            new_value = int(self.min_value + (mouse_x - self.bar_rect.x) / (self.bar_rect.width - self.bar_rect.height) * (self.max_value - self.min_value))
+            self.slider_position = self.calculate_slider_position(new_value)
+
     def draw(self, surface: pygame.Surface):
         # Redraw the bar and slider surfaces
         self.bar_surface.fill((0, 0, 0, 0))

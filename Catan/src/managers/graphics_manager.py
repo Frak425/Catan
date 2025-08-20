@@ -22,6 +22,7 @@ class GraphicsManager:
         self.input_manager = input_manager
 
     def draw_screen(self):
+
         if (self.game_manager.game_state == "main_menu"):
             for button_name, button in self.input_manager.buttons["main_menu"].items():
                 button.draw_button()
@@ -39,9 +40,14 @@ class GraphicsManager:
             for button_name, button in self.input_manager.buttons["game"].items():
                 button.draw_button()
 
+            for image_name, image in self.input_manager.images["game"].items():
+                self.game_manager.screen.blit(image.surface, image.rect)
+
         else:
             print("wrong game state")
             self.game_manager.running = False
+
+        self.draw_menu()
             
     def draw_menu(self):
         if self.menu_open:

@@ -4,6 +4,7 @@ import random
 
 from src.entities.node import Node
 from src.entities.tile import Tile
+from src.entities.placement_indicator import PlacementIndicator
 
 number_sprite_names = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 number_sprite_pressed_names = ["0_p", "1_p", "2_p", "3_p", "4_p", "5_p", "6_p", "7_p", "8_p", "9_p"]
@@ -32,6 +33,8 @@ class Board:
         self.tile_tops = [] #each index is the top point on a hexagon
         self.tiles = []
         self.pieces = [] #list of all pieces on the board
+        self.city_settlemet_indicator_locations = [] #list of all city placement indicators on the board
+        self.road_indicator_locations = []
 
         self.number_indicies = [1, 2, 3, 12, 13, 14, 4, 11, 18, 19, 15, 5, 10, 17, 16, 6, 9, 8, 7]
         self.numbers = ["5", "2", "6", "3", "8", "10", "9", "12", "11", "4", "8", "10", "9", "4", "5", "6", "3", "11"]
@@ -196,17 +199,16 @@ class Board:
         return ((point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2)
 
     def assign_tile_locations(self) -> None:
-        lens = [3, 4, 5, 4, 3]
-        for i in range(len(lens)):
-            for j in range(lens[i]):
-                x_offset = (self.screen_w - lens[i] * 2 * self.radius) / 2 + j * self.radius * 2 + self.radius
+        row_lengths = [3, 4, 5, 4, 3]
+        for i in range(len(row_lengths)):
+            for j in range(row_lengths[i]):
+                x_offset = (self.screen_w - row_lengths[i] * 2 * self.radius) / 2 + j * self.radius * 2 + self.radius
                 y_offset = (self.screen_h - self.radius_corner * 16) / 2  + self.radius_corner * 3 * i
                 self.tile_tops.append((x_offset, y_offset))
 
     def assign_tiles(self) -> None:
         # Create the list with the exact number of each tile type
         self.tiles_names = ['brick'] * 4 + ['wood'] * 4 + ['wheat'] * 4 + ['sheep'] * 3 + ['rock'] * 3 + ['desert'] * 1
-        
         # Shuffle the list to ensure randomness
         random.shuffle(self.tiles_names)
 
@@ -214,7 +216,6 @@ class Board:
         idx = self.tiles_names.index("desert")
         self.numbers.insert(self.number_indicies[idx] - 1, "")
         for i in range(self.num_tiles):
-
             top = self.tile_tops[i]
 
             points = [(top[0], top[1]), 
@@ -224,21 +225,14 @@ class Board:
                   (top[0] - self.radius, top[1] + self.radius_corner * 3), 
                   (top[0] - self.radius, top[1] + self.radius_corner)]
             
-            city1 = Node("city", points[0])
-            city2 = Node("city", points[1])
-            city3 = Node("city", points[2])
-            city4 = Node("city", points[3])
-            city5 = Node("city", points[4])
-            city6 = Node("city", points[5])
+            for point in points:
+                if not point in self.city_settlemet_indicator_locations:
+                    self.city_settlemet_indicator_locations.append(point)
 
-            road1 = Node("road", self.midpoint(points[0], points[1]))
-            road2 = Node("road", self.midpoint(points[1], points[2]))
-            road3 = Node("road", self.midpoint(points[2], points[3]))
-            road4 = Node("road", self.midpoint(points[3], points[4]))
-            road5 = Node("road", self.midpoint(points[4], points[5]))
-            road6 = Node("road", self.midpoint(points[5], points[0]))
-
-            nodes_on_hex = [[city1, city2, city3, city4, city5, city6], [road1, road1, road2, road3, road4, road5, road6]]
+            for j in range(len(points)):
+                mid = self.midpoint(points[j], points[(j + 1) % len(points)])
+                if not mid in self.road_indicator_locations:
+                    self.road_indicator_locations.append(mid)
 
             #Find the color of each tile
             if self.tiles_names[i] == "sheep":
@@ -256,7 +250,7 @@ class Board:
 
             #Find the center of each tile
             center = (top[0], top[1] + self.radius_corner)
-            self.tiles.append(Tile(self.tiles_names[i], nodes_on_hex, color, center, self.numbers[self.number_indicies[i] - 1], points, self.screen))
+            self.tiles.append(Tile(self.tiles_names[i], color, center, self.numbers[self.number_indicies[i] - 1], points, self.screen))
 
     """def flatten_nodes(self) -> None:
         i = 0

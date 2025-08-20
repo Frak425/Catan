@@ -63,15 +63,20 @@ while game_manager.running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_manager.running = False
-
         #on a mouse click
         if event.type == pygame.MOUSEBUTTONDOWN:
-            x, y = pygame.mouse.get_pos()
+            x, y = event.pos
+            input_manager.handle_input(x, y, pygame.MOUSEBUTTONDOWN)
 
-            input_manager.handle_input(x, y)
+        elif event.type == pygame.MOUSEMOTION:
+            x, y = event.pos
+            input_manager.handle_input(x, y, pygame.MOUSEMOTION)
+        
+        elif event.type == pygame.MOUSEBUTTONUP:
+            x, y = event.pos
+            input_manager.handle_input(x, y, pygame.MOUSEBUTTONUP)
 
     graphics_manager.draw_screen()
-    graphics_manager.draw_menu()
     graphics_manager.time = pygame.time.get_ticks()
 
     pygame.display.update()

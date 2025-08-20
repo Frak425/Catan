@@ -49,6 +49,8 @@ class GameManager:
         self.menu_audio_tab_size = (65, 35)
         self.menu_graphics_tab_size = (90, 35)
         
+        self.buy_selection_backdrop_offset = (self.screen_w / 8 * 5, self.screen_h / 8 * 7)
+        self.buy_selection_offset = (50, 50)
         self.board = self.init_board()
 
     def init_board(self) -> Board:
