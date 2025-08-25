@@ -11,7 +11,7 @@ class Slider:
         self.bar_color = bar_color
         self.slider_color = slider_color
         self.slider_radius = slider_radius
-        self.slider_position = self.calculate_slider_position(self.value, self.min_value, self.max_value)
+        self.slider_position = self.calculate_slider_position(self.value)
 
         # Create the bar surface
         self.bar_surface = pygame.Surface((self.bar_rect.width, self.bar_rect.height), pygame.SRCALPHA)

@@ -69,7 +69,6 @@ class InputManager:
 
     def handle_input(self, x, y, event_type) -> None:
         if event_type == pygame.MOUSEBUTTONDOWN:
-            print("down")
             #MBD will only create x,y values, actions will happen on MBU
             #create a start x and y to compare with the mouses position on future events
             self.start_x = x
@@ -86,11 +85,9 @@ class InputManager:
                 self.dragging = True
             #handle drag updates
             if self.dragging:
-                print("dragging", drag_distance)
                 self.handle_drag(x, y)
 
         elif event_type == pygame.MOUSEBUTTONUP:
-            print("up")
             self.end_x = x
             self.end_y = y
             self.dragging = False
@@ -131,9 +128,8 @@ class InputManager:
                     handler()
     
     def handle_drag(self, x, y) -> None:
-        if self.dragging:
-            pass #Currently, dragging is not implemented, but this is where it would be handled
-
+        for slider in self.sliders.values():
+            pass
 
     ## --- EVENT FUNCTIONS --- ##
 
@@ -197,6 +193,7 @@ class InputManager:
         self.game_manager = game_manager
         self.buttons = self.create_buttons()
         self.toggles = self.create_toggles()
+        self.sliders = self.create_sliders()
         self.images = self.create_images()
         self.menu = self.create_menu()
 
@@ -208,7 +205,7 @@ class InputManager:
         self.helper_manager = helper_manager
     
     def create_menu(self) -> Menu:
-        menu = Menu(self.game_manager.screen, self.game_manager.game_font, "static", self.buttons['menu'], self.toggles["menu"], self.game_manager.menu_size, self.game_manager.init_location, self.game_manager.final_location, bckg_color=self.game_manager.menu_background_color)
+        menu = Menu(self.game_manager.screen, self.game_manager.game_font, "static", self.buttons['menu'], self.toggles["menu"], self.sliders["menu"], self.game_manager.menu_size, self.game_manager.init_location, self.game_manager.final_location, bckg_color=self.game_manager.menu_background_color)
         return menu
     
     # - CREATE BUTTONS - #
@@ -457,19 +454,92 @@ class InputManager:
         """
         Create sliders for the menu.
         """
-        brightness_slider = Slider(
-            wrapper_rect=pygame.Rect(100, 200, 300, 50),
-            bar_rect=pygame.Rect(100, 200, 300, 20),
-            min_value=0,
-            max_value=100,
-            initial_value=50,
-            bar_color=(0, 100, 0),
-            slider_color=(100, 0, 0),
-            slider_radius=10
-        )
-        return {
-            "brightness_slider": brightness_slider
+        input_sliders = {
+            "deadzone": Slider(
+                wrapper_rect=pygame.Rect(100, 200, 300, 50),
+                bar_rect=pygame.Rect(100, 200, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.1,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            ),
+            "controller_sensitivity": Slider(
+                wrapper_rect=pygame.Rect(100, 300, 300, 50),
+                bar_rect=pygame.Rect(100, 300, 300, 20),
+                min_value=0,
+                max_value=10,
+                initial_value=5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            ),
+            "controller_vibration_strength": Slider(
+                wrapper_rect=pygame.Rect(100, 400, 300, 50),
+                bar_rect=pygame.Rect(100, 400, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            )
         }
+        accessability_sliders = {}
+        graphics_sliders = {
+            "brightness": Slider(
+                wrapper_rect=pygame.Rect(100, 200, 300, 50),
+                bar_rect=pygame.Rect(100, 200, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            )
+        }
+        audio_sliders = {
+            "master_volume": Slider(
+                wrapper_rect=pygame.Rect(100, 200, 300, 50),
+                bar_rect=pygame.Rect(100, 200, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            ),
+            "music_volume": Slider(
+                wrapper_rect=pygame.Rect(100, 300, 300, 50),
+                bar_rect=pygame.Rect(100, 300, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            ),
+            "sfx_volume": Slider(
+                wrapper_rect=pygame.Rect(100, 400, 300, 50),
+                bar_rect=pygame.Rect(100, 400, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            )
+        }
+        gameplay_sliders = {}
+        return {
+            "input": input_sliders,
+            "accessibility": accessability_sliders,
+            "graphics": graphics_sliders,
+            "audio": audio_sliders,
+            "gameplay": gameplay_sliders
+        }
+        
 
     # - CREATE TOGGLES - #
 
@@ -484,25 +554,55 @@ class InputManager:
     def create_menu_toggles(self) -> Dict[str, Toggle]:
         """
         Create toggles for the menu.
-        """
-        toggle1 = Toggle(
-            time=0,
-            time_to_flip=0.25,
-            location=(100, 200),
-            height=25,
-            center_width=50,
-            fill_color=(0, 0, 0),
-            toggle_color=(0, 255, 0),
-            toggle_gap=2,
-            on=False, 
-            toggle_name="toggle1",
-            guiding_lines=True,
-            callback=lambda: self.toggle_start_animation("toggle1")
-        )
-        return {
-            "toggle1": toggle1
+        
+        input_toggles = {
+            "controller_vibration": Toggle(
+                
+            ),
+            "invert_y_axis": Toggle(
+                
+            ),
+            "invert_x_axis": Toggle(
+                
+            )
         }
-    
+        accessability_toggles = {
+            "high_contrast_mode": Toggle(
+                
+            )
+        }
+        graphics_toggles = {
+            "aa": Toggle(
+                
+            ),
+            "fullscreen": Toggle(
+                
+            ),
+            "shadows": Toggle(
+                
+            )
+        }
+        audio_toggles = {
+            "sfx": Toggle(
+                
+            )
+        }
+        gameplay_toggles = {
+            "hud": Toggle(
+                
+            ),
+            "language": Toggle(
+                
+            )
+        }
+        return {
+            "input": input_toggles,
+            "accessibility": accessability_toggles,
+            "graphics": graphics_toggles,
+            "audio": audio_toggles,
+            "gameplay": gameplay_toggles
+        }
+        """
     # - CREATE IMAGES - #
 
     def create_images(self) -> Dict[str, Dict[str, Image]]:
