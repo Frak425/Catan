@@ -3,12 +3,11 @@ from typing import Dict
 from src.managers import *
 from src.ui.button import Button
 from src.ui.toggle import Toggle
-from src.ui.slider import Slider
 
 #import pytweening as tween
 
 class Menu:
-    def __init__(self, screen: pygame.Surface, game_font: pygame.font.Font , type: str, buttons: Dict[str, Dict[str, Button]], toggles: Dict[str, Toggle], sliders: Dict[str, Slider], menu_size: tuple[int], init_location: tuple = None, final_location: tuple = None, backdrop: pygame.Surface = None, bckg_color: tuple[int] = None, anim_length: int = None, start_time: float = None, time: int = 0) -> None:
+    def __init__(self, screen: pygame.Surface, game_font: pygame.font.Font , type: str, buttons: Dict[str, Button], toggles: Dict[str, Toggle], menu_size: tuple[int], init_location: tuple = None, final_location: tuple = None, backdrop: pygame.Surface = None, bckg_color: tuple[int] = None, anim_length: int = None, start_time: float = None, time: int = 0) -> None:
         self.menu_size = menu_size #(length, width)
         self.type = type #"animated" or "static"
         self.backdrop = backdrop #defaults to backdrop if both are provided
@@ -21,7 +20,6 @@ class Menu:
         self.active_tab = "input" #change as needed, should probably start on gameplay but should be whatever is first in the list
         self.buttons = buttons
         self.toggles = toggles
-        self.sliders = sliders
 
         self.init_location = init_location #(x, y)
         self.final_location = final_location #(x,y)
@@ -58,18 +56,15 @@ class Menu:
 
         # Blit tabs on the menu surface
         for button_name, button in self.buttons["tabs"].items():
-            button.draw(self.menu_surface)
+            button.draw_button(self.menu_surface)
 
         # Blit the active tab's buttons on the menu surface
         for button_name, button in self.buttons[self.active_tab].items():
-            button.draw(self.menu_surface)
+            button.draw_button(self.menu_surface)
 
         # Blit toggles on the menu surface
         for toggle_name, toggle in self.toggles.items():
             toggle.draw(self.menu_surface, time)
-
-        for slider_name, slider in self.sliders.items():
-            slider.draw(self.menu_surface)
 
     def draw(self, time):
         if self.type == "animated":

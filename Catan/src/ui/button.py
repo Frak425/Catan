@@ -21,7 +21,7 @@ class Button:
                 else:
                     print("Error: button callback not defined")
 
-    def draw(self, surface=None) -> None:
+    def draw_button(self, surface=None) -> None:
         if not self.shown:
             return
         if surface:

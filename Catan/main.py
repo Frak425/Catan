@@ -63,7 +63,7 @@ while game_manager.running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_manager.running = False
-
+        #on a mouse click
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
             input_manager.handle_input(x, y, pygame.MOUSEBUTTONDOWN)
