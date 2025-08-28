@@ -31,9 +31,9 @@ class InputManager:
             "player_num_increase": self.player_num_increase,
             "player_num_decrease": self.player_num_decrease,
             "player_choose_color_cycle": self.choose_player_color_cycle,
-            "difficulty_level_easy": self.set_diff_level_easy,
-            "difficulty_level_medium": self.set_diff_level_medium,
-            "difficulty_level_hard": self.set_diff_level_hard,
+            "difficulty_level_easy": lambda:  self.set_diff_level("easy"),
+            "difficulty_level_medium": lambda:  self.set_diff_level("medium"),
+            "difficulty_level_hard": lambda:  self.set_diff_level("hard"),
             "game_start": self.start_game,
             "open_menu": self.open_menu,
             "game_setup_back": lambda: self.set_game_state("main_menu"),
@@ -64,12 +64,11 @@ class InputManager:
         self.clicked = False
         self.start_x = 0
         self.start_y = 0
-        self.end_x = 0
-        self.end_y = 0
+        self.click_end_x = 0
+        self.click_end_y = 0
 
     def handle_input(self, x, y, event_type) -> None:
         if event_type == pygame.MOUSEBUTTONDOWN:
-            print("down")
             #MBD will only create x,y values, actions will happen on MBU
             #create a start x and y to compare with the mouses position on future events
             self.start_x = x
@@ -86,27 +85,25 @@ class InputManager:
                 self.dragging = True
             #handle drag updates
             if self.dragging:
-                print("dragging", drag_distance)
                 self.handle_drag(x, y)
 
         elif event_type == pygame.MOUSEBUTTONUP:
-            print("up")
-            self.end_x = x
-            self.end_y = y
+            self.click_end_x = x
+            self.click_end_y = y
             self.dragging = False
             self.clicked = False
             #Only buttons and toggles can be clicked, so handle those here
             self.handle_click()
 
     def handle_click(self) -> None:
-        x = self.end_x
-        y = self.end_y
+        x = self.click_end_x
+        y = self.click_end_y
         state = self.game_manager.game_state
         # If the menu is open, we check the menu buttons first
         if self.graphics_manager.menu_open:
             # Check if the click is within the menu area
             button_clicked: Button | None = self.helper_manager.check_clickable_from_dict(self.buttons["menu"][self.menu.active_tab], (x, y), self.game_manager.menu_margins[0], self.game_manager.menu_margins[1])
-            toggle_clicked: Toggle | None = self.helper_manager.check_clickable_from_dict(self.toggles["menu"], (x, y), self.game_manager.menu_margins[0], self.game_manager.menu_margins[1])
+            toggle_clicked: Toggle | None = self.helper_manager.check_clickable_from_dict(self.toggles["menu"][self.menu.active_tab], (x, y), self.game_manager.menu_margins[0], self.game_manager.menu_margins[1])
             if not button_clicked:
                 # If not, check the tabs of the menu
                 button_clicked = self.helper_manager.check_clickable_from_dict(self.buttons["menu"]["tabs"], (x, y), self.game_manager.menu_margins[0], self.game_manager.menu_margins[1])
@@ -131,9 +128,8 @@ class InputManager:
                     handler()
     
     def handle_drag(self, x, y) -> None:
-        if self.dragging:
-            pass #Currently, dragging is not implemented, but this is where it would be handled
-
+        for slider in self.sliders.values():
+            pass
 
     ## --- EVENT FUNCTIONS --- ##
 
@@ -149,18 +145,10 @@ class InputManager:
         player_color_chosen_index += 1
         player_color_chosen_index %= len(self.game_manager.player_colors)
 
-    def set_diff_level_easy(self):
-        if (game_difficulty != "easy"):
-            game_difficulty = "easy"
-
-    def set_diff_level_medium(self):
-        if (game_difficulty != "medium"):
-            game_difficulty = "medium"
-
-    def set_diff_level_hard(self):
-        if (game_difficulty != "hard"):
-            game_difficulty = "hard"
-
+    def set_diff_level(self, level: str):
+        if (self.game_manager.difficulty_level != level):
+            self.game_manager.difficulty_level = level
+        
     def start_game(self):
         self.game_manager.game_state = "init"
 
@@ -197,6 +185,7 @@ class InputManager:
         self.game_manager = game_manager
         self.buttons = self.create_buttons()
         self.toggles = self.create_toggles()
+        self.sliders = self.create_sliders()
         self.images = self.create_images()
         self.menu = self.create_menu()
 
@@ -208,7 +197,7 @@ class InputManager:
         self.helper_manager = helper_manager
     
     def create_menu(self) -> Menu:
-        menu = Menu(self.game_manager.screen, self.game_manager.game_font, "static", self.buttons['menu'], self.toggles["menu"], self.game_manager.menu_size, self.game_manager.init_location, self.game_manager.final_location, bckg_color=self.game_manager.menu_background_color)
+        menu = Menu(self.game_manager.screen, self.game_manager.game_font, "static", self.buttons['menu'], self.toggles["menu"], self.sliders["menu"], self.game_manager.menu_size, self.game_manager.init_location, self.game_manager.final_location, bckg_color=self.game_manager.menu_background_color)
         return menu
     
     # - CREATE BUTTONS - #
@@ -457,19 +446,92 @@ class InputManager:
         """
         Create sliders for the menu.
         """
-        brightness_slider = Slider(
-            wrapper_rect=pygame.Rect(100, 200, 300, 50),
-            bar_rect=pygame.Rect(100, 200, 300, 20),
-            min_value=0,
-            max_value=100,
-            initial_value=50,
-            bar_color=(0, 100, 0),
-            slider_color=(100, 0, 0),
-            slider_radius=10
-        )
-        return {
-            "brightness_slider": brightness_slider
+        input_sliders = {
+            "deadzone": Slider(
+                wrapper_rect=pygame.Rect(100, 200, 300, 50),
+                bar_rect=pygame.Rect(100, 200, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.1,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            ),
+            "controller_sensitivity": Slider(
+                wrapper_rect=pygame.Rect(100, 300, 300, 50),
+                bar_rect=pygame.Rect(100, 300, 300, 20),
+                min_value=0,
+                max_value=10,
+                initial_value=5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            ),
+            "controller_vibration_strength": Slider(
+                wrapper_rect=pygame.Rect(100, 400, 300, 50),
+                bar_rect=pygame.Rect(100, 400, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            )
         }
+        accessability_sliders = {}
+        graphics_sliders = {
+            "brightness": Slider(
+                wrapper_rect=pygame.Rect(100, 200, 300, 50),
+                bar_rect=pygame.Rect(100, 200, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            )
+        }
+        audio_sliders = {
+            "master_volume": Slider(
+                wrapper_rect=pygame.Rect(100, 200, 300, 50),
+                bar_rect=pygame.Rect(100, 200, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            ),
+            "music_volume": Slider(
+                wrapper_rect=pygame.Rect(100, 300, 300, 50),
+                bar_rect=pygame.Rect(100, 300, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            ),
+            "sfx_volume": Slider(
+                wrapper_rect=pygame.Rect(100, 400, 300, 50),
+                bar_rect=pygame.Rect(100, 400, 300, 20),
+                min_value=0,
+                max_value=1,
+                initial_value=0.5,
+                bar_color=(0, 100, 0),
+                slider_color=(100, 0, 0),
+                slider_radius=10
+            )
+        }
+        gameplay_sliders = {}
+        return {
+            "input": input_sliders,
+            "accessibility": accessability_sliders,
+            "graphics": graphics_sliders,
+            "audio": audio_sliders,
+            "gameplay": gameplay_sliders
+        }
+        
 
     # - CREATE TOGGLES - #
 
@@ -482,27 +544,173 @@ class InputManager:
         }
     
     def create_menu_toggles(self) -> Dict[str, Toggle]:
-        """
-        Create toggles for the menu.
-        """
-        toggle1 = Toggle(
-            time=0,
-            time_to_flip=0.25,
-            location=(100, 200),
-            height=25,
-            center_width=50,
-            fill_color=(0, 0, 0),
-            toggle_color=(0, 255, 0),
-            toggle_gap=2,
-            on=False, 
-            toggle_name="toggle1",
-            guiding_lines=True,
-            callback=lambda: self.toggle_start_animation("toggle1")
-        )
-        return {
-            "toggle1": toggle1
+        default_time_to_flip = 0.25
+        default_height = 50
+        default_center_width = 100
+        default_fill_color = (0, 100, 0)
+        default_toggle_color = (100, 0, 0)
+        default_toggle_gap = 7
+        default_on = False
+        default_guiding_lines = True
+        #Create toggles for the menu.
+        
+        input_toggles = {
+            "controller_vibration": Toggle(
+                0,
+                time_to_flip=default_time_to_flip,
+                location=(100, 300),
+                height=default_height,
+                center_width=default_center_width,
+                fill_color=default_fill_color,
+                toggle_color=default_toggle_color,
+                toggle_gap=default_toggle_gap,
+                toggle_name="controller_vibration",
+                on=default_on,
+                guiding_lines=default_guiding_lines,
+                callback=None,
+            ),
+            "invert_y_axis": Toggle(
+                0,
+                time_to_flip=default_time_to_flip,
+                location=(200, 300),
+                height=default_height,
+                center_width=default_center_width,
+                fill_color=default_fill_color,
+                toggle_color=default_toggle_color,
+                toggle_gap=default_toggle_gap,
+                toggle_name="controller_vibration",
+                on=default_on,
+                guiding_lines=default_guiding_lines,
+                callback=None,
+            ),
+            "invert_x_axis": Toggle(
+                0,
+                time_to_flip=default_time_to_flip,
+                location=(300, 300),
+                height=default_height,
+                center_width=default_center_width,
+                fill_color=default_fill_color,
+                toggle_color=default_toggle_color,
+                toggle_gap=default_toggle_gap,
+                toggle_name="controller_vibration",
+                on=default_on,
+                guiding_lines=default_guiding_lines,
+                callback=None,
+            )
         }
-    
+        accessability_toggles = {
+            "high_contrast_mode": Toggle(
+                0,
+                time_to_flip=default_time_to_flip,
+                location=(100, 300),
+                height=default_height,
+                center_width=default_center_width,
+                fill_color=default_fill_color,
+                toggle_color=default_toggle_color,
+                toggle_gap=default_toggle_gap,
+                toggle_name="controller_vibration",
+                on=default_on,
+                guiding_lines=default_guiding_lines,
+                callback=None,
+            )
+        }
+        graphics_toggles = {
+            "aa": Toggle(
+                0,
+                time_to_flip=default_time_to_flip,
+                location=(200, 300),
+                height=default_height,
+                center_width=default_center_width,
+                fill_color=default_fill_color,
+                toggle_color=default_toggle_color,
+                toggle_gap=default_toggle_gap,
+                toggle_name="controller_vibration",
+                on=default_on,
+                guiding_lines=default_guiding_lines,
+                callback=None,
+            ),
+            "fullscreen": Toggle(
+                0,
+                time_to_flip=default_time_to_flip,
+                location=(300, 300),
+                height=default_height,
+                center_width=default_center_width,
+                fill_color=default_fill_color,
+                toggle_color=default_toggle_color,
+                toggle_gap=default_toggle_gap,
+                toggle_name="controller_vibration",
+                on=default_on,
+                guiding_lines=default_guiding_lines,
+                callback=None,
+            ),
+            "shadows": Toggle(
+                0,
+                time_to_flip=default_time_to_flip,
+                location=(400, 300),
+                height=default_height,
+                center_width=default_center_width,
+                fill_color=default_fill_color,
+                toggle_color=default_toggle_color,
+                toggle_gap=default_toggle_gap,
+                toggle_name="controller_vibration",
+                on=default_on,
+                guiding_lines=default_guiding_lines,
+                callback=None,
+            )
+        }
+        audio_toggles = {
+            "sfx": Toggle(
+                0,
+                time_to_flip=default_time_to_flip,
+                location=(100, 300),
+                height=default_height,
+                center_width=default_center_width,
+                fill_color=default_fill_color,
+                toggle_color=default_toggle_color,
+                toggle_gap=default_toggle_gap,
+                toggle_name="controller_vibration",
+                on=default_on,
+                guiding_lines=default_guiding_lines,
+                callback=None,
+            )
+        }
+        gameplay_toggles = {
+            "hud": Toggle(
+                0,
+                time_to_flip=default_time_to_flip,
+                location=(100, 300),
+                height=default_height,
+                center_width=default_center_width,
+                fill_color=default_fill_color,
+                toggle_color=default_toggle_color,
+                toggle_gap=default_toggle_gap,
+                toggle_name="controller_vibration",
+                on=default_on,
+                guiding_lines=default_guiding_lines,
+                callback=None,
+            ),
+            "language": Toggle(
+                0,
+                time_to_flip=default_time_to_flip,
+                location=(200, 300),
+                height=default_height,
+                center_width=default_center_width,
+                fill_color=default_fill_color,
+                toggle_color=default_toggle_color,
+                toggle_gap=default_toggle_gap,
+                toggle_name="controller_vibration",
+                on=default_on,
+                guiding_lines=default_guiding_lines,
+                callback=None,
+            )
+        }
+        return {
+            "input": input_toggles,
+            "accessibility": accessability_toggles,
+            "graphics": graphics_toggles,
+            "audio": audio_toggles,
+            "gameplay": gameplay_toggles
+        }
     # - CREATE IMAGES - #
 
     def create_images(self) -> Dict[str, Dict[str, Image]]:

@@ -24,7 +24,7 @@ class GameManager:
         self.player_color_chosen_index = 0
         self.game_difficulty = "easy"
         self.framerates = [30, 60, 120, 240]
-        self.framerate_index = 0
+        self.framerate_index = 1
         self.num_tiles = 19
         self.points_to_win = 10
         self.game_difficulty = "easy"
