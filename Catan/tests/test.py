@@ -1,32 +1,73 @@
-import pygame, sys
+# Example file showing a basic pygame "game loop"
+import pygame
+import math
 
+# pygame setup
 pygame.init()
-screen = pygame.display.set_mode((800, 600))
+screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
+running = True
 
-clicks = []  # store all click positions
+circle_x = 50
+circle_y = 50
+circle_v_x = 10
+circle_v_y = 10
 
-while True:
+square_x = 200
+square_y = 300
+square_v_x = 8
+square_v_y = 8
+
+square = pygame.Surface((50, 50))
+square.fill("white")
+
+circle = pygame.Surface((50, 50), pygame.SRCALPHA)  # per-pixel alpha
+pygame.draw.circle(circle, "blue", (25, 25), 25)
+
+while running:
+    # poll for events
+    # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+            running = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            print("DOWN", event.pos)
-            clicks.append(("down", event.pos))
+    # fill the screen with a color to wipe away anything from last frame
+    screen.fill("purple")
 
-        if event.type == pygame.MOUSEBUTTONUP:
-            print("UP", event.pos)
-            clicks.append(("up", event.pos))
+    # RENDER YOUR GAME HERE
 
-    # clear screen
-    screen.fill((30, 30, 30))
+    #make square bounce around screen
+    if (square_x > screen.get_width() - 50):
+        square_v_x = -square_v_x
+    if (square_x < 0):
+        square_v_x = -square_v_x
+    if (square_y > screen.get_height() - 50):
+        square_v_y = -square_v_y 
+    if (square_y < 0):
+        square_v_y = -square_v_y
 
-    # draw circles for each click
-    for etype, pos in clicks:
-        color = (255, 0, 0) if etype == "down" else (0, 255, 0)
-        pygame.draw.circle(screen, color, pos, 6)
+    #make circle bounce around screen
+    if (circle_x > screen.get_width() - 50):
+        circle_v_x = -circle_v_x
+    if (circle_x < 0):
+        circle_v_x = -circle_v_x
+    if (circle_y > screen.get_height() - 50):
+        circle_v_y = -circle_v_y 
+    if (circle_y < 0):
+        circle_v_y = -circle_v_y
+        
+    square_x += square_v_x
+    square_y += square_v_y
 
+    circle_x += circle_v_x
+    circle_y += circle_v_y
+
+    screen.blit(square, (square_x, square_y))
+    screen.blit(circle, (circle_x, circle_y))
+
+    # flip() the display to put your work on screen
     pygame.display.flip()
-    clock.tick(60)
+
+    clock.tick(30)  # limits FPS to 60
+
+pygame.quit()

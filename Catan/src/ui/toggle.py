@@ -25,14 +25,19 @@ class Toggle:
         self.location = location
         self.on = on
         self.animating = False
-        self.toggle_center_location = (self.height // 2, self.height // 2)
+        if not self.on:
+            self.toggle_center_location = (self.height // 2, self.height // 2) 
+        else:
+            self.toggle_center_location = (self.center_width + self.height // 2, self.height // 2)
 
         #Create the toggle's background surface
         self.surface = pygame.Surface((self.center_width + self.height, self.height), pygame.SRCALPHA)
         self.surface.fill((0, 0, 0, 0))  # Transparent background
+        #draw endpoints and center rectangle
         pygame.draw.circle(self.surface, self.fill_color, (self.radius, self.height // 2), self.radius)
-        pygame.draw.circle(self.surface, self.fill_color, (self.center_width + self.height - self.radius, self.height // 2), self.radius)
+        pygame.draw.circle(self.surface, self.fill_color, (self.center_width + self.radius, self.height // 2), self.radius)
         pygame.draw.rect(self.surface, self.fill_color, (self.height / 2, 0, self.center_width, self.height))
+        
         if self.guiding_lines:
             pygame.draw.line(self.surface, (100, 100, 200), (0, self.height / 2), (self.height + self. center_width, self.height / 2), 1)
             pygame.draw.line(self.surface, (100, 100, 200), ((self.height + self.center_width) / 2, 0), ((self.height + self.center_width) / 2, self.height), 1)
@@ -40,13 +45,14 @@ class Toggle:
         #Create the toggle circle
         self.toggle_circle = pygame.Surface((self.height - self.toggle_gap * 2, self.height - self.toggle_gap * 2), pygame.SRCALPHA)
         self.toggle_circle.fill((0, 0, 0, 0))  # Transparent background
-        pygame.draw.circle(self.toggle_circle, self.toggle_color, (self.toggle_radius, self.toggle_radius), self.toggle_radius)
+        pygame.draw.circle(self.toggle_circle, self.toggle_color, self.toggle_circle.get_rect().center, self.toggle_radius)
     
     def set_animating(self, time: int):
-        self.animating = True
-        self.time = time
-        self.start_time = time
-        self.end_time = time + int(self.time_to_flip * 1000)
+        if not self.animating:
+            self.animating = True
+            self.time = time
+            self.start_time = time
+            self.end_time = time + int(self.time_to_flip * 1000)
     
     def update(self, new_time: int):
         if self.animating:
@@ -55,7 +61,7 @@ class Toggle:
                     self.on = not self.on
                     return
             progress = (new_time - self.start_time) / (self.end_time - self.start_time)
-            progress = tween.easeInOutQuad(progress)
+            progress = tween.easeInOutCubic(progress)
             if not self.on:
                 self.toggle_center_location = (self.height // 2 + int((self.center_width) * progress), self.height // 2)
             else:
@@ -72,5 +78,5 @@ class Toggle:
         if self.guiding_lines:
             pygame.draw.line(self.surface, (100, 100, 200), (0, self.height / 2), (self.height + self. center_width, self.height / 2), 1)
             pygame.draw.line(self.surface, (100, 100, 200), ((self.height + self.center_width) / 2, 0), ((self.height + self.center_width) / 2, self.height), 1)
-        self.surface.blit(self.toggle_circle, (self.toggle_center_location[0] - self.toggle_circle.get_size()[0] / 2 + self.toggle_gap / 2, self.toggle_center_location[1] - self.toggle_circle.get_size()[1] / 2 + self.toggle_gap / 2))
+        self.surface.blit(self.toggle_circle, (self.toggle_center_location[0] - self.toggle_circle.get_size()[0] / 2, self.toggle_center_location[1] - self.toggle_circle.get_size()[1] / 2))
         surface.blit(self.surface, self.rect.topleft)

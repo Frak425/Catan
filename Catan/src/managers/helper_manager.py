@@ -54,6 +54,5 @@ class HelperManager:
     def check_clickable_from_dict(self, clickables: Dict[str, any], mouse_location: tuple[int], offset_x = 0, offset_y = 0) -> Button:
         for name, class_instance in clickables.items():
             if (self.check_point_in_rect(class_instance.rect, (mouse_location[0] - offset_x, mouse_location[1] - offset_y))):
-                print(class_instance.name)
                 return class_instance
         return None

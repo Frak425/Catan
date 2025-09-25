@@ -2,7 +2,7 @@ import pygame
 from pygame import *
 
 class Button:
-    def __init__(self, color: tuple[int], text: str, rect: Rect, button_name: str, surface: pygame.Surface, font, location: tuple[int], callback=None) -> None:
+    def __init__(self, color: tuple[int], text: str, rect: Rect, button_name: str, surface: pygame.Surface, font, location: tuple[int]) -> None:
         self.color = color
         self.text = text
         self.rect = rect #includes location and size data
@@ -11,17 +11,8 @@ class Button:
         self.game_font = font
         self.location = location
         self.shown = True
-        self.callback = callback
-            
-    def handle_click(self, event) -> None:
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.rect.collidepoint(event.pos):
-                if self.callback:
-                    self.callback()
-                else:
-                    print("Error: button callback not defined")
 
-    def draw_button(self, surface=None) -> None:
+    def draw(self, surface=None) -> None:
         if not self.shown:
             return
         if surface:

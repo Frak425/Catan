@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 import pygame
 from pygame import *
 
@@ -8,6 +10,8 @@ from src.ui.menu import Menu
 class GameManager:
     def __init__(self, screen: Surface) -> None:
         self.running = True
+        self.LAYOUT_CONFIG_FILE = Path("layout.json")
+        self.SETTINGS_CONFIG_FILE = Path("settings.json")
         self.screen = screen
         self.screen_size = (self.screen.get_width(), self.screen.get_height())
         self.screen_w = self.screen_size[0]
@@ -24,7 +28,7 @@ class GameManager:
         self.player_color_chosen_index = 0
         self.game_difficulty = "easy"
         self.framerates = [30, 60, 120, 240]
-        self.framerate_index = 0
+        self.framerate_index = 1
         self.num_tiles = 19
         self.points_to_win = 10
         self.game_difficulty = "easy"
@@ -64,5 +68,37 @@ class GameManager:
         board.assign_tile_classes()
         return board
 
-    def set_menu(self, menu):
-        self.menu = menu
+    def init_configs(self):
+        layout_dict = self.create_layout_defaults()
+        settings_dict = self.create_settings_defaults()
+        #create layout and settings files if they don't exist
+        if self.load_config("layout") == {}:
+            self.save_config(layout_dict, "layout")
+        if self.load_config("settings") == {}:
+            self.save_config(settings_dict, "settings")
+
+    def create_settings_defaults(self):
+        pass
+
+    def create_layout_defaults(self):
+        pass
+
+    def load_config(self, file: str) -> dict:
+        if file == "layout":
+            CONFIG_FILE = self.LAYOUT_CONFIG_FILE
+        elif file == "settings":
+            CONFIG_FILE = self.SETTINGS_CONFIG_FILE
+
+        if CONFIG_FILE.exists():
+            with open(CONFIG_FILE, "r") as f:
+                return json.load(f)
+        return {}
+    
+    def save_config(self, config: dict, file: str) -> None:
+        if file == "layout":
+            CONFIG_FILE = self.LAYOUT_CONFIG_FILE
+        elif file == "settings":
+            CONFIG_FILE = self.SETTINGS_CONFIG_FILE
+
+        with open(CONFIG_FILE, "w") as f:
+            json.dump(config, f, indent=4)

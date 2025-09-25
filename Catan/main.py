@@ -80,3 +80,5 @@ while game_manager.running:
     graphics_manager.time = pygame.time.get_ticks()
 
     pygame.display.update()
+
+pygame.quit()
