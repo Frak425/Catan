@@ -13,6 +13,7 @@ from src.ui.menu import Menu
 from src.ui.toggle import Toggle
 from src.ui.image import Image
 from src.ui.slider import Slider
+from src.ui.text_display import TextDisplay
 
 class InputManager:
     def __init__(self):
@@ -39,7 +40,8 @@ class InputManager:
             "game_setup_back": lambda: self.set_game_state("main_menu"),
         }
         self.game_handlers = {
-            "settings_menu": self.open_menu
+            "settings_menu": self.open_menu,
+            "back": lambda: self.set_game_state("main_menu")
         }
         self.menu_handlers = {
             "close_menu": self.close_menu,
@@ -95,6 +97,7 @@ class InputManager:
                 slider_clicked: Slider | None = self.helper_manager.check_clickable_from_dict(self.sliders[state], (x, y))
 
             if button_clicked:
+                print(f"Button {button_clicked.name} clicked")
                 self.active = button_clicked
 
             if toggle_clicked:
@@ -102,8 +105,6 @@ class InputManager:
 
             if slider_clicked:
                 self.active = slider_clicked
-                print(self.sliders[state])
-                print("active slider", self.active.name)
 
         elif event_type == pygame.MOUSEMOTION:
             #find distance from start to current position
@@ -144,8 +145,11 @@ class InputManager:
         else:
             if self.helper_manager.check_point_in_rect(pygame.Rect(self.active.rect.x, self.active.rect.y, self.active.rect.w, self.active.rect.h), (x, y)):
                 self.handler = self.handlers_by_state[state].get(self.active.name)
+
             if self.active.__class__.__name__ == "Toggle":
                 self.active.set_animating(self.graphics_manager.time)
+
+            #TODO: consider how slider play into handlers. Ideally slider would alter game state via their handler, but that would require an overhaul/implementation of settings because it changes those values
 
         if self.handler:
             self.handler()
@@ -236,8 +240,8 @@ class InputManager:
     
     def create_title_buttons(self) -> Dict[str, Button]:
         #create title screen
-        play_button = Button((0, 100, 0), "PLAY", pygame.rect.Rect(self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 - self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height), "play", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.set_game_state("setup"))
-        quit_button = Button((100, 0, 0), "QUIT", pygame.rect.Rect(self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 + self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height), "quit", self.game_manager.screen, self.game_manager.game_font, (0, 0), lambda: self.quit)
+        play_button = Button((0, 100, 0), "PLAY", pygame.rect.Rect(self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 - self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height), "play", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        quit_button = Button((100, 0, 0), "QUIT", pygame.rect.Rect(self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 + self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height), "quit", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         return {
             "play_button": play_button, 
             "quit_button": quit_button
@@ -273,6 +277,8 @@ class InputManager:
 
     def create_game_buttons(self) -> Dict[str, Button]:
         #create board buttons
+        back_button = Button((100, 100, 200), "back", pygame.Rect(10, 10, 70, 40), "back", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+
         board_buy_settlement_button = Button((0, 0, 0), "image", pygame.Rect(700, 650, 40, 40), "board_buy_settlement", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         board_buy_city_button = Button((0, 0, 0), "image", pygame.Rect(800, 650, 40, 40), "board_buy_city", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         board_buy_road_button = Button((0, 0, 0), "image", pygame.Rect(900, 10, 10, 40), "board_buy_road", self.game_manager.screen, self.game_manager.game_font, (0, 0))
@@ -290,7 +296,8 @@ class InputManager:
             "board_buy_road_button": board_buy_road_button, 
             "board_buy_development_button": board_buy_development_button, 
             "board_roll_dice_button": board_roll_dice_button, 
-            "settings_menu_button": settings_menu_button
+            "settings_menu_button": settings_menu_button,
+            "back_button": back_button
         }
    
     def create_menu_buttons(self) -> Dict[str, Dict[str, Button]]:    
@@ -313,7 +320,7 @@ class InputManager:
                         self.game_manager.menu_input_tab_size[0], 
                         self.game_manager.menu_input_tab_size[1]
                     ), 
-                    "input", self.game_manager.screen, self.game_manager.game_font, (0, 0), self.menu_handlers["input"]
+                    "input", self.game_manager.screen, self.game_manager.game_font, (0, 0)
                 ),
             "accessibility": 
                 Button((100, 0, 0), "Accessibility", 
@@ -323,7 +330,7 @@ class InputManager:
                         self.game_manager.menu_accessibility_tab_size[0], 
                         self.game_manager.menu_accessibility_tab_size[1]
                     ), 
-                    "accessibility", self.game_manager.screen, self.game_manager.game_font, (0, 0), self.menu_handlers["accessibility"]
+                    "accessibility", self.game_manager.screen, self.game_manager.game_font, (0, 0)
                 ),
             "gameplay": 
                 Button((100, 0, 0), "Gameplay", 
@@ -332,7 +339,7 @@ class InputManager:
                         self.game_manager.menu_tab_margin_top, 
                         self.game_manager.menu_gameplay_tab_size[0], 
                         self.game_manager.menu_gameplay_tab_size[1]
-                    ), "gameplay", self.game_manager.screen, self.game_manager.game_font, (0, 0), self.menu_handlers["gameplay"]
+                    ), "gameplay", self.game_manager.screen, self.game_manager.game_font, (0, 0)
                 ),
             "audio": 
                 Button((100, 0, 0), "Audio", 
@@ -341,7 +348,7 @@ class InputManager:
                         self.game_manager.menu_tab_margin_top, 
                         self.game_manager.menu_audio_tab_size[0], 
                         self.game_manager.menu_audio_tab_size[1]
-                    ), "audio", self.game_manager.screen, self.game_manager.game_font, (0, 0), self.menu_handlers["audio"]
+                    ), "audio", self.game_manager.screen, self.game_manager.game_font, (0, 0)
                 ),
             "graphics": 
                 Button((100, 0, 0), "Graphics", 
@@ -350,7 +357,7 @@ class InputManager:
                         self.game_manager.menu_tab_margin_top, 
                         self.game_manager.menu_graphics_tab_size[0], 
                         self.game_manager.menu_graphics_tab_size[1]
-                    ), "graphics", self.game_manager.screen, self.game_manager.game_font, (0, 0), self.menu_handlers["graphics"]
+                    ), "graphics", self.game_manager.screen, self.game_manager.game_font, (0, 0)
                 ),
             "close_menu": 
                 Button((100, 0, 0), "Close", 
@@ -359,7 +366,7 @@ class InputManager:
                         self.game_manager.close_menu_margins[1], 
                         self.game_manager.close_menu_size[0], 
                         self.game_manager.close_menu_size[1]
-                    ), "close_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0), self.menu_handlers["close_menu"]
+                    ), "close_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0)
                 )
         } 
 
@@ -496,7 +503,7 @@ class InputManager:
             ),
             "controller_vibration_strength": Slider(
                 name="controller_vibration_strength",
-                wrapper_rect=pygame.Rect(100, 400, 300, 50),
+                wrapper_rect=pygame.Rect(100, 400, 300, 20),
                 rect=pygame.Rect(100, 400, 300, 20),
                 min_value=0,
                 max_value=1,
@@ -510,7 +517,7 @@ class InputManager:
         graphics_sliders = {
             "brightness": Slider(
                 name="brightness",
-                wrapper_rect=pygame.Rect(100, 200, 300, 50),
+                wrapper_rect=pygame.Rect(100, 200, 300, 20),
                 rect=pygame.Rect(100, 200, 300, 20),
                 min_value=0,
                 max_value=1,
@@ -523,7 +530,7 @@ class InputManager:
         audio_sliders = {
             "master_volume": Slider(
                 name="master_volume",
-                wrapper_rect=pygame.Rect(100, 200, 300, 50),
+                wrapper_rect=pygame.Rect(100, 200, 300, 20),
                 rect=pygame.Rect(100, 200, 300, 20),
                 min_value=0,
                 max_value=1,
@@ -743,6 +750,7 @@ class InputManager:
             "audio": audio_toggles,
             "gameplay": gameplay_toggles
         }
+    
     # - CREATE IMAGES - #
 
     def create_images(self) -> Dict[str, Dict[str, Image]]:
@@ -764,4 +772,21 @@ class InputManager:
         }
         
 
+    # - CREATE TEXT DISPLAYS - #
 
+    def create_text_displays(self) -> Dict[str, Dict[str, TextDisplay]]:
+        return {
+            "main_menu": {},
+            "setup": self.create_setup_text_displays(),
+            "game": self.create_game_text_displays(),
+            "menu": self.create_menu_text_displays()
+        }
+    
+    def create_setup_text_displays(self) -> Dict[str, TextDisplay]:
+        pass
+
+    def create_game_text_displays(self) -> Dict[str, TextDisplay]:
+        pass
+
+    def create_menu_text_displays(self) -> Dict[str, TextDisplay]:
+        pass
