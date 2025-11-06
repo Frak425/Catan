@@ -23,7 +23,8 @@ class InputManager:
         self.helper_manager:"HelperManager" = None
         
         #Handlers abstract the effects of all buttons
-        #EX. "button_name_here": self.function_defined_below,
+        #EX. "button_name_here": self.function_defined_below, all button names corrospond to some handler
+        #When adding buttons, make sure to add their handlers here
         self.main_menu_handlers = {
             "play": lambda: self.set_game_state("setup"),
             "quit": self.quit
@@ -31,6 +32,7 @@ class InputManager:
         self.setup_handlers = {
             "player_num_increase": self.player_num_increase,
             "player_num_decrease": self.player_num_decrease,
+            "player_num_slider": lambda: self.set_player_num(self.sliders["setup"]["player_num_slider"].value),
             "player_choose_color_cycle": self.choose_player_color_cycle,
             "difficulty_level_easy": lambda:  self.set_diff_level("easy"),
             "difficulty_level_medium": lambda:  self.set_diff_level("medium"),
@@ -101,6 +103,7 @@ class InputManager:
                 self.active = button_clicked
 
             if toggle_clicked:
+                print(f"Toggle {toggle_clicked.name} clicked")
                 self.active = toggle_clicked
 
             if slider_clicked:
@@ -127,7 +130,7 @@ class InputManager:
             self.click_end_y = y
             self.dragging = False
             self.clicked = False
-            #Only buttons and toggles can be clicked, so handle those here
+
             if self.active:
                 self.handle_click()
 
@@ -137,19 +140,20 @@ class InputManager:
         state = self.game_manager.game_state
 
         #if the click ended inside the clickable object, call its handler
+        #TODO: simplify logic, to much computation
         if self.graphics_manager.menu_open:
-            if self.helper_manager.check_point_in_rect(pygame.Rect(self.active.rect.x + self.game_manager.menu_margins[0], self.active.rect.y + self.game_manager.menu_margins[1], self.active.rect.w, self.active.rect.h), (x, y)):
+            if pygame.rect.Rect.collidepoint(pygame.Rect(self.active.rect.x + self.game_manager.menu_margins[0], self.active.rect.y + self.game_manager.menu_margins[1], self.active.rect.w, self.active.rect.h), (x, y)):
                 self.handler = self.handlers_by_state["menu"].get(self.active.name)
             if self.active.__class__.__name__ == "Toggle":
                 self.active.set_animating(self.graphics_manager.time)
+
         else:
-            if self.helper_manager.check_point_in_rect(pygame.Rect(self.active.rect.x, self.active.rect.y, self.active.rect.w, self.active.rect.h), (x, y)):
+            if pygame.rect.Rect.collidepoint(self.active.rect, (x, y)):
                 self.handler = self.handlers_by_state[state].get(self.active.name)
 
             if self.active.__class__.__name__ == "Toggle":
                 self.active.set_animating(self.graphics_manager.time)
 
-            #TODO: consider how slider play into handlers. Ideally slider would alter game state via their handler, but that would require an overhaul/implementation of settings because it changes those values
 
         if self.handler:
             self.handler()
@@ -160,7 +164,7 @@ class InputManager:
                 slider.update_location(x, y)
 
     ## --- EVENT FUNCTIONS --- ##
-
+    #TODO: Add return types to functions
     def player_num_increase(self):
         if (self.game_manager.players_num < 4):
             self.game_manager.players_num += 1
@@ -168,6 +172,10 @@ class InputManager:
     def player_num_decrease(self):
         if (self.game_manager.players_num > 2):
             self.game_manager.players_num -= 1
+
+    def set_player_num(self, num: int) -> None:
+        self.game_manager.players_num = num
+        self.text_displays["setup"]["player_num_text"].update_text(f"Number of Players: {num}")
 
     def choose_player_color_cycle(self):
         player_color_chosen_index += 1
@@ -211,11 +219,13 @@ class InputManager:
 
     def set_game_manager(self, game_manager: 'GameManager') -> None:
         self.game_manager = game_manager
+        #Put all new UI types here
         self.buttons = self.create_buttons()
         self.toggles = self.create_toggles()
         self.sliders = self.create_sliders()
         self.images = self.create_images()
         self.menu = self.create_menu()
+        self.text_displays = self.create_text_displays()
 
     def set_graphics_manager(self, graphics_manager: 'GraphicsManager') -> None:
         self.graphics_manager = graphics_manager
@@ -252,8 +262,9 @@ class InputManager:
         game_setup_back_button = Button((100, 0, 0), "Back", pygame.Rect(self.game_manager.screen_w / 4 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2, 200, 100), "game_setup_back", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         game_start_button = Button((100, 0, 0), "Start", pygame.Rect(self.game_manager.screen_w / 4 * 3 - self.game_manager.game_start_button_width / 2, self.game_manager.screen_h / 8 * 6, self.game_manager.game_start_button_width, self.game_manager.game_start_button_height), "game_start", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         
-        player_num_increase_button = Button((0, 100, 0), "+", pygame.Rect(self.game_manager.screen_w / 4 - self.game_manager.player_number_incease_decrease_button_size / 2 + 100, self.game_manager.screen_h / 4 * 2.5, self.game_manager.player_number_incease_decrease_button_size, self.game_manager.player_number_incease_decrease_button_size), "player_num_increase", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        player_num_decrease_button = Button((0, 100, 0), "-", pygame.Rect(self.game_manager.screen_w / 4 - self.game_manager.player_number_incease_decrease_button_size / 2 - 100, self.game_manager.screen_h / 4 * 2.5, self.game_manager.player_number_incease_decrease_button_size, self.game_manager.player_number_incease_decrease_button_size), "player_num_decrease", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        #TODO: decide on player_num being changed by button or slider
+        #player_num_increase_button = Button((0, 100, 0), "+", pygame.Rect(self.game_manager.screen_w / 4 - self.game_manager.player_number_incease_decrease_button_size / 2 + 100, self.game_manager.screen_h / 4 * 2.5, self.game_manager.player_number_incease_decrease_button_size, self.game_manager.player_number_incease_decrease_button_size), "player_num_increase", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        #player_num_decrease_button = Button((0, 100, 0), "-", pygame.Rect(self.game_manager.screen_w / 4 - self.game_manager.player_number_incease_decrease_button_size / 2 - 100, self.game_manager.screen_h / 4 * 2.5, self.game_manager.player_number_incease_decrease_button_size, self.game_manager.player_number_incease_decrease_button_size), "player_num_decrease", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         
         player_choose_color_cycle_button = Button((0, 0, 0), "->", pygame.Rect(10, 10, 10, 10), "player_choose_color_cycle", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         
@@ -264,8 +275,9 @@ class InputManager:
         open_menu_button = Button((100, 0, 0), "image", pygame.Rect(self.game_manager.screen_w - self.game_manager.settings_open_button_offset - self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_offset, self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_size), "open_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         
         return {
-            "player_num_increase_button": player_num_increase_button, 
-            "player_num_decrease_button": player_num_decrease_button, 
+            #TODO: decide on player_num being changed by button or slider
+            #"player_num_increase_button": player_num_increase_button, 
+            #"player_num_decrease_button": player_num_decrease_button, 
             "difficulty_level_easy_button": difficulty_level_easy_button, 
             "difficulty_level_medium_button": difficulty_level_medium_button, 
             "difficulty_level_hard_button": difficulty_level_hard_button, 
@@ -461,9 +473,9 @@ class InputManager:
         """
         player_num_slider = Slider(
             name="player_num_slider",
-            wrapper_rect=pygame.Rect(100, 200, 300, 50),
+            wrapper_rect=pygame.Rect(100, 200, 300, 20),
             rect=pygame.Rect(100, 200, 300, 20),
-            min_value=2,
+            min_value=1,
             max_value=4,
             initial_value=self.game_manager.players_num,
             bar_color=(0, 100, 0),
@@ -783,7 +795,15 @@ class InputManager:
         }
     
     def create_setup_text_displays(self) -> Dict[str, TextDisplay]:
-        pass
+        player_num_text = TextDisplay(
+            text="Number of Players: ", 
+            font=self.game_manager.game_font,
+            text_color=(0, 0, 0),
+            location=(100, 150)
+        )
+        return {
+            "player_num_text": player_num_text
+        }
 
     def create_game_text_displays(self) -> Dict[str, TextDisplay]:
         pass

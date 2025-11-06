@@ -5,7 +5,6 @@ class PlayerManager:
     def __init__(self, player_list: list[Player]):
         self.players = player_list
         self.current_turn = 0
-        self
 
     def next_turn(self) -> None:
         """Moves turn to the next player"""
