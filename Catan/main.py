@@ -9,12 +9,6 @@ from src.managers.helper_manager import HelperManager
 from src.managers.input_manager import InputManager
 from src.managers.player_manager import PlayerManager
 
-from src.scenes.board import Board
-from src.scenes.game_over import GameOver
-from src.scenes.game_setup import GameSetup
-from src.scenes.title_screen import TitleScreen
-
-
 #initialize game
 pygame.init()
 #set resolution
@@ -45,13 +39,6 @@ input_manager.set_game_manager(game_manager)
 input_manager.create_buttons()
 input_manager.set_graphics_manager(graphics_manager)
 input_manager.set_helper_manager(helper_manager)
-
-#create scenes
-title_screen = TitleScreen(game_manager)
-game_setup = GameSetup(game_manager)
-#board = Board(game_manager)
-game_over = GameOver(game_manager)
-#list_scenes = [title_screen, game_setup, board, game_over]
 
 #game loop
 while game_manager.running:

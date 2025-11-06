@@ -9,6 +9,7 @@ from src.ui.menu import Menu
 
 class GameManager:
     def __init__(self, screen: Surface) -> None:
+        #TODO: Refactor this to use config files properly
         self.running = True
         self.LAYOUT_CONFIG_FILE = Path("layout.json")
         self.SETTINGS_CONFIG_FILE = Path("settings.json")
@@ -69,36 +70,60 @@ class GameManager:
         return board
 
     def init_configs(self):
-        layout_dict = self.create_layout_defaults()
-        settings_dict = self.create_settings_defaults()
-        #create layout and settings files if they don't exist
-        if self.load_config("layout") == {}:
-            self.save_config(layout_dict, "layout")
-        if self.load_config("settings") == {}:
-            self.save_config(settings_dict, "settings")
+        self.layout = self.create_layout_defaults()
+        self.settings = self.create_settings_defaults()
+        self.save_config(self.layout, "layout")
+        self.save_config(self.settings, "settings")
 
-    def create_settings_defaults(self):
-        pass
+    def create_settings_defaults(self) -> dict:
+        if (self.settings != {}):
+            return
+        
+        #create settings default values
+        return {}
 
-    def create_layout_defaults(self):
-        pass
+    def create_layout_defaults(self) -> dict:
+        if (self.layout != {}):
+            return
+        
+        #create layout default values
+        return {}
 
-    def load_config(self, file: str) -> dict:
-        if file == "layout":
-            CONFIG_FILE = self.LAYOUT_CONFIG_FILE
-        elif file == "settings":
-            CONFIG_FILE = self.SETTINGS_CONFIG_FILE
+    def load_config(self, file: str) -> None:
+        CONFIG_FILE = self.get_config_file(file)
+        CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)  # Ensure directories exist
 
         if CONFIG_FILE.exists():
             with open(CONFIG_FILE, "r") as f:
-                return json.load(f)
-        return {}
+                data = json.load(f)
+        else:
+            # File does not exist — create it with an empty dict or default config
+            data = {}
+            with open(CONFIG_FILE, "w") as f:
+                json.dump(data, f, indent=4)
+
+        # Assign loaded data to the correct attribute
+        self.set_config_file(file, data)
+
     
     def save_config(self, config: dict, file: str) -> None:
+        CONFIG_FILE = self.get_config_file(file)
+
+        with open(CONFIG_FILE, "w") as f:
+            json.dump(config, f, indent=4)
+
+    def get_config_file(self, file: str) -> Path:
         if file == "layout":
             CONFIG_FILE = self.LAYOUT_CONFIG_FILE
         elif file == "settings":
             CONFIG_FILE = self.SETTINGS_CONFIG_FILE
 
-        with open(CONFIG_FILE, "w") as f:
-            json.dump(config, f, indent=4)
+        return CONFIG_FILE
+    
+    def set_config_file(self, file: str, value: dict) -> Path:
+        if file == "layout":
+            CONFIG_FILE = self.LAYOUT_CONFIG_FILE
+        elif file == "settings":
+            CONFIG_FILE = self.SETTINGS_CONFIG_FILE
+
+        CONFIG_FILE = value

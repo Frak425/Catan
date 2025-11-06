@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from game_manager import GameManager
@@ -33,6 +34,9 @@ class GraphicsManager:
 
             for slider_name, slider in self.input_manager.sliders["setup"].items():
                 slider.draw(self.game_manager.screen)
+
+            for text_display_name, text_display in self.input_manager.text_displays["setup"].items():
+                text_display.draw(self.game_manager.screen)
 
         elif (self.game_manager.game_state == "init"):
             self.game_manager.init_board()

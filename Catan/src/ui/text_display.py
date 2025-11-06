@@ -3,9 +3,10 @@ from pygame import *
 import math
 
 class TextDisplay:
-    def __init__(self, font: pygame.font.Font, text: str, background_image: pygame.Surface = None, background_color: tuple[int] = (255, 255, 255), text_color: tuple[int] = (0, 0, 0), padding: int = 5) -> None:
+    def __init__(self, font: pygame.font.Font, text: str, location: tuple[int], background_image: pygame.Surface = None, background_color: tuple[int] = (255, 255, 255), text_color: tuple[int] = (0, 0, 0), padding: int = 5) -> None:
         self.font = font
         self.text = text
+        self.location = location
         self.background_image = background_image
         self.background_color = background_color
         self.text_color = text_color
@@ -18,11 +19,11 @@ class TextDisplay:
         # Create the background surface
         if self.background_image:
             self.background_surface = self.background_image
-            self.background_rect = self.background_surface.get_rect()
         else:
             self.background_surface = pygame.Surface((self.text_rect.width + 2 * self.padding, self.text_rect.height + 2 * self.padding))
             self.background_surface.fill(self.background_color)
-            self.background_rect = self.background_surface.get_rect()
+
+        self.background_rect = self.background_surface.get_rect()
 
     def update_text(self, new_text: str) -> None:
         self.text = new_text
@@ -34,5 +35,6 @@ class TextDisplay:
         self.text_rect.center = self.background_rect.center
 
         # Blit the background and text to the screen
+        self.background_surface.fill(self.background_color)
+        self.background_surface.blit(self.text_surface, self.text_rect)
         screen.blit(self.background_surface, self.background_rect)
-        screen.blit(self.text_surface, self.text_rect)
