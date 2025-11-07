@@ -99,11 +99,9 @@ class InputManager:
                 slider_clicked: Slider | None = self.helper_manager.check_clickable_from_dict(self.sliders[state], (x, y))
 
             if button_clicked:
-                print(f"Button {button_clicked.name} clicked")
                 self.active = button_clicked
 
             if toggle_clicked:
-                print(f"Toggle {toggle_clicked.name} clicked")
                 self.active = toggle_clicked
 
             if slider_clicked:
@@ -226,6 +224,7 @@ class InputManager:
         self.images = self.create_images()
         self.menu = self.create_menu()
         self.text_displays = self.create_text_displays()
+        self.initialize_ui_elements()
 
     def set_graphics_manager(self, graphics_manager: 'GraphicsManager') -> None:
         self.graphics_manager = graphics_manager
@@ -238,6 +237,10 @@ class InputManager:
         menu = Menu(self.game_manager.screen, self.game_manager.game_font, "static", self.buttons['menu'], self.toggles["menu"], self.sliders["menu"], self.game_manager.menu_size, self.game_manager.init_location, self.game_manager.final_location, bckg_color=self.game_manager.menu_background_color)
         return menu
     
+    def initialize_ui_elements(self) -> None:
+        # Initialize any UI elements that require setup after creation
+        self.handlers_by_state["setup"]["player_num_slider"]()  # Set initial player number text
+
     # - CREATE BUTTONS - #
 
     def create_buttons(self) -> Dict[str, Dict[str, Button]]:

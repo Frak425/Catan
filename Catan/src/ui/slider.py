@@ -40,12 +40,14 @@ class Slider:
         elif value > self.max_value:
             value = self.max_value
         # Calculate the position based on the value
-        return int(self.rect.x + (value - self.min_value) / (self.max_value - self.min_value) * (self.rect.width - self.rect.height) + self.rect.height / 2)
+        relative_position = (value - self.min_value) / (self.max_value - self.min_value)
+        slider_position = relative_position * (self.rect.width - self.rect.height)
+        return int(slider_position)
 
     def calculate_value(self) -> int:
         # Calculate the value based on the slider position
-        relative_position = self.slider_position - self.rect.height / 2
-        value = int(self.min_value + (relative_position / (self.rect.width - self.rect.height)) * (self.max_value - self.min_value))
+        relative_position = self.slider_position / (self.rect.width - self.rect.height)
+        value = int(self.min_value + relative_position * (self.max_value - self.min_value))
         # Ensure the value is within the defined range
         if value < self.min_value:
             value = self.min_value
