@@ -27,6 +27,9 @@ clock = pygame.time.Clock()
 #managers act in a circular way, every one except game_manager calls every other one
 #dependencies are installed after initialization
 game_manager = GameManager(screen)
+audio_manager = AudioManager()
+#TODO: create list of player in game manager
+player_manager = PlayerManager([])
 graphics_manager = GraphicsManager(clock.get_time())
 input_manager = InputManager()
 helper_manager = HelperManager()
@@ -39,6 +42,13 @@ input_manager.set_game_manager(game_manager)
 input_manager.create_buttons()
 input_manager.set_graphics_manager(graphics_manager)
 input_manager.set_helper_manager(helper_manager)
+
+game_manager.set_graphics_manager(graphics_manager)
+game_manager.set_audio_manager(audio_manager)
+game_manager.set_helper_manager(helper_manager)
+game_manager.set_input_manager(input_manager)
+game_manager.set_player_manager(player_manager)
+
 
 #game loop
 while game_manager.running:
@@ -62,6 +72,11 @@ while game_manager.running:
         elif event.type == pygame.MOUSEBUTTONUP:
             x, y = event.pos
             input_manager.handle_input(x, y, pygame.MOUSEBUTTONUP)
+
+        #on a keyboard press
+        elif event.type == pygame.KEYDOWN:
+            key = event.key
+            input_manager.handle_keyboard(key)
 
     graphics_manager.draw_screen()
     graphics_manager.time = pygame.time.get_ticks()

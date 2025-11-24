@@ -1,7 +1,8 @@
 import pygame
 
 class Image:
-    def __init__(self, rect: pygame.Rect, image_path: str = None, default_color: tuple = (100, 100, 100)):
+    def __init__(self, name: str, rect: pygame.Rect, image_path: str = None, default_color: tuple = (100, 100, 100)):
+        self.name = name
         self.rect = rect
         self.surface = pygame.Surface(self.rect.size, pygame.SRCALPHA)
         self.image_path = image_path

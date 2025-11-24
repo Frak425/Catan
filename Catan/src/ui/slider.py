@@ -1,8 +1,12 @@
 import pygame
 
+from Catan.src.managers.game_manager import GameManager
+
 class Slider:
-    def __init__(self, name: str, wrapper_rect: pygame.Rect, rect: pygame.Rect, min_value: int, max_value: int, initial_value: int, bar_color: tuple[int], slider_color: tuple[int], slider_radius: int) -> None:
+    def __init__(self, name: str, wrapper_rect: pygame.Rect, rect: pygame.Rect, min_value: int, max_value: int, initial_value: int, bar_color: tuple[int], slider_color: tuple[int], slider_radius: int, game_manager: GameManager) -> None:
         self.name = name
+        self.game_manager = game_manager
+
         self.rect = rect
         self.wrapper_rect = wrapper_rect
         self.min_value = min_value

@@ -88,7 +88,7 @@ class Board:
         other_sxs = 29
         total_sxs = number_sxs + text_sxs + other_sxs
 
-        sprite_sheet = pygame.image.load('Assets/New Piskel (6).png')
+        sprite_sheet = pygame.image.load('Catan/assets/New Piskel (6).png')
         top_left_offset_x, top_left_offset_y = (3, 3)
         sprite_sheet_w, sprite_sheet_h = sprite_sheet.get_size()
         section_size = 64

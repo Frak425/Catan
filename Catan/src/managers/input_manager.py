@@ -161,6 +161,10 @@ class InputManager:
             if slider == self.active:
                 slider.update_location(x, y)
 
+    def handle_keyboard(self, key: pygame.event):
+        if key == pygame.K_0:
+            self.game_manager.dev_mode = not self.game_manager.dev_mode
+
     ## --- EVENT FUNCTIONS --- ##
     #TODO: Add return types to functions
     def player_num_increase(self):
