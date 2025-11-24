@@ -1,7 +1,12 @@
 import pygame
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.managers.game_manager import GameManager
+
 class Image:
-    def __init__(self, name: str, rect: pygame.Rect, image_path: str = None, default_color: tuple = (100, 100, 100)):
+    def __init__(self, game_manager: GameManager, name: str, rect: pygame.Rect, image_path: str = None, default_color: tuple = (100, 100, 100)):
         self.name = name
         self.rect = rect
         self.surface = pygame.Surface(self.rect.size, pygame.SRCALPHA)

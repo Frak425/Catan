@@ -1,8 +1,12 @@
 import pygame
 import pytweening as tween
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from Catan.src.managers.game_manager import GameManager
+
 class Toggle:
-    def __init__(self, time: int, time_to_flip: float, location: tuple[int], height: int, center_width: int, fill_color: tuple[int], toggle_color: tuple[int], toggle_gap: int, toggle_name: str, on: bool = False, guiding_lines: bool = False, callback=None) -> None:
+    def __init__(self, time: int, time_to_flip: float, location: tuple[int], height: int, center_width: int, fill_color: tuple[int], toggle_color: tuple[int], toggle_gap: int, toggle_name: str, game_manager: GameManager, on: bool = False, guiding_lines: bool = False, callback=None) -> None:
         self.name = toggle_name
         self.guiding_lines = guiding_lines
         self.callback = callback

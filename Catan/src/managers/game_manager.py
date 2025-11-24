@@ -3,11 +3,11 @@ from pathlib import Path
 import pygame
 from pygame import *
 
-from Catan.src.ui.button import Button
-from Catan.src.ui.image import Image
-from Catan.src.ui.slider import Slider
-from Catan.src.ui.text_display import TextDisplay
-from Catan.src.ui.toggle import Toggle
+from src.ui.button import Button
+from src.ui.image import Image
+from src.ui.slider import Slider
+from src.ui.text_display import TextDisplay
+from src.ui.toggle import Toggle
 from src.entities.player import Player
 from src.entities.board import Board
 from src.ui.menu import Menu
@@ -81,14 +81,11 @@ class GameManager:
         board.assign_tile_classes()
         return board
 
-    def init_configs(self):
-        self.layout = self.create_layout_defaults()
-        self.settings = self.create_settings_defaults()
-        self.save_config(self.layout, "layout")
-        self.save_config(self.settings, "settings")
-
     def set_input_manager(self, input_manager: InputManager):
         self.input_manager = input_manager
+        self.load_config("layout")
+        self.create_layout_defaults()
+
 
     def set_audio_manager(self, audio_manager: AudioManager):
         self.audio_manager = audio_manager
@@ -103,7 +100,7 @@ class GameManager:
         self.player_manager = player_manager
 
     #initialize default settings
-    def create_layout_defaults(self) -> dict:
+    def create_layout_defaults(self) -> None:
         if (self.layout != {}):
             return
         
@@ -146,7 +143,7 @@ class GameManager:
             }
         }
 
-        layout_defaults["home"] = self.create_layout_defaults_by_section("home")
+        layout_defaults["home"] = self.create_layout_defaults_by_section("main_menu")
         layout_defaults["setup"] = self.create_layout_defaults_by_section("setup")
         layout_defaults["game"] = self.create_layout_defaults_by_section("game")
         layout_defaults["menu"] = self.create_layout_defaults_by_section("menu")
@@ -176,7 +173,7 @@ class GameManager:
                 "graphics": section_defaults
             }
 
-            for tab_name, tab in menu.items():
+            for tab_name in self.input_manager.menu.tabs:
                 buttons = self.input_manager.buttons["menu"][tab_name]
                 menu[tab_name]["buttons"] = self.convert_buttons_to_list(buttons)
 
@@ -198,32 +195,32 @@ class GameManager:
             return menu
             
         else:
-            buttons = self.input_manager.buttons["section"]
+            buttons = self.input_manager.buttons[section]
             section_defaults["buttons"] = self.convert_buttons_to_list(buttons)
 
-            sliders = self.input_manager.sliders["section"]
+            sliders = self.input_manager.sliders[section]
             section_defaults["sliders"] = self.convert_sliders_to_list(sliders)
 
-            toggles = self.input_manager.toggles["section"]
+            toggles = self.input_manager.toggles[section]
             section_defaults["toggles"] = self.convert_toggles_to_list(toggles)
 
-            text_displays = self.input_manager.text_displays["section"]
+            text_displays = self.input_manager.text_displays[section]
             section_defaults["text_displays"] = self.convert_text_displays_to_list(text_displays)
 
             #TODO: implement these
-            #text_inputs = self.input_manager.text_inputs["section"]
+            #text_inputs = self.input_manager.text_inputs[section]
             #section_defaults["text_inputs"] = self.convert_text_inputs_to_list(text_inputs)
 
-            #multi_selects = self.input_manager.multi_selects["section"]
+            #multi_selects = self.input_manager.multi_selects[section]
             #section_defaults["multi_selects"] = self.convert_multi_selects_to_list(multi_selects)
 
             return section_defaults
 
     ## --- CONVERT OBJECTS TO --- ##
 
-    def convert_buttons_to_list(self, buttons: list[Button]) -> list:
+    def convert_buttons_to_list(self, buttons: dict[str, Button]) -> list:
         layout_object_list = []
-        for button in buttons:
+        for button_name, button in buttons.items():
             layout_object = {
                 "name": button.name,
                 "rect": [button.rect[0], button.rect[1], button.rect[2], button.rect[3]],
@@ -234,19 +231,20 @@ class GameManager:
             layout_object_list.append(layout_object)
         return layout_object_list
 
-    def convert_images_to_list(self, images: list[Image]) -> list:
+    def convert_images_to_list(self, images: dict[str, Image]) -> list:
         layout_object_list = []
-        for image in images:
+        for image_name, image in images.items():
             layout_object = {
                 "name": image.name,
                 "rect": [image.rect[0], image.rect[1], image.rect[2], image.rect[3]],
                 "file_path": image.image_path,
             }
             layout_object_list.append(layout_object)
+        return layout_object_list
 
-    def convert_sliders_to_list(self, sliders: list[Slider]) -> list:
+    def convert_sliders_to_list(self, sliders: dict[str, Slider]) -> list:
         layout_object_list = []
-        for slider in sliders:
+        for slider_name, slider in sliders.items():
             layout_object = {
                 "name": slider.name,
                 "rect": [slider.rect[0], slider.rect[1], slider.rect[2], slider.rect[3]],
@@ -260,9 +258,9 @@ class GameManager:
             layout_object_list.append(layout_object)
         return layout_object_list
 
-    def convert_toggles_to_list(self, toggles: list[Toggle]) -> list:
+    def convert_toggles_to_list(self, toggles: dict[str, Toggle]) -> list:
         layout_object_list = []
-        for toggle in toggles:
+        for toggle_name, toggle in toggles.items():
             layout_object = {
                 "name": toggle.name,
                 "rect": [toggle.rect[0], toggle.rect[1], toggle.rect[2], toggle.rect[3]],
@@ -277,16 +275,16 @@ class GameManager:
             layout_object_list.append(layout_object)
         return layout_object_list
 
-    def convert_text_displays_to_list(self, text_displays: list[TextDisplay]) -> list:
+    def convert_text_displays_to_list(self, text_displays: dict[str, TextDisplay]) -> list:
         layout_object_list = []
-        for text_display in text_displays:
+        for text_display_name, text_display in text_displays.items():
             layout_object = {
                 "name": text_display.name,
                 "rect": [text_display.rect[0], text_display.rect[1], text_display.rect[2], text_display.rect[3]],
-                "color": [text_display.color[0], text_display.color[1], text_display.color[2]],
+                "color": [text_display.background_color[0], text_display.background_color[1], text_display.background_color[2]],
                 "text": text_display.text,
-                "font": text_display.font,
-                "location": [text_display.location[0], text_display.location[1]]
+                "text_color": [text_display.text_color[0], text_display.text_color[1], text_display.text_color[2]],
+                "padding": text_display.padding
             }
             layout_object_list.append(layout_object)
         return layout_object_list
