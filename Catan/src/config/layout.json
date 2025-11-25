@@ -1,1 +1,1044 @@
-{}
+{
+    "home": {
+        "buttons": [
+            {
+                "name": "play",
+                "rect": [
+                    583,
+                    341,
+                    200,
+                    75
+                ],
+                "color": [
+                    0,
+                    100,
+                    0
+                ],
+                "text": "PLAY",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "quit",
+                "rect": [
+                    583,
+                    426,
+                    200,
+                    75
+                ],
+                "color": [
+                    100,
+                    0,
+                    0
+                ],
+                "text": "QUIT",
+                "location": [
+                    0,
+                    0
+                ]
+            }
+        ],
+        "images": [],
+        "sliders": [],
+        "toggles": [],
+        "text_displays": [],
+        "text_inputs": [],
+        "multi_selects": []
+    },
+    "setup": {
+        "buttons": [
+            {
+                "name": "difficulty_level_easy",
+                "rect": [
+                    10,
+                    10,
+                    10,
+                    10
+                ],
+                "color": [
+                    0,
+                    0,
+                    0
+                ],
+                "text": "easy",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "difficulty_level_medium",
+                "rect": [
+                    10,
+                    10,
+                    10,
+                    10
+                ],
+                "color": [
+                    0,
+                    0,
+                    0
+                ],
+                "text": "medium",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "difficulty_level_hard",
+                "rect": [
+                    10,
+                    10,
+                    10,
+                    10
+                ],
+                "color": [
+                    0,
+                    0,
+                    0
+                ],
+                "text": "hard",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "open_menu",
+                "rect": [
+                    1268,
+                    21,
+                    75,
+                    75
+                ],
+                "color": [
+                    100,
+                    0,
+                    0
+                ],
+                "text": "image",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "player_choose_color_cycle",
+                "rect": [
+                    10,
+                    10,
+                    10,
+                    10
+                ],
+                "color": [
+                    0,
+                    0,
+                    0
+                ],
+                "text": "->",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "game_start",
+                "rect": [
+                    949,
+                    576,
+                    150,
+                    50
+                ],
+                "color": [
+                    100,
+                    0,
+                    0
+                ],
+                "text": "Start",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "game_setup_back",
+                "rect": [
+                    241,
+                    384,
+                    200,
+                    100
+                ],
+                "color": [
+                    100,
+                    0,
+                    0
+                ],
+                "text": "Back",
+                "location": [
+                    0,
+                    0
+                ]
+            }
+        ],
+        "images": [],
+        "sliders": [
+            {
+                "name": "player_num_slider",
+                "rect": [
+                    100,
+                    200,
+                    300,
+                    20
+                ],
+                "wrapper_rect": [
+                    100,
+                    200,
+                    300,
+                    20
+                ],
+                "min_value": 1,
+                "max_value": 4,
+                "bar_color": [
+                    0,
+                    100,
+                    0
+                ],
+                "slider_color": [
+                    100,
+                    0,
+                    0
+                ],
+                "slider_radius": 10
+            }
+        ],
+        "toggles": [],
+        "text_displays": [
+            {
+                "name": "player_num_text",
+                "rect": [
+                    100,
+                    150,
+                    300,
+                    50
+                ],
+                "color": [
+                    255,
+                    255,
+                    255
+                ],
+                "text": "Number of Players: 2",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5
+            }
+        ],
+        "text_inputs": [],
+        "multi_selects": []
+    },
+    "game": {
+        "buttons": [
+            {
+                "name": "board_buy_settlement",
+                "rect": [
+                    700,
+                    650,
+                    40,
+                    40
+                ],
+                "color": [
+                    0,
+                    0,
+                    0
+                ],
+                "text": "image",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "board_buy_city",
+                "rect": [
+                    800,
+                    650,
+                    40,
+                    40
+                ],
+                "color": [
+                    0,
+                    0,
+                    0
+                ],
+                "text": "image",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "board_buy_road",
+                "rect": [
+                    900,
+                    10,
+                    10,
+                    40
+                ],
+                "color": [
+                    0,
+                    0,
+                    0
+                ],
+                "text": "image",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "board_buy_development",
+                "rect": [
+                    1000,
+                    40,
+                    40,
+                    40
+                ],
+                "color": [
+                    0,
+                    0,
+                    0
+                ],
+                "text": "image",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "board_roll_dice",
+                "rect": [
+                    1050,
+                    600,
+                    40,
+                    40
+                ],
+                "color": [
+                    0,
+                    0,
+                    0
+                ],
+                "text": "image",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "settings_menu",
+                "rect": [
+                    1268,
+                    21,
+                    75,
+                    75
+                ],
+                "color": [
+                    100,
+                    0,
+                    0
+                ],
+                "text": "image",
+                "location": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "back",
+                "rect": [
+                    10,
+                    10,
+                    70,
+                    40
+                ],
+                "color": [
+                    100,
+                    100,
+                    200
+                ],
+                "text": "back",
+                "location": [
+                    0,
+                    0
+                ]
+            }
+        ],
+        "images": [],
+        "sliders": [],
+        "toggles": [],
+        "text_displays": [],
+        "text_inputs": [],
+        "multi_selects": []
+    },
+    "menu": {
+        "input": {
+            "buttons": [
+                {
+                    "name": "test3",
+                    "rect": [
+                        200,
+                        100,
+                        100,
+                        50
+                    ],
+                    "color": [
+                        200,
+                        50,
+                        100
+                    ],
+                    "text": "test3",
+                    "location": [
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "images": [],
+            "sliders": [
+                {
+                    "name": "brightness",
+                    "rect": [
+                        100,
+                        200,
+                        300,
+                        20
+                    ],
+                    "wrapper_rect": [
+                        100,
+                        200,
+                        300,
+                        20
+                    ],
+                    "min_value": 0,
+                    "max_value": 1,
+                    "bar_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "slider_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "slider_radius": 10
+                }
+            ],
+            "toggles": [
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        200,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                },
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        300,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                },
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        400,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                }
+            ],
+            "text_displays": [],
+            "text_inputs": [],
+            "multi_selects": []
+        },
+        "accessibility": {
+            "buttons": [
+                {
+                    "name": "test3",
+                    "rect": [
+                        200,
+                        100,
+                        100,
+                        50
+                    ],
+                    "color": [
+                        200,
+                        50,
+                        100
+                    ],
+                    "text": "test3",
+                    "location": [
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "images": [],
+            "sliders": [
+                {
+                    "name": "brightness",
+                    "rect": [
+                        100,
+                        200,
+                        300,
+                        20
+                    ],
+                    "wrapper_rect": [
+                        100,
+                        200,
+                        300,
+                        20
+                    ],
+                    "min_value": 0,
+                    "max_value": 1,
+                    "bar_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "slider_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "slider_radius": 10
+                }
+            ],
+            "toggles": [
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        200,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                },
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        300,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                },
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        400,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                }
+            ],
+            "text_displays": [],
+            "text_inputs": [],
+            "multi_selects": []
+        },
+        "gameplay": {
+            "buttons": [
+                {
+                    "name": "test3",
+                    "rect": [
+                        200,
+                        100,
+                        100,
+                        50
+                    ],
+                    "color": [
+                        200,
+                        50,
+                        100
+                    ],
+                    "text": "test3",
+                    "location": [
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "images": [],
+            "sliders": [
+                {
+                    "name": "brightness",
+                    "rect": [
+                        100,
+                        200,
+                        300,
+                        20
+                    ],
+                    "wrapper_rect": [
+                        100,
+                        200,
+                        300,
+                        20
+                    ],
+                    "min_value": 0,
+                    "max_value": 1,
+                    "bar_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "slider_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "slider_radius": 10
+                }
+            ],
+            "toggles": [
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        200,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                },
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        300,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                },
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        400,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                }
+            ],
+            "text_displays": [],
+            "text_inputs": [],
+            "multi_selects": []
+        },
+        "audio": {
+            "buttons": [
+                {
+                    "name": "test3",
+                    "rect": [
+                        200,
+                        100,
+                        100,
+                        50
+                    ],
+                    "color": [
+                        200,
+                        50,
+                        100
+                    ],
+                    "text": "test3",
+                    "location": [
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "images": [],
+            "sliders": [
+                {
+                    "name": "brightness",
+                    "rect": [
+                        100,
+                        200,
+                        300,
+                        20
+                    ],
+                    "wrapper_rect": [
+                        100,
+                        200,
+                        300,
+                        20
+                    ],
+                    "min_value": 0,
+                    "max_value": 1,
+                    "bar_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "slider_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "slider_radius": 10
+                }
+            ],
+            "toggles": [
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        200,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                },
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        300,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                },
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        400,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                }
+            ],
+            "text_displays": [],
+            "text_inputs": [],
+            "multi_selects": []
+        },
+        "graphics": {
+            "buttons": [
+                {
+                    "name": "test3",
+                    "rect": [
+                        200,
+                        100,
+                        100,
+                        50
+                    ],
+                    "color": [
+                        200,
+                        50,
+                        100
+                    ],
+                    "text": "test3",
+                    "location": [
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "images": [],
+            "sliders": [
+                {
+                    "name": "brightness",
+                    "rect": [
+                        100,
+                        200,
+                        300,
+                        20
+                    ],
+                    "wrapper_rect": [
+                        100,
+                        200,
+                        300,
+                        20
+                    ],
+                    "min_value": 0,
+                    "max_value": 1,
+                    "bar_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "slider_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "slider_radius": 10
+                }
+            ],
+            "toggles": [
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        200,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                },
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        300,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                },
+                {
+                    "name": "controller_vibration",
+                    "rect": [
+                        400,
+                        300,
+                        150,
+                        50
+                    ],
+                    "guiding_lines": true,
+                    "height": 50,
+                    "center_width": 100,
+                    "fill_color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "toggle_color": [
+                        100,
+                        0,
+                        0
+                    ],
+                    "toggle_gap": 7,
+                    "time_to_flip": 0.25
+                }
+            ],
+            "text_displays": [],
+            "text_inputs": [],
+            "multi_selects": []
+        }
+    }
+}

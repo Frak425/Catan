@@ -21,8 +21,11 @@ class GameManager:
     def __init__(self, screen: Surface) -> None:
         #TODO: Refactor this to use config files properly
         self.running = True
-        self.LAYOUT_CONFIG_FILE = Path("layout.json")
-        self.SETTINGS_CONFIG_FILE = Path("settings.json")
+        self.edited = False  #whether to use edited settings or layout
+        self.LAYOUT_CONFIG_PATH = Path("Catan/src/config/layout.json")
+        self.SETTINGS_CONFIG_PATH = Path("Catan/src/config/settings.json")
+        self.LAYOUT_STATE_CONFIG_PATH = Path("Catan/src/config/layout_state.json")
+        self.SETTINGS_STATE_CONFIG_PATH = Path("Catan/src/config/settings_state.json")
         self.screen = screen
         self.screen_size = (self.screen.get_width(), self.screen.get_height())
         self.screen_w = self.screen_size[0]
@@ -86,7 +89,6 @@ class GameManager:
         self.load_config("layout")
         self.create_layout_defaults()
 
-
     def set_audio_manager(self, audio_manager: AudioManager):
         self.audio_manager = audio_manager
 
@@ -100,12 +102,9 @@ class GameManager:
         self.player_manager = player_manager
 
     #initialize default settings
-    def create_layout_defaults(self) -> None:
-        if (self.layout != {}):
-            return
-        
-        #create layout default values
-        layout_defaults = {
+    def get_layout(self) -> dict:
+
+        layout = {
             "home": {
                 "images": [],
                 "sliders": [],
@@ -143,16 +142,25 @@ class GameManager:
             }
         }
 
-        layout_defaults["home"] = self.create_layout_defaults_by_section("main_menu")
-        layout_defaults["setup"] = self.create_layout_defaults_by_section("setup")
-        layout_defaults["game"] = self.create_layout_defaults_by_section("game")
-        layout_defaults["menu"] = self.create_layout_defaults_by_section("menu")
+        layout["home"] = self.save_layout_by_section("main_menu")
+        layout["setup"] = self.save_layout_by_section("setup")
+        layout["game"] = self.save_layout_by_section("game")
+        layout["menu"] = self.save_layout_by_section("menu")
 
-        self.save_config(layout_defaults, "layout")
-        self.layout = layout_defaults
+        return layout
 
+    def get_settings(self) -> dict:
+        settings_defaults = {
+            "audio": {},
+            "graphics": {},
+            "gameplay": {},
+            "accessibility": {},
+            "input": {}
+        }
+
+        return settings_defaults
             
-    def create_layout_defaults_by_section(self, section: str) -> dict:
+    def save_layout_by_section(self, section: str) -> dict:
         section_defaults = {
             "buttons": [],
             "images": [],
@@ -297,18 +305,18 @@ class GameManager:
 
     ## --- SET/GET CONFIG FROM FILES --- ##
 
-    #loag settings from file into game manager
+    #loag config from file into game manager
     def load_config(self, file: str) -> None:
-        CONFIG_FILE = self.get_config_file(file)
-        CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)  # Ensure directories exist
+        CONFIG_PATH = self.get_config_path(file)
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)  # Ensure directories exist
 
-        if CONFIG_FILE.exists():
-            with open(CONFIG_FILE, "r") as f:
+        if CONFIG_PATH.exists():
+            with open(CONFIG_PATH, "r") as f:
                 data = json.load(f)
         else:
             # File does not exist — create it with an empty dict or default config
-            data = {}
-            with open(CONFIG_FILE, "w") as f:
+            data = self.get_layout() if file == "layout" else self.get_settings()
+            with open(CONFIG_PATH, "w") as f:
                 json.dump(data, f, indent=4)
 
         # Assign loaded data to the correct attribute
@@ -319,24 +327,31 @@ class GameManager:
 
     #save settings from game manager into file
     def save_config(self, config: dict, file: str) -> None:
-        CONFIG_FILE = self.get_config_file(file)
+        CONFIG_PATH = self.get_config_path(file)
 
-        with open(CONFIG_FILE, "w") as f:
-            json.dump(config, f, indent=4)
+        with open(CONFIG_PATH, "w") as f:
+            json.dump(self.get_config_file(CONFIG_PATH), f, indent=4)
+
+    def override_config(self, config: dict, file: str) -> None:
+            if file == "layout":
+                CONFIG_PATH = self.LAYOUT_STATE_CONFIG_PATH
+            elif file == "settings":
+                CONFIG_PATH = self.SETTINGS_STATE_CONFIG_PATH
+            with open(CONFIG_PATH, "w") as f:
+                json.dump(config, f, indent=4)
 
     #return config as object
-    def get_config_file(self, file: str) -> Path:
+    def get_config_path(self, file: str) -> Path:
         if file == "layout":
-            CONFIG_FILE = self.LAYOUT_CONFIG_FILE
+            CONFIG_PATH = self.LAYOUT_STATE_CONFIG_PATH
         elif file == "settings":
-            CONFIG_FILE = self.SETTINGS_CONFIG_FILE
+            CONFIG_PATH = self.SETTINGS_STATE_CONFIG_PATH
 
-        return CONFIG_FILE
+        return CONFIG_PATH
     
-    def set_config_file(self, file: str, value: dict) -> Path:
-        if file == "layout":
-            CONFIG_FILE = self.LAYOUT_CONFIG_FILE
-        elif file == "settings":
-            CONFIG_FILE = self.SETTINGS_CONFIG_FILE
-
-        CONFIG_FILE = value
+    #get config data based on path. could be better but for now it works
+    def get_config_file(self, path: Path) -> dict:
+        if path == self.LAYOUT_STATE_CONFIG_PATH:
+            return self.layout
+        elif path == self.SETTINGS_STATE_CONFIG_PATH:
+            return self.settings
