@@ -1,8 +1,15 @@
 import pygame
 from slider import Slider
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.managers.game_manager import GameManager
+
 class ScrollableArea:
-    def __init__(self, wrapper_rect: pygame.Rect, content_height: int, exterior_padding: int, interior_padding, scroll_bar_width: int, content_background_image: pygame.Surface = None, content_background_color: tuple = (255, 255, 255, 1), scroll_bar_image: pygame.Surface = None, scroll_bar_color: tuple = (200, 200, 200, 1), scroll_handle_color: tuple = (100, 100, 100, 1), scroll_handle_image: pygame.Surface = None, scroll_bar_side: str = "right", background_color: tuple = (255, 255, 255, 1),  background_image: pygame.Surface = None):
+    def __init__(self, game_manager: GameManager, wrapper_rect: pygame.Rect, content_height: int, exterior_padding: int, interior_padding, scroll_bar_width: int, content_background_image: pygame.Surface | None, scroll_bar_image: pygame.Surface | None, scroll_handle_image: pygame.Surface | None, background_image: pygame.Surface | None, content_background_color: tuple = (255, 255, 255, 1), scroll_bar_color: tuple = (200, 200, 200, 1), scroll_handle_color: tuple = (100, 100, 100, 1), scroll_bar_side: str = "right", background_color: tuple = (255, 255, 255, 1)):
+        self.game_manager = game_manager
+        
         self.rect = wrapper_rect
         self.content_height = content_height
         self.exterior_padding = exterior_padding
@@ -20,7 +27,7 @@ class ScrollableArea:
         self.scroll_handle_image = scroll_handle_image
 
         self.scroll_y = 0
-        self.max_scroll = max(0, content_height - (self.rect.height - 2 * (self.exterior_padding + self.interior_padding)))
+        self.max_scroll = max(0, content_height - (self.rect.height - 2 * (self.exterior_padding)))
 
         self.create_surfaces()
 
@@ -51,9 +58,10 @@ class ScrollableArea:
             bar_color=self.scroll_bar_color,
             handle_color=self.scroll_handle_color,
             handle_radius=self.scroll_bar_width // 2,
-            game_manager=None,
+            game_manager=self.game_manager,
             direction="vertical",
-            handle_shape="rectangle"
+            handle_shape="stadium",
+            bar_image=self.scroll_bar_image
         )
 
     def update_scroll(self, new_scroll_y: int):
@@ -61,24 +69,21 @@ class ScrollableArea:
         self.scroll_slider.value = self.scroll_y
         self.scroll_slider.slider_position = self.scroll_slider.calculate_slider_position(self.scroll_y)
 
+    #draws from the bottom up, background surface is blitted last and refreshed every frame. This will be made more efficient later, but for now it works.
     def draw(self, surface: pygame.Surface):
-        # Draw background
-        surface.blit(self.background_surface, self.rect.topleft)
-
-        # Draw content
-        content_viewport = pygame.Rect(0, self.scroll_y, self.content_surface.get_width(), self.rect.height - 2 * (self.exterior_padding + self.interior_padding))
-        surface.blit(self.content_surface, (self.rect.x + self.exterior_padding, self.rect.y + self.exterior_padding), content_viewport)
-
-        # Draw scroll bar
-        if self.scroll_bar_image:
-            surface.blit(self.scroll_bar_image, self.scroll_bar_rect.topleft)
+        #refresh background surface
+        if self.background_image:
+            self.background_surface.blit(self.background_image, (0, 0))
         else:
-            pygame.draw.rect(surface, self.scroll_bar_color, self.scroll_bar_rect)
+            self.background_surface.fill(self.background_color)
 
-        # Draw scroll handle
-        handle_pos = (self.scroll_bar_rect.x, self.scroll_bar_rect.y + self.scroll_slider.slider_position)
-        if self.scroll_handle_image:
-            surface.blit(self.scroll_handle_image, handle_pos)
-        else:
-            handle_rect = pygame.Rect(handle_pos[0], handle_pos[1], self.scroll_bar_width, 50)
-            pygame.draw.rect(surface, self.scroll_handle_color, handle_rect)
+        #blit content surface
+        self.background_surface.blit(self.content_surface, (self.exterior_padding, self.exterior_padding))
+        
+        #blit scroll bar
+        self.scroll_slider.draw(self.background_surface)
+
+        #draw to main surface
+        surface.blit(self.background_surface, (self.rect.x, self.rect.y))
+
+        

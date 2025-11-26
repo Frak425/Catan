@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
 class Slider:
-    def __init__(self, name: str, wrapper_rect: pygame.Rect, rect: pygame.Rect, min_value: int, max_value: int, initial_value: int, bar_color: tuple[int], handle_color: tuple[int], handle_radius: int, game_manager: "GameManager", direction: str = "horizontal", handle_shape: str = "circle", handle_length: int = 0) -> None:
+    def __init__(self, name: str, wrapper_rect: pygame.Rect, rect: pygame.Rect, min_value: int, max_value: int, initial_value: int | float, bar_color: tuple[int, int, int], handle_color: tuple[int, int, int], handle_radius: int, game_manager: "GameManager",  bar_image: pygame.Surface | None, direction: str = "horizontal", handle_shape: str = "circle", handle_length: int = 0) -> None:
         self.name = name
         self.game_manager = game_manager
 
@@ -17,6 +17,7 @@ class Slider:
         self.max_value = max_value
         self.value = initial_value
         self.bar_color = bar_color
+        self.bar_image = bar_image
         self.handle_color = handle_color
         self.handle_radius = handle_radius
         self.handle_length = handle_length
@@ -70,7 +71,7 @@ class Slider:
             self.handle_surface.fill((0, 0, 0, 0))
             pygame.draw.rect(self.handle_surface, self.handle_color, (0, 0, self.handle_length, self.rect.height))
 
-    def calculate_slider_position(self, value: int) -> int:
+    def calculate_slider_position(self, value: float | int) -> int:
         # Ensure the value is within the defined range
         if value < self.min_value:
             value = self.min_value

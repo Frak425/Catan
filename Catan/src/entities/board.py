@@ -27,7 +27,7 @@ road_sprite_names_left = ["c_red_l", "c_blue_l", "c_white_l", "c_yellow_l", "c_g
 sprites = {}
 
 class Board:
-    def __init__(self, hex_r_side: int, screen_h, screen_w, num_tiles, screen, game_font, font_size) -> None:
+    def __init__(self, hex_r_side, screen_h, screen_w, num_tiles, screen, game_font, font_size) -> None:
 
         self.tiles_names = [] #arr len 19 filled with self.types randomly. Assigned in self.assign_tiles
         self.tile_tops = [] #each index is the top point on a hexagon
@@ -195,7 +195,7 @@ class Board:
             elif sxs_idx == change_mode_at_idx[3]:
                 assignment_mode = "settlement_right"
 
-    def midpoint(self, point1: tuple[int], point2: tuple[int]) -> tuple:
+    def midpoint(self, point1: tuple[int, int], point2: tuple[int, int]) -> tuple:
         return ((point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2)
 
     def assign_tile_locations(self) -> None:
@@ -250,7 +250,7 @@ class Board:
 
             #Find the center of each tile
             center = (top[0], top[1] + self.radius_corner)
-            self.tiles.append(Tile(self.tiles_names[i], color, center, self.numbers[self.number_indicies[i] - 1], points, self.screen))
+            self.tiles.append(Tile(self.tiles_names[i], color, center, int(self.numbers[self.number_indicies[i] - 1]), points, self.screen))
 
     """def flatten_nodes(self) -> None:
         i = 0

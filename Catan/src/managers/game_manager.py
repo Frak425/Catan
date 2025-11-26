@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 import pygame
-from pygame import *
 
 from src.ui.button import Button
 from src.ui.image import Image
@@ -18,7 +17,7 @@ from src.managers.player_manager import PlayerManager
 from src.managers.audio_manager import AudioManager
 
 class GameManager:
-    def __init__(self, screen: Surface) -> None:
+    def __init__(self, screen: pygame.Surface) -> None:
         #TODO: Refactor this to use config files properly
         self.running = True
         self.edited = False  #whether to use edited settings or layout
@@ -87,7 +86,7 @@ class GameManager:
     def set_input_manager(self, input_manager: InputManager):
         self.input_manager = input_manager
         self.load_config("layout")
-        self.create_layout_defaults()
+        #self.get_layout()
 
     def set_audio_manager(self, audio_manager: AudioManager):
         self.audio_manager = audio_manager
@@ -260,8 +259,8 @@ class GameManager:
                 "min_value": slider.min_value,
                 "max_value": slider.max_value,
                 "bar_color": [slider.bar_color[0], slider.bar_color[1], slider.bar_color[2]],
-                "slider_color": [slider.slider_color[0], slider.slider_color[1], slider.slider_color[2]],
-                "slider_radius": slider.slider_radius
+                "handle_color": [slider.handle_color[0], slider.handle_color[1], slider.handle_color[2]],
+                "handle_radius": slider.handle_radius
             }
             layout_object_list.append(layout_object)
         return layout_object_list
@@ -298,10 +297,10 @@ class GameManager:
         return layout_object_list
 
     def convert_text_inputs_to_list(self, text_inputs: list) -> list:
-        pass
+        return []
 
     def convert_multi_selects_to_list(self, multi_selects: list) -> list:
-        pass
+        return []
 
     ## --- SET/GET CONFIG FROM FILES --- ##
 
@@ -355,3 +354,4 @@ class GameManager:
             return self.layout
         elif path == self.SETTINGS_STATE_CONFIG_PATH:
             return self.settings
+        return {}

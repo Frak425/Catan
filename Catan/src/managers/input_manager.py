@@ -6,6 +6,8 @@ if TYPE_CHECKING:
     from game_manager import GameManager
     from graphics_manager import GraphicsManager
     from helper_manager import HelperManager
+    from src.managers.audio_manager import AudioManager
+    from src.managers.player_manager import PlayerManager
 
 from src.ui.button import Button
 from src.entities.node import Node
@@ -18,9 +20,11 @@ from src.ui.text_display import TextDisplay
 class InputManager:
     def __init__(self):
         #All of these have to be defined after initialization
-        self.game_manager: "GameManager" = None
-        self.graphics_manager: "GraphicsManager" = None
-        self.helper_manager:"HelperManager" = None
+        self.game_manager: GameManager
+        self.graphics_manager: GraphicsManager
+        self.helper_manager: HelperManager
+        self.audio_manager: AudioManager
+        self.player_manager: PlayerManager
         
         #Handlers abstract the effects of all buttons
         #EX. "button_name_here": self.function_defined_below, all button names corrospond to some handler
@@ -66,7 +70,7 @@ class InputManager:
 
         self.dragging = False #true between MBD and MBU with distance > 5 pixels
         self.clicked = False #true between MBD and MBU
-        self.active = None #the currently active clickable object
+        self.active: Button | Slider | Toggle | Button | Image | None #the currently active clickable object
         self.start_x = 0
         self.start_y = 0
         self.click_end_x = 0
@@ -139,17 +143,19 @@ class InputManager:
 
         #if the click ended inside the clickable object, call its handler
         #TODO: simplify logic, to much computation
+        assert self.active is not None
         if self.graphics_manager.menu_open:
+            
             if pygame.rect.Rect.collidepoint(pygame.Rect(self.active.rect.x + self.game_manager.menu_margins[0], self.active.rect.y + self.game_manager.menu_margins[1], self.active.rect.w, self.active.rect.h), (x, y)):
                 self.handler = self.handlers_by_state["menu"].get(self.active.name)
-            if self.active.__class__.__name__ == "Toggle":
+            if isinstance(self.active, Toggle):
                 self.active.set_animating(self.graphics_manager.time)
 
         else:
             if pygame.rect.Rect.collidepoint(self.active.rect, (x, y)):
                 self.handler = self.handlers_by_state[state].get(self.active.name)
 
-            if self.active.__class__.__name__ == "Toggle":
+            if isinstance(self.active, Toggle):
                 self.active.set_animating(self.graphics_manager.time)
 
 
@@ -161,7 +167,7 @@ class InputManager:
             if slider == self.active:
                 slider.update_location(x, y)
 
-    def handle_keyboard(self, key: pygame.event):
+    def handle_keyboard(self, key: pygame.event.Event):
         if key == pygame.K_0:
             self.game_manager.dev_mode = not self.game_manager.dev_mode
 
@@ -180,12 +186,14 @@ class InputManager:
         self.text_displays["setup"]["player_num_text"].update_text(f"Number of Players: {num}")
 
     def choose_player_color_cycle(self):
-        player_color_chosen_index += 1
-        player_color_chosen_index %= len(self.game_manager.player_colors)
+        self.game_manager.player_color_chosen_index += 1
+        self.game_manager.player_color_chosen_index %= len(self.game_manager.player_colors)
 
+    #TODO: Implement
     def set_diff_level(self, level: str):
-        if (self.game_manager.difficulty_level != level):
-            self.game_manager.difficulty_level = level
+        pass
+        #if (self.game_manager.difficulty_level != level):
+        #   self.game_manager.difficulty_level = level
         
     def start_game(self):
         self.game_manager.game_state = "init"
@@ -210,9 +218,6 @@ class InputManager:
             if tab_name != new_tab:
                 button.color = (100, 0, 0)
         self.menu.update_menu(self.graphics_manager.time)
-
-    def toggle_start_animation(self, toggle_name):
-        self.toggles[toggle_name].set_animating(self.game_manager.time)
 
     def quit(self):
         self.game_manager.running = False
@@ -247,7 +252,7 @@ class InputManager:
 
     # - CREATE BUTTONS - #
 
-    def create_buttons(self) -> Dict[str, Dict[str, Button]]:
+    def create_buttons(self):
         return {
             "main_menu": self.create_title_buttons(),
             "setup": self.create_setup_buttons(),
@@ -466,7 +471,7 @@ class InputManager:
     
     # - CREAT SLIDERS -#
 
-    def create_sliders(self) -> Dict[str, Dict[str, Slider]]:
+    def create_sliders(self):
         return {
             "main_menu": {},
             "setup": self.create_setup_sliders(),
@@ -486,15 +491,16 @@ class InputManager:
             max_value=4,
             initial_value=self.game_manager.players_num,
             bar_color=(0, 100, 0),
-            slider_color=(100, 0, 0),
-            slider_radius=10,
-            game_manager= self.game_manager
+            handle_color=(100, 0, 0),
+            handle_radius=10,
+            game_manager= self.game_manager,
+            bar_image=None
         )
         return {
             "player_num_slider": player_num_slider
         }
     
-    def create_menu_sliders(self) -> Dict[str, Slider]:
+    def create_menu_sliders(self) -> Dict[str, Dict[str, Slider]]:
         """
         Create sliders for the menu.
         """
@@ -507,9 +513,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.1,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10,
-                game_manager= self.game_manager
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             ),
             "controller_sensitivity": Slider(
                 name="controller_sensitivity",
@@ -519,9 +526,10 @@ class InputManager:
                 max_value=10,
                 initial_value=5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10,
-                game_manager= self.game_manager
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             ),
             "controller_vibration_strength": Slider(
                 name="controller_vibration_strength",
@@ -531,9 +539,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10,
-                game_manager= self.game_manager
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             )
         }
         accessability_sliders = {}
@@ -546,9 +555,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10,
-                game_manager= self.game_manager
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             )
         }
         audio_sliders = {
@@ -560,9 +570,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10,
-                game_manager= self.game_manager
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             ),
             "music_volume": Slider(
                 name="music_volume",
@@ -572,9 +583,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10,
-                game_manager= self.game_manager
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             ),
             "sfx_volume": Slider(
                 name="sfx_volume",
@@ -584,9 +596,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10,
-                game_manager= self.game_manager
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             )
         }
         gameplay_sliders = {}
@@ -601,7 +614,7 @@ class InputManager:
 
     # - CREATE TOGGLES - #
 
-    def create_toggles(self) -> Dict[str, Dict[str, Toggle]]:
+    def create_toggles(self):
         return {
             "main_menu": {},
             "setup": {},
@@ -609,7 +622,7 @@ class InputManager:
             "menu": self.create_menu_toggles()
         }
     
-    def create_menu_toggles(self) -> Dict[str, Toggle]:
+    def create_menu_toggles(self) -> Dict[str, Dict[str, Toggle]]:
         default_time_to_flip = 0.25
         default_height = 50
         default_center_width = 100
@@ -811,7 +824,7 @@ class InputManager:
 
     # - CREATE TEXT DISPLAYS - #
 
-    def create_text_displays(self) -> Dict[str, Dict[str, TextDisplay]]:
+    def create_text_displays(self):
         return {
             "main_menu": {},
             "setup": self.create_setup_text_displays(),
@@ -835,7 +848,7 @@ class InputManager:
     def create_game_text_displays(self) -> Dict[str, TextDisplay]:
         return {}
 
-    def create_menu_text_displays(self) -> Dict[str, TextDisplay]:
+    def create_menu_text_displays(self) -> Dict[str, Dict[str, TextDisplay]]:
         input_text_displays = {}
         accessibility_text_displays = {}
         graphics_text_displays = {}

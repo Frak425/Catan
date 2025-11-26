@@ -1,5 +1,4 @@
 import pygame
-from pygame import *
 
 from typing import TYPE_CHECKING
 
@@ -9,11 +8,13 @@ if TYPE_CHECKING:
 
 
 class Button:
-    def __init__(self, color: tuple[int], text: str, rect: Rect, button_name: str, surface: pygame.Surface, font, location: tuple[int], game_manager: "GameManager") -> None:
+    def __init__(self, color: tuple[int, int, int], text: str, rect: pygame.Rect, name: str, surface: pygame.Surface, font, location: tuple[int, int], game_manager: "GameManager") -> None:
+        self.game_manager = game_manager
+        
         self.color = color
         self.text = text
         self.rect = rect #includes location and size data
-        self.name = button_name
+        self.name = name
         self.surface = surface
         self.game_font = font
         self.location = location

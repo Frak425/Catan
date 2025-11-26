@@ -8,7 +8,7 @@ from src.ui.slider import Slider
 #import pytweening as tween
 
 class Menu:
-    def __init__(self, screen: pygame.Surface, game_font: pygame.font.Font , type: str, buttons: Dict[str, Dict[str, Button]], toggles: Dict[str, Dict[str, Toggle]], sliders: Dict[str, Dict[str, Slider]], menu_size: tuple[int], init_location: tuple = None, final_location: tuple = None, backdrop: pygame.Surface = None, bckg_color: tuple[int] = None, anim_length: int = None, start_time: float = None, time: int = 0) -> None:
+    def __init__(self, screen: pygame.Surface, game_font: pygame.font.Font , type: str, buttons: Dict[str, Dict[str, Button]], toggles: Dict[str, Dict[str, Toggle]], sliders: Dict[str, Dict[str, Slider]], menu_size: tuple[int, int], init_location: tuple | None= None, final_location: tuple | None= None, backdrop: pygame.Surface | None = None, bckg_color: tuple[int, int, int] | None = None, anim_length: int | None = None, start_time: float | None = None, time: int = 0) -> None:
         self.menu_size = menu_size #(length, width)
         self.type = type #"animated" or "static"
         self.backdrop = backdrop #defaults to backdrop if both are provided
@@ -39,6 +39,7 @@ class Menu:
         if self.backdrop:
             self.menu_surface.blit(pygame.transform.scale(self.backdrop, self.menu_size), (0, 0))
         else:
+            assert self.bckg_color is not None
             self.menu_surface.fill(self.bckg_color)
 
         self.update_menu(time)
@@ -51,9 +52,10 @@ class Menu:
     def close_menu(self):
         self.location = self.init_location
 
-    def update_menu(self, time: int = None):
+    def update_menu(self, time: int):
         # When refreshing the menu...
         # Refresh the background and cover everything previously
+        assert self.bckg_color is not None
         self.menu_surface.fill((self.bckg_color))
 
         # Blit tabs on the menu surface
@@ -72,7 +74,6 @@ class Menu:
             slider.draw(self.menu_surface)
 
     def draw(self, time):
-        if self.type == "animated":
-            self.update_offset(time)
         self.update_menu(time)
+        assert self.location is not None
         self.screen.blit(self.menu_surface, self.location)
