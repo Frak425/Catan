@@ -234,6 +234,30 @@ class InputManager:
             if b.get('name') == name:
                 return b
         return None
+
+    def get_layout_slider_props(self, state: str, name: str, tab: str | None = None) -> dict | None:
+        """Return layout props dict for given named slider (or None if not found).
+        Mirrors `get_layout_button_props` but looks for sliders in the layout JSON.
+        """
+        layout = getattr(self.game_manager, 'layout', None)
+        if not layout:
+            return None
+
+        layout_section = self._layout_section_for_state(state)
+        try:
+            if layout_section == 'menu':
+                if not tab:
+                    return None
+                sliders_list = layout[layout_section][tab].get('sliders', [])
+            else:
+                sliders_list = layout[layout_section].get('sliders', [])
+        except Exception:
+            return None
+
+        for s in sliders_list:
+            if s.get('name') == name:
+                return s
+        return None
     
     def create_menu(self) -> Menu:
         menu = Menu(self.game_manager.screen, self.game_manager.game_font, "static", self.buttons['menu'], self.toggles["menu"], self.sliders["menu"], self.game_manager.menu_size, self.game_manager.init_location, self.game_manager.final_location, bckg_color=self.game_manager.menu_background_color)
@@ -460,21 +484,21 @@ class InputManager:
         """
         Create sliders for the setup.
         """
-        player_num_slider = Slider(
-            name="player_num_slider",
-            wrapper_rect=pygame.Rect(100, 200, 300, 20),
-            rect=pygame.Rect(100, 200, 300, 20),
-            min_value=1,
-            max_value=4,
-            initial_value=self.game_manager.players_num,
-            bar_color=(0, 100, 0),
-            handle_color=(100, 0, 0),
-            handle_radius=10,
-            game_manager= self.game_manager,
-            bar_image=None
-            ,
-            callback=lambda: self.set_player_num(int(player_num_slider.value))
-        )
+        props = self.get_layout_slider_props("setup", "player_num_slider") or {
+            "name": "player_num_slider",
+            "rect": [100, 200, 300, 20],
+            "wrapper_rect": [100, 200, 300, 20],
+            "min_value": 1,
+            "max_value": 4,
+            "bar_color": [0, 100, 0],
+            "handle_color": [100, 0, 0],
+            "handle_radius": 10
+        }
+
+        player_num_slider = Slider(props, self.game_manager.players_num, self.game_manager, None, callback=None)
+        # assign callback after creation so the lambda can reference the slider instance
+        player_num_slider.callback = lambda: self.set_player_num(int(player_num_slider.value))
+
         return {
             "player_num_slider": player_num_slider
         }
@@ -483,103 +507,29 @@ class InputManager:
         """
         Create sliders for the menu.
         """
+        # input tab sliders
+        props_deadzone = self.get_layout_slider_props("menu", "deadzone", tab="input") or {"name": "deadzone", "rect": [100, 200, 300, 20], "wrapper_rect": [100, 200, 300, 20], "min_value": 0, "max_value": 1, "initial_value": 0.1, "bar_color": [0, 100, 0], "handle_color": [100, 0, 0], "handle_radius": 10}
+        props_controller_sens = self.get_layout_slider_props("menu", "controller_sensitivity", tab="input") or {"name": "controller_sensitivity", "rect": [100, 300, 300, 20], "wrapper_rect": [100, 300, 300, 20], "min_value": 0, "max_value": 10, "initial_value": 5, "bar_color": [0, 100, 0], "handle_color": [100, 0, 0], "handle_radius": 10}
+        props_controller_vib = self.get_layout_slider_props("menu", "controller_vibration_strength", tab="input") or {"name": "controller_vibration_strength", "rect": [100, 400, 300, 20], "wrapper_rect": [100, 400, 300, 20], "min_value": 0, "max_value": 1, "initial_value": 0.5, "bar_color": [0, 100, 0], "handle_color": [100, 0, 0], "handle_radius": 10}
+
         input_sliders = {
-            "deadzone": Slider(
-                name="deadzone",
-                wrapper_rect=pygame.Rect(100, 200, 300, 20),
-                rect=pygame.Rect(100, 200, 300, 20),
-                min_value=0,
-                max_value=1,
-                initial_value=0.1,
-                bar_color=(0, 100, 0),
-                handle_color=(100, 0, 0),
-                handle_radius=10,
-                game_manager= self.game_manager,
-                bar_image=None
-            ),
-            "controller_sensitivity": Slider(
-                name="controller_sensitivity",
-                wrapper_rect=pygame.Rect(100, 300, 300, 20),
-                rect=pygame.Rect(100, 300, 300, 20),
-                min_value=0,
-                max_value=10,
-                initial_value=5,
-                bar_color=(0, 100, 0),
-                handle_color=(100, 0, 0),
-                handle_radius=10,
-                game_manager= self.game_manager,
-                bar_image=None
-            ),
-            "controller_vibration_strength": Slider(
-                name="controller_vibration_strength",
-                wrapper_rect=pygame.Rect(100, 400, 300, 20),
-                rect=pygame.Rect(100, 400, 300, 20),
-                min_value=0,
-                max_value=1,
-                initial_value=0.5,
-                bar_color=(0, 100, 0),
-                handle_color=(100, 0, 0),
-                handle_radius=10,
-                game_manager= self.game_manager,
-                bar_image=None
-            )
+            "deadzone": Slider(props_deadzone, props_deadzone.get("initial_value", 0.1), self.game_manager, None),
+            "controller_sensitivity": Slider(props_controller_sens, props_controller_sens.get("initial_value", 5), self.game_manager, None),
+            "controller_vibration_strength": Slider(props_controller_vib, props_controller_vib.get("initial_value", 0.5), self.game_manager, None)
         }
         accessability_sliders = {}
+        props_brightness = self.get_layout_slider_props("menu", "brightness", tab="graphics") or {"name": "brightness", "rect": [100, 200, 300, 20], "wrapper_rect": [100, 200, 300, 20], "min_value": 0, "max_value": 1, "initial_value": 0.5, "bar_color": [0,100,0], "handle_color": [100,0,0], "handle_radius": 10}
         graphics_sliders = {
-            "brightness": Slider(
-                name="brightness",
-                wrapper_rect=pygame.Rect(100, 200, 300, 20),
-                rect=pygame.Rect(100, 200, 300, 20),
-                min_value=0,
-                max_value=1,
-                initial_value=0.5,
-                bar_color=(0, 100, 0),
-                handle_color=(100, 0, 0),
-                handle_radius=10,
-                game_manager= self.game_manager,
-                bar_image=None
-            )
+            "brightness": Slider(props_brightness, props_brightness.get("initial_value", 0.5), self.game_manager, None)
         }
+        props_master = self.get_layout_slider_props("menu", "master_volume", tab="audio") or {"name": "master_volume", "rect": [100,200,300,20], "wrapper_rect": [100,200,300,20], "min_value": 0, "max_value": 1, "initial_value": 0.5, "bar_color": [0,100,0], "handle_color": [100,0,0], "handle_radius": 10}
+        props_music = self.get_layout_slider_props("menu", "music_volume", tab="audio") or {"name": "music_volume", "rect": [100,300,300,20], "wrapper_rect": [100,300,300,20], "min_value": 0, "max_value": 1, "initial_value": 0.5, "bar_color": [0,100,0], "handle_color": [100,0,0], "handle_radius": 10}
+        props_sfx = self.get_layout_slider_props("menu", "sfx_volume", tab="audio") or {"name": "sfx_volume", "rect": [100,400,300,20], "wrapper_rect": [100,400,300,20], "min_value": 0, "max_value": 1, "initial_value": 0.5, "bar_color": [0,100,0], "handle_color": [100,0,0], "handle_radius": 10}
+
         audio_sliders = {
-            "master_volume": Slider(
-                name="master_volume",
-                wrapper_rect=pygame.Rect(100, 200, 300, 20),
-                rect=pygame.Rect(100, 200, 300, 20),
-                min_value=0,
-                max_value=1,
-                initial_value=0.5,
-                bar_color=(0, 100, 0),
-                handle_color=(100, 0, 0),
-                handle_radius=10,
-                game_manager= self.game_manager,
-                bar_image=None
-            ),
-            "music_volume": Slider(
-                name="music_volume",
-                wrapper_rect=pygame.Rect(100, 300, 300, 20),
-                rect=pygame.Rect(100, 300, 300, 20),
-                min_value=0,
-                max_value=1,
-                initial_value=0.5,
-                bar_color=(0, 100, 0),
-                handle_color=(100, 0, 0),
-                handle_radius=10,
-                game_manager= self.game_manager,
-                bar_image=None
-            ),
-            "sfx_volume": Slider(
-                name="sfx_volume",
-                wrapper_rect=pygame.Rect(100, 400, 300, 20),
-                rect=pygame.Rect(100, 400, 300, 20),
-                min_value=0,
-                max_value=1,
-                initial_value=0.5,
-                bar_color=(0, 100, 0),
-                handle_color=(100, 0, 0),
-                handle_radius=10,
-                game_manager= self.game_manager,
-                bar_image=None
-            )
+            "master_volume": Slider(props_master, props_master.get("initial_value", 0.5), self.game_manager, None),
+            "music_volume": Slider(props_music, props_music.get("initial_value", 0.5), self.game_manager, None),
+            "sfx_volume": Slider(props_sfx, props_sfx.get("initial_value", 0.5), self.game_manager, None)
         }
         gameplay_sliders = {}
         return {
