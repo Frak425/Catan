@@ -1,8 +1,8 @@
 import pygame
 import random
 
-from src.ui.button import Button
+from typing import TYPE_CHECKING
 
-class Drag_n_drop(Button):
-    def __init__(self, layer: str, color: tuple[int], text: str, rect: list[int], var_name: str, screen, font) -> None:
-        super().__init__(layer, color, text, rect, var_name, screen, font)
+if TYPE_CHECKING:
+    from src.managers.game_manager import GameManager
+from src.ui.button import Button

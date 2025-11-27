@@ -1,12 +1,18 @@
 import pygame
-from pygame import *
 import math
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.managers.game_manager import GameManager
+
 class TextDisplay:
-    def __init__(self, font: pygame.font.Font, text: str, location: tuple[int], background_image: pygame.Surface = None, background_color: tuple[int] = (255, 255, 255), text_color: tuple[int] = (0, 0, 0), padding: int = 5) -> None:
+    def __init__(self, game_manager: GameManager, name: str, font: pygame.font.Font, text: str, rect: pygame.Rect, background_image: pygame.Surface | None = None, background_color: tuple[int, int, int] = (255, 255, 255), text_color: tuple[int, int, int] = (0, 0, 0), padding: int = 5) -> None:
+        self.name = name
+        self.game_manager = game_manager
+
         self.font = font
         self.text = text
-        self.location = location
+        self.rect = rect
         self.background_image = background_image
         self.background_color = background_color
         self.text_color = text_color

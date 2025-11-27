@@ -26,11 +26,11 @@ class GraphicsManager:
 
         if (self.game_manager.game_state == "main_menu"):
             for button_name, button in self.input_manager.buttons["main_menu"].items():
-                button.draw()
+                button.draw(self.game_manager.screen)
 
         elif (self.game_manager.game_state == "setup"):       
             for button_name, button in self.input_manager.buttons["setup"].items():
-                button.draw()
+                button.draw(self.game_manager.screen)
 
             for slider_name, slider in self.input_manager.sliders["setup"].items():
                 slider.draw(self.game_manager.screen)
@@ -45,7 +45,7 @@ class GraphicsManager:
         elif (self.game_manager.game_state == "game"):
             self.game_manager.board.draw_board()
             for button_name, button in self.input_manager.buttons["game"].items():
-                button.draw()
+                button.draw(self.game_manager.screen)
 
             for image_name, image in self.input_manager.images["game"].items():
                 self.game_manager.screen.blit(image.surface, image.rect)

@@ -1,18 +1,30 @@
 import json
 from pathlib import Path
 import pygame
-from pygame import *
 
+from src.ui.button import Button
+from src.ui.image import Image
+from src.ui.slider import Slider
+from src.ui.text_display import TextDisplay
+from src.ui.toggle import Toggle
 from src.entities.player import Player
 from src.entities.board import Board
 from src.ui.menu import Menu
+from src.managers.input_manager import InputManager
+from src.managers.helper_manager import HelperManager
+from src.managers.graphics_manager import GraphicsManager
+from src.managers.player_manager import PlayerManager
+from src.managers.audio_manager import AudioManager
 
 class GameManager:
-    def __init__(self, screen: Surface) -> None:
+    def __init__(self, screen: pygame.Surface) -> None:
         #TODO: Refactor this to use config files properly
         self.running = True
-        self.LAYOUT_CONFIG_FILE = Path("layout.json")
-        self.SETTINGS_CONFIG_FILE = Path("settings.json")
+        self.edited = False  #whether to use edited settings or layout
+        self.LAYOUT_CONFIG_PATH = Path("Catan/src/config/layout.json")
+        self.SETTINGS_CONFIG_PATH = Path("Catan/src/config/settings.json")
+        self.LAYOUT_STATE_CONFIG_PATH = Path("Catan/src/config/layout_state.json")
+        self.SETTINGS_STATE_CONFIG_PATH = Path("Catan/src/config/settings_state.json")
         self.screen = screen
         self.screen_size = (self.screen.get_width(), self.screen.get_height())
         self.screen_w = self.screen_size[0]
@@ -58,6 +70,8 @@ class GameManager:
         self.buy_selection_offset = (50, 50)
         self.board = self.init_board()
 
+        self.dev_mode = False
+
     def init_board(self) -> Board:
         for i in range(self.players_num):
             self.players_list.append(Player(self.player_colors, self.points_to_win))
@@ -69,61 +83,275 @@ class GameManager:
         board.assign_tile_classes()
         return board
 
-    def init_configs(self):
-        self.layout = self.create_layout_defaults()
-        self.settings = self.create_settings_defaults()
-        self.save_config(self.layout, "layout")
-        self.save_config(self.settings, "settings")
+    def set_input_manager(self, input_manager: InputManager):
+        self.input_manager = input_manager
+        self.load_config("layout")
+        #self.get_layout()
 
-    def create_settings_defaults(self) -> dict:
-        if (self.settings != {}):
-            return
-        
-        #create settings default values
-        return {}
+    def set_audio_manager(self, audio_manager: AudioManager):
+        self.audio_manager = audio_manager
 
-    def create_layout_defaults(self) -> dict:
-        if (self.layout != {}):
-            return
-        
-        #create layout default values
-        return {}
+    def set_graphics_manager(self, graphics_manager: GraphicsManager):
+        self.graphics_manager = graphics_manager
 
+    def set_helper_manager(self, helper_manager: HelperManager):
+        self.helper_manager = helper_manager
+
+    def set_player_manager(self, player_manager: PlayerManager):
+        self.player_manager = player_manager
+
+    #initialize default settings
+    def get_layout(self) -> dict:
+
+        layout = {
+            "home": {
+                "images": [],
+                "sliders": [],
+                "toggles": [],
+                "text_displays": [],
+                "text_inputs": [],
+                "multi_selects": []
+            },
+            "setup": {
+                "buttons": [],
+                "images": [],
+                "sliders": [],
+                "toggles": [],
+                "text_displays": [],
+                "text_inputs": [],
+                "multi_selects": []
+            },
+            "game": {
+                "buttons": [],
+                "images": [],
+                "sliders": [],
+                "toggles": [],
+                "text_displays": [],
+                "text_inputs": [],
+                "multi_selects": []
+            },
+            "menu": {
+                "buttons": [],
+                "images": [],
+                "sliders": [],
+                "toggles": [],
+                "text_displays": [],
+                "text_inputs": [],
+                "multi_selects": []
+            }
+        }
+
+        layout["home"] = self.save_layout_by_section("main_menu")
+        layout["setup"] = self.save_layout_by_section("setup")
+        layout["game"] = self.save_layout_by_section("game")
+        layout["menu"] = self.save_layout_by_section("menu")
+
+        return layout
+
+    def get_settings(self) -> dict:
+        settings_defaults = {
+            "audio": {},
+            "graphics": {},
+            "gameplay": {},
+            "accessibility": {},
+            "input": {}
+        }
+
+        return settings_defaults
+            
+    def save_layout_by_section(self, section: str) -> dict:
+        section_defaults = {
+            "buttons": [],
+            "images": [],
+            "sliders": [],
+            "toggles": [],
+            "text_displays": [],
+            "text_inputs": [],
+            "multi_selects": []
+        }
+
+        #create defaults for each section here
+        if section == "menu":
+            menu = {
+                "input": section_defaults,
+                "accessibility": section_defaults,
+                "gameplay": section_defaults,
+                "audio": section_defaults,
+                "graphics": section_defaults
+            }
+
+            for tab_name in self.input_manager.menu.tabs:
+                buttons = self.input_manager.buttons["menu"][tab_name]
+                menu[tab_name]["buttons"] = self.convert_buttons_to_list(buttons)
+
+                sliders = self.input_manager.sliders["menu"][tab_name]
+                menu[tab_name]["sliders"] = self.convert_sliders_to_list(sliders)
+
+                toggles = self.input_manager.toggles["menu"][tab_name]
+                menu[tab_name]["toggles"] = self.convert_toggles_to_list(toggles)
+
+                text_displays = self.input_manager.text_displays["menu"][tab_name]
+                menu[tab_name]["text_displays"] = self.convert_text_displays_to_list(text_displays)
+                
+                #TODO: implement these
+                #text_inputs = self.input_manager.text_inputs["menu"][tab_name]
+                #menu[tab_name]["text_inputs"] = self.convert_text_inputs_to_list(text_inputs)
+
+                #multi_selects = self.input_manager.multi_selects["menu"][tab_name]
+                #menu[tab_name]["multi_selects"] = self.convert_multi_selects_to_list(multi_selects)
+            return menu
+            
+        else:
+            buttons = self.input_manager.buttons[section]
+            section_defaults["buttons"] = self.convert_buttons_to_list(buttons)
+
+            sliders = self.input_manager.sliders[section]
+            section_defaults["sliders"] = self.convert_sliders_to_list(sliders)
+
+            toggles = self.input_manager.toggles[section]
+            section_defaults["toggles"] = self.convert_toggles_to_list(toggles)
+
+            text_displays = self.input_manager.text_displays[section]
+            section_defaults["text_displays"] = self.convert_text_displays_to_list(text_displays)
+
+            #TODO: implement these
+            #text_inputs = self.input_manager.text_inputs[section]
+            #section_defaults["text_inputs"] = self.convert_text_inputs_to_list(text_inputs)
+
+            #multi_selects = self.input_manager.multi_selects[section]
+            #section_defaults["multi_selects"] = self.convert_multi_selects_to_list(multi_selects)
+
+            return section_defaults
+
+    ## --- CONVERT OBJECTS TO --- ##
+
+    def convert_buttons_to_list(self, buttons: dict[str, Button]) -> list:
+        layout_object_list = []
+        for button_name, button in buttons.items():
+            layout_object = {
+                "name": button.name,
+                "rect": [button.rect[0], button.rect[1], button.rect[2], button.rect[3]],
+                "color": [button.color[0], button.color[1], button.color[2]],
+                "text": button.text,
+                "location": [button.location[0], button.location[1]]
+            }
+            layout_object_list.append(layout_object)
+        return layout_object_list
+
+    def convert_images_to_list(self, images: dict[str, Image]) -> list:
+        layout_object_list = []
+        for image_name, image in images.items():
+            layout_object = {
+                "name": image.name,
+                "rect": [image.rect[0], image.rect[1], image.rect[2], image.rect[3]],
+                "file_path": image.image_path,
+            }
+            layout_object_list.append(layout_object)
+        return layout_object_list
+
+    def convert_sliders_to_list(self, sliders: dict[str, Slider]) -> list:
+        layout_object_list = []
+        for slider_name, slider in sliders.items():
+            layout_object = {
+                "name": slider.name,
+                "rect": [slider.rect[0], slider.rect[1], slider.rect[2], slider.rect[3]],
+                "wrapper_rect": [slider.wrapper_rect[0], slider.wrapper_rect[1], slider.wrapper_rect[2], slider.wrapper_rect[3]],
+                "min_value": slider.min_value,
+                "max_value": slider.max_value,
+                "bar_color": [slider.bar_color[0], slider.bar_color[1], slider.bar_color[2]],
+                "handle_color": [slider.handle_color[0], slider.handle_color[1], slider.handle_color[2]],
+                "handle_radius": slider.handle_radius
+            }
+            layout_object_list.append(layout_object)
+        return layout_object_list
+
+    def convert_toggles_to_list(self, toggles: dict[str, Toggle]) -> list:
+        layout_object_list = []
+        for toggle_name, toggle in toggles.items():
+            layout_object = {
+                "name": toggle.name,
+                "rect": [toggle.rect[0], toggle.rect[1], toggle.rect[2], toggle.rect[3]],
+                "guiding_lines": toggle.guiding_lines,
+                "height": toggle.height,
+                "center_width": toggle.center_width,
+                "fill_color": [toggle.fill_color[0], toggle.fill_color[1], toggle.fill_color[2]],
+                "toggle_color": [toggle.toggle_color[0], toggle.toggle_color[1], toggle.toggle_color[2]],
+                "toggle_gap": toggle.toggle_gap,
+                "time_to_flip": toggle.time_to_flip
+            }
+            layout_object_list.append(layout_object)
+        return layout_object_list
+
+    def convert_text_displays_to_list(self, text_displays: dict[str, TextDisplay]) -> list:
+        layout_object_list = []
+        for text_display_name, text_display in text_displays.items():
+            layout_object = {
+                "name": text_display.name,
+                "rect": [text_display.rect[0], text_display.rect[1], text_display.rect[2], text_display.rect[3]],
+                "color": [text_display.background_color[0], text_display.background_color[1], text_display.background_color[2]],
+                "text": text_display.text,
+                "text_color": [text_display.text_color[0], text_display.text_color[1], text_display.text_color[2]],
+                "padding": text_display.padding
+            }
+            layout_object_list.append(layout_object)
+        return layout_object_list
+
+    def convert_text_inputs_to_list(self, text_inputs: list) -> list:
+        return []
+
+    def convert_multi_selects_to_list(self, multi_selects: list) -> list:
+        return []
+
+    ## --- SET/GET CONFIG FROM FILES --- ##
+
+    #loag config from file into game manager
     def load_config(self, file: str) -> None:
-        CONFIG_FILE = self.get_config_file(file)
-        CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)  # Ensure directories exist
+        CONFIG_PATH = self.get_config_path(file)
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)  # Ensure directories exist
 
-        if CONFIG_FILE.exists():
-            with open(CONFIG_FILE, "r") as f:
+        if CONFIG_PATH.exists():
+            with open(CONFIG_PATH, "r") as f:
                 data = json.load(f)
         else:
             # File does not exist — create it with an empty dict or default config
-            data = {}
-            with open(CONFIG_FILE, "w") as f:
+            data = self.get_layout() if file == "layout" else self.get_settings()
+            with open(CONFIG_PATH, "w") as f:
                 json.dump(data, f, indent=4)
 
         # Assign loaded data to the correct attribute
-        self.set_config_file(file, data)
+        if file == "layout":
+            self.layout = data
+        elif file == "settings":
+            self.settings = data
 
-    
+    #save settings from game manager into file
     def save_config(self, config: dict, file: str) -> None:
-        CONFIG_FILE = self.get_config_file(file)
+        CONFIG_PATH = self.get_config_path(file)
 
-        with open(CONFIG_FILE, "w") as f:
-            json.dump(config, f, indent=4)
+        with open(CONFIG_PATH, "w") as f:
+            json.dump(self.get_config_file(CONFIG_PATH), f, indent=4)
 
-    def get_config_file(self, file: str) -> Path:
+    def override_config(self, config: dict, file: str) -> None:
+            if file == "layout":
+                CONFIG_PATH = self.LAYOUT_STATE_CONFIG_PATH
+            elif file == "settings":
+                CONFIG_PATH = self.SETTINGS_STATE_CONFIG_PATH
+            with open(CONFIG_PATH, "w") as f:
+                json.dump(config, f, indent=4)
+
+    #return config as object
+    def get_config_path(self, file: str) -> Path:
         if file == "layout":
-            CONFIG_FILE = self.LAYOUT_CONFIG_FILE
+            CONFIG_PATH = self.LAYOUT_STATE_CONFIG_PATH
         elif file == "settings":
-            CONFIG_FILE = self.SETTINGS_CONFIG_FILE
+            CONFIG_PATH = self.SETTINGS_STATE_CONFIG_PATH
 
-        return CONFIG_FILE
+        return CONFIG_PATH
     
-    def set_config_file(self, file: str, value: dict) -> Path:
-        if file == "layout":
-            CONFIG_FILE = self.LAYOUT_CONFIG_FILE
-        elif file == "settings":
-            CONFIG_FILE = self.SETTINGS_CONFIG_FILE
-
-        CONFIG_FILE = value
+    #get config data based on path. could be better but for now it works
+    def get_config_file(self, path: Path) -> dict:
+        if path == self.LAYOUT_STATE_CONFIG_PATH:
+            return self.layout
+        elif path == self.SETTINGS_STATE_CONFIG_PATH:
+            return self.settings
+        return {}

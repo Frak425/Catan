@@ -6,6 +6,8 @@ if TYPE_CHECKING:
     from game_manager import GameManager
     from graphics_manager import GraphicsManager
     from helper_manager import HelperManager
+    from src.managers.audio_manager import AudioManager
+    from src.managers.player_manager import PlayerManager
 
 from src.ui.button import Button
 from src.entities.node import Node
@@ -18,55 +20,19 @@ from src.ui.text_display import TextDisplay
 class InputManager:
     def __init__(self):
         #All of these have to be defined after initialization
-        self.game_manager: "GameManager" = None
-        self.graphics_manager: "GraphicsManager" = None
-        self.helper_manager:"HelperManager" = None
+        self.game_manager: GameManager
+        self.graphics_manager: GraphicsManager
+        self.helper_manager: HelperManager
+        self.audio_manager: AudioManager
+        self.player_manager: PlayerManager
         
-        #Handlers abstract the effects of all buttons
-        #EX. "button_name_here": self.function_defined_below, all button names corrospond to some handler
-        #When adding buttons, make sure to add their handlers here
-        self.main_menu_handlers = {
-            "play": lambda: self.set_game_state("setup"),
-            "quit": self.quit
-        }
-        self.setup_handlers = {
-            "player_num_increase": self.player_num_increase,
-            "player_num_decrease": self.player_num_decrease,
-            "player_num_slider": lambda: self.set_player_num(self.sliders["setup"]["player_num_slider"].value),
-            "player_choose_color_cycle": self.choose_player_color_cycle,
-            "difficulty_level_easy": lambda:  self.set_diff_level("easy"),
-            "difficulty_level_medium": lambda:  self.set_diff_level("medium"),
-            "difficulty_level_hard": lambda:  self.set_diff_level("hard"),
-            "game_start": self.start_game,
-            "open_menu": self.open_menu,
-            "game_setup_back": lambda: self.set_game_state("main_menu"),
-        }
-        self.game_handlers = {
-            "settings_menu": self.open_menu,
-            "back": lambda: self.set_game_state("main_menu")
-        }
-        self.menu_handlers = {
-            "close_menu": self.close_menu,
-            "input": lambda: self.change_tab("input"),
-            "accessibility": lambda: self.change_tab("accessibility"),
-            "gameplay": lambda: self.change_tab("gameplay"),  
-            "audio": lambda: self.change_tab("audio"),
-            "graphics": lambda: self.change_tab("graphics"),
-        }
-        self.game_over_handlers = {}
-        self.handlers_by_state: dict[str, dict] = {
-            "main_menu": self.main_menu_handlers,
-            "setup": self.setup_handlers,
-            "game": self.game_handlers,
-            "game_over": self.game_over_handlers,
-            "menu": self.menu_handlers
-        }
+        # Handlers are now passed directly into Button/Slider/Image instances via callback args.
 
         ## --- VARIABLES --- ##
 
         self.dragging = False #true between MBD and MBU with distance > 5 pixels
         self.clicked = False #true between MBD and MBU
-        self.active = None #the currently active clickable object
+        self.active: Button | Slider | Toggle | Button | Image | None #the currently active clickable object
         self.start_x = 0
         self.start_y = 0
         self.click_end_x = 0
@@ -117,7 +83,7 @@ class InputManager:
             if self.clicked and drag_distance > 5:
                 self.dragging = True
             #handle drag updates
-            if self.dragging and self.active.__class__.__name__ == "Slider":
+            if self.dragging and isinstance(self.active, Slider):
                 if self.graphics_manager.menu_open:
                     self.handle_drag(x - self.game_manager.menu_margins[0], y - self.game_manager.menu_margins[1], self.sliders["menu"][self.menu.active_tab])
                 else:
@@ -139,27 +105,31 @@ class InputManager:
 
         #if the click ended inside the clickable object, call its handler
         #TODO: simplify logic, to much computation
+        assert self.active is not None
+        handler = None
         if self.graphics_manager.menu_open:
             if pygame.rect.Rect.collidepoint(pygame.Rect(self.active.rect.x + self.game_manager.menu_margins[0], self.active.rect.y + self.game_manager.menu_margins[1], self.active.rect.w, self.active.rect.h), (x, y)):
-                self.handler = self.handlers_by_state["menu"].get(self.active.name)
-            if self.active.__class__.__name__ == "Toggle":
+                handler = getattr(self.active, 'callback', None)
+            if isinstance(self.active, Toggle):
                 self.active.set_animating(self.graphics_manager.time)
 
         else:
             if pygame.rect.Rect.collidepoint(self.active.rect, (x, y)):
-                self.handler = self.handlers_by_state[state].get(self.active.name)
+                handler = getattr(self.active, 'callback', None)
 
-            if self.active.__class__.__name__ == "Toggle":
+            if isinstance(self.active, Toggle):
                 self.active.set_animating(self.graphics_manager.time)
 
-
-        if self.handler:
-            self.handler()
+        if handler:
+            handler()
     
     def handle_drag(self, x: int, y: int, sliders: Dict[str, Slider]) -> None:
-        for slider in sliders.values():
-            if slider == self.active:
-                slider.update_location(x, y)
+        if self.active and isinstance(self.active, Slider):
+            self.active.update_location(x, y)
+
+    def handle_keyboard(self, key: pygame.event.Event):
+        if key == pygame.K_0:
+            self.game_manager.dev_mode = not self.game_manager.dev_mode
 
     ## --- EVENT FUNCTIONS --- ##
     #TODO: Add return types to functions
@@ -176,12 +146,14 @@ class InputManager:
         self.text_displays["setup"]["player_num_text"].update_text(f"Number of Players: {num}")
 
     def choose_player_color_cycle(self):
-        player_color_chosen_index += 1
-        player_color_chosen_index %= len(self.game_manager.player_colors)
+        self.game_manager.player_color_chosen_index += 1
+        self.game_manager.player_color_chosen_index %= len(self.game_manager.player_colors)
 
+    #TODO: Implement
     def set_diff_level(self, level: str):
-        if (self.game_manager.difficulty_level != level):
-            self.game_manager.difficulty_level = level
+        pass
+        #if (self.game_manager.difficulty_level != level):
+        #   self.game_manager.difficulty_level = level
         
     def start_game(self):
         self.game_manager.game_state = "init"
@@ -207,9 +179,6 @@ class InputManager:
                 button.color = (100, 0, 0)
         self.menu.update_menu(self.graphics_manager.time)
 
-    def toggle_start_animation(self, toggle_name):
-        self.toggles[toggle_name].set_animating(self.game_manager.time)
-
     def quit(self):
         self.game_manager.running = False
 
@@ -232,6 +201,39 @@ class InputManager:
 
     def set_helper_manager(self, helper_manager: 'HelperManager') -> None:
         self.helper_manager = helper_manager
+
+    def _layout_section_for_state(self, state: str) -> str:
+        # map internal state names to layout.json sections
+        if state == "main_menu":
+            return "home"
+        if state == "menu":
+            return "menu"
+        return state
+
+    def get_layout_button_props(self, state: str, name: str, tab: str | None = None) -> dict | None:
+        """Return layout props dict for given named button (or None if not found).
+        `state` is a game_state like 'main_menu', 'setup', 'game' or 'menu'.
+        If `state` == 'menu', `tab` should be provided to look under that tab section.
+        """
+        layout = getattr(self.game_manager, 'layout', None)
+        if not layout:
+            return None
+
+        layout_section = self._layout_section_for_state(state)
+        try:
+            if layout_section == 'menu':
+                if not tab:
+                    return None
+                buttons_list = layout[layout_section][tab]['buttons']
+            else:
+                buttons_list = layout[layout_section]['buttons']
+        except Exception:
+            return None
+
+        for b in buttons_list:
+            if b.get('name') == name:
+                return b
+        return None
     
     def create_menu(self) -> Menu:
         menu = Menu(self.game_manager.screen, self.game_manager.game_font, "static", self.buttons['menu'], self.toggles["menu"], self.sliders["menu"], self.game_manager.menu_size, self.game_manager.init_location, self.game_manager.final_location, bckg_color=self.game_manager.menu_background_color)
@@ -239,11 +241,14 @@ class InputManager:
     
     def initialize_ui_elements(self) -> None:
         # Initialize any UI elements that require setup after creation
-        self.handlers_by_state["setup"]["player_num_slider"]()  # Set initial player number text
+        # Call the callback for setup player number slider to set initial UI text
+        player_num_slider = self.sliders["setup"]["player_num_slider"]
+        if hasattr(player_num_slider, 'callback') and player_num_slider.callback:
+            player_num_slider.callback()
 
     # - CREATE BUTTONS - #
 
-    def create_buttons(self) -> Dict[str, Dict[str, Button]]:
+    def create_buttons(self):
         return {
             "main_menu": self.create_title_buttons(),
             "setup": self.create_setup_buttons(),
@@ -253,8 +258,11 @@ class InputManager:
     
     def create_title_buttons(self) -> Dict[str, Button]:
         #create title screen
-        play_button = Button((0, 100, 0), "PLAY", pygame.rect.Rect(self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 - self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height), "play", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        quit_button = Button((100, 0, 0), "QUIT", pygame.rect.Rect(self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 + self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height), "quit", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        props_play = self.get_layout_button_props("main_menu", "play") or {"name":"play", "rect":[self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 - self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height], "color":[0,100,0], "text":"PLAY", "location":[0,0]}
+        props_quit = self.get_layout_button_props("main_menu", "quit") or {"name":"quit", "rect":[self.game_manager.screen_w / 2 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2 + self.game_manager.play_button_height / 1.75, self.game_manager.play_button_width, self.game_manager.play_button_height], "color":[100,0,0], "text":"QUIT", "location":[0,0]}
+
+        play_button = Button(props_play, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=lambda: self.set_game_state("setup"))
+        quit_button = Button(props_quit, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=self.quit)
         return {
             "play_button": play_button, 
             "quit_button": quit_button
@@ -262,20 +270,29 @@ class InputManager:
 
     def create_setup_buttons(self) -> Dict[str, Button]:
         #create game setup buttons
-        game_setup_back_button = Button((100, 0, 0), "Back", pygame.Rect(self.game_manager.screen_w / 4 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2, 200, 100), "game_setup_back", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        game_start_button = Button((100, 0, 0), "Start", pygame.Rect(self.game_manager.screen_w / 4 * 3 - self.game_manager.game_start_button_width / 2, self.game_manager.screen_h / 8 * 6, self.game_manager.game_start_button_width, self.game_manager.game_start_button_height), "game_start", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        props_game_setup_back = self.get_layout_button_props("setup", "game_setup_back") or {"name":"game_setup_back", "rect":[self.game_manager.screen_w / 4 - self.game_manager.play_button_width / 2, self.game_manager.screen_h / 2, 200, 100], "color":[100,0,0], "text":"Back", "location":[0,0]}
+        props_game_start = self.get_layout_button_props("setup", "game_start") or {"name":"game_start", "rect":[self.game_manager.screen_w / 4 * 3 - self.game_manager.game_start_button_width / 2, self.game_manager.screen_h / 8 * 6, self.game_manager.game_start_button_width, self.game_manager.game_start_button_height], "color":[100,0,0], "text":"Start", "location":[0,0]}
+
+        game_setup_back_button = Button(props_game_setup_back, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=lambda: self.set_game_state("main_menu"))
+        game_start_button = Button(props_game_start, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=self.start_game)
         
         #TODO: decide on player_num being changed by button or slider
         #player_num_increase_button = Button((0, 100, 0), "+", pygame.Rect(self.game_manager.screen_w / 4 - self.game_manager.player_number_incease_decrease_button_size / 2 + 100, self.game_manager.screen_h / 4 * 2.5, self.game_manager.player_number_incease_decrease_button_size, self.game_manager.player_number_incease_decrease_button_size), "player_num_increase", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         #player_num_decrease_button = Button((0, 100, 0), "-", pygame.Rect(self.game_manager.screen_w / 4 - self.game_manager.player_number_incease_decrease_button_size / 2 - 100, self.game_manager.screen_h / 4 * 2.5, self.game_manager.player_number_incease_decrease_button_size, self.game_manager.player_number_incease_decrease_button_size), "player_num_decrease", self.game_manager.screen, self.game_manager.game_font, (0, 0))
         
-        player_choose_color_cycle_button = Button((0, 0, 0), "->", pygame.Rect(10, 10, 10, 10), "player_choose_color_cycle", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        props_choose_color = self.get_layout_button_props("setup", "player_choose_color_cycle") or {"name":"player_choose_color_cycle","rect":[10,10,10,10],"color":[0,0,0],"text":"->","location":[0,0]}
+        player_choose_color_cycle_button = Button(props_choose_color, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=self.choose_player_color_cycle)
         
-        difficulty_level_easy_button = Button((0, 0, 0), "easy", pygame.Rect(10, 10, 10, 10), "difficulty_level_easy", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        difficulty_level_medium_button = Button((0, 0, 0), "medium", pygame.Rect(10, 10, 10, 10), "difficulty_level_medium", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        difficulty_level_hard_button = Button((0, 0, 0), "hard", pygame.Rect(10, 10, 10, 10), "difficulty_level_hard", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        props_easy = self.get_layout_button_props("setup", "difficulty_level_easy") or {"name":"difficulty_level_easy","rect":[10,10,10,10],"color":[0,0,0],"text":"easy","location":[0,0]}
+        props_medium = self.get_layout_button_props("setup", "difficulty_level_medium") or {"name":"difficulty_level_medium","rect":[10,10,10,10],"color":[0,0,0],"text":"medium","location":[0,0]}
+        props_hard = self.get_layout_button_props("setup", "difficulty_level_hard") or {"name":"difficulty_level_hard","rect":[10,10,10,10],"color":[0,0,0],"text":"hard","location":[0,0]}
+
+        difficulty_level_easy_button = Button(props_easy, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=lambda: self.set_diff_level("easy"))
+        difficulty_level_medium_button = Button(props_medium, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=lambda: self.set_diff_level("medium"))
+        difficulty_level_hard_button = Button(props_hard, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=lambda: self.set_diff_level("hard"))
         
-        open_menu_button = Button((100, 0, 0), "image", pygame.Rect(self.game_manager.screen_w - self.game_manager.settings_open_button_offset - self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_offset, self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_size), "open_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        props_open_menu = self.get_layout_button_props("setup", "open_menu") or {"name":"open_menu","rect":[self.game_manager.screen_w - self.game_manager.settings_open_button_offset - self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_offset, self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_size],"color":[100,0,0],"text":"image","location":[0,0]}
+        open_menu_button = Button(props_open_menu, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=self.open_menu)
         
         return {
             #TODO: decide on player_num being changed by button or slider
@@ -292,14 +309,22 @@ class InputManager:
 
     def create_game_buttons(self) -> Dict[str, Button]:
         #create board buttons
-        back_button = Button((100, 100, 200), "back", pygame.Rect(10, 10, 70, 40), "back", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        props_back = self.get_layout_button_props("game", "back") or {"name":"back","rect":[10,10,70,40],"color":[100,100,200],"text":"back","location":[0,0]}
+        back_button = Button(props_back, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=lambda: self.set_game_state("main_menu"))
 
-        board_buy_settlement_button = Button((0, 0, 0), "image", pygame.Rect(700, 650, 40, 40), "board_buy_settlement", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        board_buy_city_button = Button((0, 0, 0), "image", pygame.Rect(800, 650, 40, 40), "board_buy_city", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        board_buy_road_button = Button((0, 0, 0), "image", pygame.Rect(900, 10, 10, 40), "board_buy_road", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        board_buy_development_button = Button((0, 0, 0), "image", pygame.Rect(1000, 40, 40, 40), "board_buy_development", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        board_roll_dice_button = Button((0, 0, 0), "image", pygame.Rect(1050, 600, 40, 40), "board_roll_dice", self.game_manager.screen, self.game_manager.game_font, (0, 0))
-        settings_menu_button = Button((100, 0, 0), "image", pygame.Rect(self.game_manager.screen_w - self.game_manager.settings_open_button_offset - self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_offset, self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_size), "settings_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+        props_buy_settlement = self.get_layout_button_props("game", "board_buy_settlement") or {"name":"board_buy_settlement","rect":[700,650,40,40],"color":[0,0,0],"text":"image","location":[0,0]}
+        props_buy_city = self.get_layout_button_props("game", "board_buy_city") or {"name":"board_buy_city","rect":[800,650,40,40],"color":[0,0,0],"text":"image","location":[0,0]}
+        props_buy_road = self.get_layout_button_props("game", "board_buy_road") or {"name":"board_buy_road","rect":[900,10,10,40],"color":[0,0,0],"text":"image","location":[0,0]}
+        props_buy_dev = self.get_layout_button_props("game", "board_buy_development") or {"name":"board_buy_development","rect":[1000,40,40,40],"color":[0,0,0],"text":"image","location":[0,0]}
+        props_roll_dice = self.get_layout_button_props("game", "board_roll_dice") or {"name":"board_roll_dice","rect":[1050,600,40,40],"color":[0,0,0],"text":"image","location":[0,0]}
+
+        board_buy_settlement_button = Button(props_buy_settlement, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
+        board_buy_city_button = Button(props_buy_city, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
+        board_buy_road_button = Button(props_buy_road, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
+        board_buy_development_button = Button(props_buy_dev, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
+        board_roll_dice_button = Button(props_roll_dice, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
+        props_settings_menu = self.get_layout_button_props("game", "settings_menu") or {"name":"settings_menu","rect":[self.game_manager.screen_w - self.game_manager.settings_open_button_offset - self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_offset, self.game_manager.settings_open_button_size, self.game_manager.settings_open_button_size],"color":[100,0,0],"text":"image","location":[0,0]}
+        settings_menu_button = Button(props_settings_menu, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=self.open_menu)
         
         #select_citys_button = Button((0, 0, 0), "", )
         #select_roads_button = Button()
@@ -328,61 +353,17 @@ class InputManager:
         #TODO: fill with buttons
         tabs = {
             "input": 
-                Button((100, 0, 0), "Input", 
-                    pygame.rect.Rect(
-                        300, 
-                        self.game_manager.menu_tab_margin_top, 
-                        self.game_manager.menu_input_tab_size[0], 
-                        self.game_manager.menu_input_tab_size[1]
-                    ), 
-                    "input", self.game_manager.screen, self.game_manager.game_font, (0, 0)
-                ),
+                Button({"name":"input","rect":[300,self.game_manager.menu_tab_margin_top,self.game_manager.menu_input_tab_size[0],self.game_manager.menu_input_tab_size[1]],"color":[100,0,0],"text":"Input","location":[0,0]}, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=lambda: self.change_tab("input")),
             "accessibility": 
-                Button((100, 0, 0), "Accessibility", 
-                    pygame.rect.Rect(
-                        400, 
-                        self.game_manager.menu_tab_margin_top, 
-                        self.game_manager.menu_accessibility_tab_size[0], 
-                        self.game_manager.menu_accessibility_tab_size[1]
-                    ), 
-                    "accessibility", self.game_manager.screen, self.game_manager.game_font, (0, 0)
-                ),
+                Button({"name":"accessibility","rect":[400,self.game_manager.menu_tab_margin_top,self.game_manager.menu_accessibility_tab_size[0],self.game_manager.menu_accessibility_tab_size[1]],"color":[100,0,0],"text":"Accessibility","location":[0,0]}, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=lambda: self.change_tab("accessibility")),
             "gameplay": 
-                Button((100, 0, 0), "Gameplay", 
-                    pygame.rect.Rect(
-                        self.game_manager.menu_size[0] / 2 - self.game_manager.menu_gameplay_tab_size[0] / 2, 
-                        self.game_manager.menu_tab_margin_top, 
-                        self.game_manager.menu_gameplay_tab_size[0], 
-                        self.game_manager.menu_gameplay_tab_size[1]
-                    ), "gameplay", self.game_manager.screen, self.game_manager.game_font, (0, 0)
-                ),
+                Button({"name":"gameplay","rect":[self.game_manager.menu_size[0] / 2 - self.game_manager.menu_gameplay_tab_size[0] / 2,self.game_manager.menu_tab_margin_top,self.game_manager.menu_gameplay_tab_size[0],self.game_manager.menu_gameplay_tab_size[1]],"color":[100,0,0],"text":"Gameplay","location":[0,0]}, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=lambda: self.change_tab("gameplay")),
             "audio": 
-                Button((100, 0, 0), "Audio", 
-                    pygame.rect.Rect(
-                        700, 
-                        self.game_manager.menu_tab_margin_top, 
-                        self.game_manager.menu_audio_tab_size[0], 
-                        self.game_manager.menu_audio_tab_size[1]
-                    ), "audio", self.game_manager.screen, self.game_manager.game_font, (0, 0)
-                ),
+                Button({"name":"audio","rect":[700,self.game_manager.menu_tab_margin_top,self.game_manager.menu_audio_tab_size[0],self.game_manager.menu_audio_tab_size[1]],"color":[100,0,0],"text":"Audio","location":[0,0]}, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=lambda: self.change_tab("audio")),
             "graphics": 
-                Button((100, 0, 0), "Graphics", 
-                    pygame.rect.Rect(
-                        800, 
-                        self.game_manager.menu_tab_margin_top, 
-                        self.game_manager.menu_graphics_tab_size[0], 
-                        self.game_manager.menu_graphics_tab_size[1]
-                    ), "graphics", self.game_manager.screen, self.game_manager.game_font, (0, 0)
-                ),
+                Button({"name":"graphics","rect":[800,self.game_manager.menu_tab_margin_top,self.game_manager.menu_graphics_tab_size[0],self.game_manager.menu_graphics_tab_size[1]],"color":[100,0,0],"text":"Graphics","location":[0,0]}, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=lambda: self.change_tab("graphics")),
             "close_menu": 
-                Button((100, 0, 0), "Close", 
-                    pygame.rect.Rect(
-                        self.game_manager.menu_size[0] - self.game_manager.close_menu_size[0] - self.game_manager.close_menu_margins[0],
-                        self.game_manager.close_menu_margins[1], 
-                        self.game_manager.close_menu_size[0], 
-                        self.game_manager.close_menu_size[1]
-                    ), "close_menu", self.game_manager.screen, self.game_manager.game_font, (0, 0)
-                )
+                Button({"name":"close_menu","rect":[self.game_manager.menu_size[0] - self.game_manager.close_menu_size[0] - self.game_manager.close_menu_margins[0], self.game_manager.close_menu_margins[1], self.game_manager.close_menu_size[0], self.game_manager.close_menu_size[1]],"color":[100,0,0],"text":"Close","location":[0,0]}, self.game_manager.screen, self.game_manager.game_font, self.game_manager, callback=self.close_menu)
         } 
 
         """
@@ -394,8 +375,9 @@ class InputManager:
         -Sensitivities (sliders TBD)
         """
         #TODO: fill with buttons
+        props_test1 = self.get_layout_button_props("menu", "test1", tab="input") or {"name":"test1","rect":[200,100,100,50],"color":[200,50,100],"text":"test1","location":[0,0]}
         input_buttons = {
-            "test1": Button((200, 50, 100), "test1", pygame.rect.Rect(200, 100, 100, 50), "test1", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+            "test1": Button(props_test1, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
         }
 
     
@@ -407,8 +389,9 @@ class InputManager:
         -TTS: Hesitant to implement because limited usage and maximal time to produce
         """
         #TODO: fill with buttons
+        props_test2 = self.get_layout_button_props("menu", "test2", tab="accessibility") or {"name":"test2","rect":[200,100,100,50],"color":[200,50,100],"text":"test2","location":[0,0]}
         accessability_buttons = {
-            "test2": Button((200, 50, 100), "test2", pygame.rect.Rect(200, 100, 100, 50), "test2", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+            "test2": Button(props_test2, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
         }
 
     
@@ -424,8 +407,9 @@ class InputManager:
         -V-sync (toggle)
         """
         #TODO: fill with buttons
+        props_test3_graphics = self.get_layout_button_props("menu", "test3", tab="graphics") or {"name":"test3","rect":[200,100,100,50],"color":[200,50,100],"text":"test3","location":[0,0]}
         graphics_buttons = {
-            "test3": Button((200, 50, 100), "test3", pygame.rect.Rect(200, 100, 100, 50), "test3", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+            "test3": Button(props_test3_graphics, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
         }
 
     
@@ -436,8 +420,9 @@ class InputManager:
         -SFX (toggle)
         """
         #TODO: fill with buttons
+        props_test4 = self.get_layout_button_props("menu", "test4", tab="audio") or {"name":"test4","rect":[200,100,100,50],"color":[200,50,100],"text":"test4","location":[0,0]}
         audio_buttons = {
-            "test4": Button((200, 50, 100), "test4", pygame.rect.Rect(200, 100, 100, 50), "test4", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+            "test4": Button(props_test4, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
         }
 
     
@@ -447,8 +432,9 @@ class InputManager:
         -Language (multi-choice select box)
         """ 
         #TODO: fill with buttons
+        props_test5 = self.get_layout_button_props("menu", "test5", tab="gameplay") or {"name":"test5","rect":[200,100,100,50],"color":[200,50,100],"text":"test5","location":[0,0]}
         gameplay_buttons = {
-            "test5": Button((200, 50, 100), "test5", pygame.rect.Rect(200, 100, 100, 50), "test5", self.game_manager.screen, self.game_manager.game_font, (0, 0))
+            "test5": Button(props_test5, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
         } 
         
         return {
@@ -462,7 +448,7 @@ class InputManager:
     
     # - CREAT SLIDERS -#
 
-    def create_sliders(self) -> Dict[str, Dict[str, Slider]]:
+    def create_sliders(self):
         return {
             "main_menu": {},
             "setup": self.create_setup_sliders(),
@@ -482,14 +468,18 @@ class InputManager:
             max_value=4,
             initial_value=self.game_manager.players_num,
             bar_color=(0, 100, 0),
-            slider_color=(100, 0, 0),
-            slider_radius=10
+            handle_color=(100, 0, 0),
+            handle_radius=10,
+            game_manager= self.game_manager,
+            bar_image=None
+            ,
+            callback=lambda: self.set_player_num(int(player_num_slider.value))
         )
         return {
             "player_num_slider": player_num_slider
         }
     
-    def create_menu_sliders(self) -> Dict[str, Slider]:
+    def create_menu_sliders(self) -> Dict[str, Dict[str, Slider]]:
         """
         Create sliders for the menu.
         """
@@ -502,8 +492,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.1,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             ),
             "controller_sensitivity": Slider(
                 name="controller_sensitivity",
@@ -513,8 +505,10 @@ class InputManager:
                 max_value=10,
                 initial_value=5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             ),
             "controller_vibration_strength": Slider(
                 name="controller_vibration_strength",
@@ -524,8 +518,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             )
         }
         accessability_sliders = {}
@@ -538,8 +534,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             )
         }
         audio_sliders = {
@@ -551,8 +549,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             ),
             "music_volume": Slider(
                 name="music_volume",
@@ -562,8 +562,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             ),
             "sfx_volume": Slider(
                 name="sfx_volume",
@@ -573,8 +575,10 @@ class InputManager:
                 max_value=1,
                 initial_value=0.5,
                 bar_color=(0, 100, 0),
-                slider_color=(100, 0, 0),
-                slider_radius=10
+                handle_color=(100, 0, 0),
+                handle_radius=10,
+                game_manager= self.game_manager,
+                bar_image=None
             )
         }
         gameplay_sliders = {}
@@ -589,7 +593,7 @@ class InputManager:
 
     # - CREATE TOGGLES - #
 
-    def create_toggles(self) -> Dict[str, Dict[str, Toggle]]:
+    def create_toggles(self):
         return {
             "main_menu": {},
             "setup": {},
@@ -597,7 +601,7 @@ class InputManager:
             "menu": self.create_menu_toggles()
         }
     
-    def create_menu_toggles(self) -> Dict[str, Toggle]:
+    def create_menu_toggles(self) -> Dict[str, Dict[str, Toggle]]:
         default_time_to_flip = 0.25
         default_height = 50
         default_center_width = 100
@@ -619,6 +623,7 @@ class InputManager:
                 toggle_color=default_toggle_color,
                 toggle_gap=default_toggle_gap,
                 toggle_name="controller_vibration",
+                game_manager=self.game_manager,
                 on=default_on,
                 guiding_lines=default_guiding_lines,
                 callback=None,
@@ -633,6 +638,7 @@ class InputManager:
                 toggle_color=default_toggle_color,
                 toggle_gap=default_toggle_gap,
                 toggle_name="controller_vibration",
+                game_manager=self.game_manager,
                 on=default_on,
                 guiding_lines=default_guiding_lines,
                 callback=None,
@@ -647,6 +653,7 @@ class InputManager:
                 toggle_color=default_toggle_color,
                 toggle_gap=default_toggle_gap,
                 toggle_name="controller_vibration",
+                game_manager=self.game_manager,
                 on=default_on,
                 guiding_lines=default_guiding_lines,
                 callback=None,
@@ -663,6 +670,7 @@ class InputManager:
                 toggle_color=default_toggle_color,
                 toggle_gap=default_toggle_gap,
                 toggle_name="controller_vibration",
+                game_manager=self.game_manager,
                 on=default_on,
                 guiding_lines=default_guiding_lines,
                 callback=None,
@@ -679,6 +687,7 @@ class InputManager:
                 toggle_color=default_toggle_color,
                 toggle_gap=default_toggle_gap,
                 toggle_name="controller_vibration",
+                game_manager=self.game_manager,
                 on=default_on,
                 guiding_lines=default_guiding_lines,
                 callback=None,
@@ -693,6 +702,7 @@ class InputManager:
                 toggle_color=default_toggle_color,
                 toggle_gap=default_toggle_gap,
                 toggle_name="controller_vibration",
+                game_manager=self.game_manager,
                 on=default_on,
                 guiding_lines=default_guiding_lines,
                 callback=None,
@@ -707,6 +717,7 @@ class InputManager:
                 toggle_color=default_toggle_color,
                 toggle_gap=default_toggle_gap,
                 toggle_name="controller_vibration",
+                game_manager=self.game_manager,
                 on=default_on,
                 guiding_lines=default_guiding_lines,
                 callback=None,
@@ -723,6 +734,7 @@ class InputManager:
                 toggle_color=default_toggle_color,
                 toggle_gap=default_toggle_gap,
                 toggle_name="controller_vibration",
+                game_manager=self.game_manager,
                 on=default_on,
                 guiding_lines=default_guiding_lines,
                 callback=None,
@@ -739,6 +751,7 @@ class InputManager:
                 toggle_color=default_toggle_color,
                 toggle_gap=default_toggle_gap,
                 toggle_name="controller_vibration",
+                game_manager=self.game_manager,
                 on=default_on,
                 guiding_lines=default_guiding_lines,
                 callback=None,
@@ -753,6 +766,7 @@ class InputManager:
                 toggle_color=default_toggle_color,
                 toggle_gap=default_toggle_gap,
                 toggle_name="controller_vibration",
+                game_manager=self.game_manager,
                 on=default_on,
                 guiding_lines=default_guiding_lines,
                 callback=None,
@@ -780,7 +794,7 @@ class InputManager:
         """
         Create images for the menu.
         """
-        buy_background_image = Image(pygame.Rect(self.game_manager.screen_w / 2, 650, self.game_manager.screen_w / 3, 100))
+        buy_background_image = Image(self.game_manager, "buy_background_image", pygame.Rect(self.game_manager.screen_w / 2, 650, self.game_manager.screen_w / 3, 100))
 
         return {
             "buy_background_image": buy_background_image
@@ -789,7 +803,7 @@ class InputManager:
 
     # - CREATE TEXT DISPLAYS - #
 
-    def create_text_displays(self) -> Dict[str, Dict[str, TextDisplay]]:
+    def create_text_displays(self):
         return {
             "main_menu": {},
             "setup": self.create_setup_text_displays(),
@@ -799,17 +813,31 @@ class InputManager:
     
     def create_setup_text_displays(self) -> Dict[str, TextDisplay]:
         player_num_text = TextDisplay(
+            name="player_num_text",
             text="Number of Players: ", 
             font=self.game_manager.game_font,
             text_color=(0, 0, 0),
-            location=(100, 150)
+            rect=pygame.Rect(100, 150, 300, 50),
+            game_manager=self.game_manager
         )
         return {
             "player_num_text": player_num_text
         }
 
     def create_game_text_displays(self) -> Dict[str, TextDisplay]:
-        pass
+        return {}
 
-    def create_menu_text_displays(self) -> Dict[str, TextDisplay]:
-        pass
+    def create_menu_text_displays(self) -> Dict[str, Dict[str, TextDisplay]]:
+        input_text_displays = {}
+        accessibility_text_displays = {}
+        graphics_text_displays = {}
+        audio_text_displays = {}
+        gameplay_text_displays = {}
+        
+        return {
+            "input": input_text_displays,
+            "accessibility": accessibility_text_displays,
+            "graphics": graphics_text_displays,
+            "audio": audio_text_displays,
+            "gameplay": gameplay_text_displays
+        }
