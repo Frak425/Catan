@@ -250,7 +250,7 @@ class Board:
 
             #Find the center of each tile
             center = (top[0], top[1] + self.radius_corner)
-            self.tiles.append(Tile(self.tiles_names[i], color, center, int(self.numbers[self.number_indicies[i] - 1]), points, self.screen))
+            self.tiles.append(Tile(self.tiles_names[i], color, center, self.numbers[self.number_indicies[i] - 1], points, self.screen))
 
     """def flatten_nodes(self) -> None:
         i = 0

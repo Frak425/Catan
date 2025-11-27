@@ -1,6 +1,6 @@
 import pygame
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Optional
 
 if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
@@ -8,29 +8,52 @@ if TYPE_CHECKING:
 
 
 class Button:
-    def __init__(self, color: tuple[int, int, int], text: str, rect: pygame.Rect, name: str, surface: pygame.Surface, font, location: tuple[int, int], game_manager: "GameManager") -> None:
+    def __init__(self, layout_props: dict, surface: pygame.Surface, font, game_manager: "GameManager", callback: Optional[Callable] = None, shown: bool = True) -> None:
         self.game_manager = game_manager
-        
-        self.color = color
-        self.text = text
-        self.rect = rect #includes location and size data
-        self.name = name
+
+        #init props
+        # Initialize defaults so read_layout() can fall back reliably
+        self.name = ""
+        self.text = ""
+        self.rect = pygame.Rect(0, 0, 0, 0)
+        self.color = (0, 0, 0)
+        self.location = (0, 0)
+        # read layout and override default values
+        self.read_layout(layout_props)
+
         self.surface = surface
         self.game_font = font
-        self.location = location
-        self.shown = True
+        self.shown = shown
+        self.hovering = False
+        # Optional callback to run when clicked
+        self.callback = callback
 
-    def draw(self, surface=None) -> None:
+    def trigger(self):
+        if self.callback:
+            self.callback()
+
+    def draw(self, surface: pygame.Surface) -> None:
         if not self.shown:
             return
-        if surface:
-            pygame.draw.rect(surface, self.color, self.rect) #change this to include backgrounds
-            text = self.game_font.render(self.text, False, (0, 0, 0))
-            surface.blit(text, (self.rect[0], self.rect[1]))
-        else:
-            pygame.draw.rect(self.surface, self.color, self.rect) #change this to include backgrounds
-            text = self.game_font.render(self.text, False, (0, 0, 0))
-            self.surface.blit(text, (self.rect[0], self.rect[1]))
+        # Draw using the provided surface explicitly
+        pygame.draw.rect(surface, self.color, self.rect) #change this to include backgrounds
+        text = self.game_font.render(self.text, False, (0, 0, 0))
+        surface.blit(text, (self.rect[0], self.rect[1]))
+
+    def read_layout(self, layout: dict) -> None:
+        # Schema reference: See [settings.json](./config/layout.json#L23-L41)
+
+        self.name = layout.get("name", self.name)
+        rect_data = layout.get("rect", [self.rect.x, self.rect.y, self.rect.width, self.rect.height])
+        self.rect = pygame.Rect(rect_data[0], rect_data[1], rect_data[2], rect_data[3])
+        color_data = layout.get("color", [self.color[0], self.color[1], self.color[2]])
+        self.color = (color_data[0], color_data[1], color_data[2])
+        self.text = layout.get("text", self.text)
+        location_data = layout.get("location", [self.location[0], self.location[1]])
+        self.location = (location_data[0], location_data[1])
+
+    def read_settings(self, settings: dict) -> None:
+        pass
 
     def hide(self) -> None:
         self.shown = False

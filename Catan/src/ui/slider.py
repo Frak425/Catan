@@ -1,12 +1,12 @@
 import pygame
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Optional
 
 if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
 class Slider:
-    def __init__(self, name: str, wrapper_rect: pygame.Rect, rect: pygame.Rect, min_value: int, max_value: int, initial_value: int | float, bar_color: tuple[int, int, int], handle_color: tuple[int, int, int], handle_radius: int, game_manager: "GameManager",  bar_image: pygame.Surface | None, direction: str = "horizontal", handle_shape: str = "circle", handle_length: int = 0) -> None:
+    def __init__(self, name: str, wrapper_rect: pygame.Rect, rect: pygame.Rect, min_value: int, max_value: int, initial_value: int | float, bar_color: tuple[int, int, int], handle_color: tuple[int, int, int], handle_radius: int, game_manager: "GameManager",  bar_image: pygame.Surface | None, direction: str = "horizontal", handle_shape: str = "circle", handle_length: int = 0, callback: Optional[Callable] = None) -> None:
         self.name = name
         self.game_manager = game_manager
 
@@ -33,6 +33,8 @@ class Slider:
         self.draw_surface.fill((0, 0, 0, 0))  # Transparent background
 
         self.create_surfaces(self.direction, self.handle_shape)
+        # optional callback triggered on slider click/interaction
+        self.callback = callback
 
     def create_surfaces(self, direction: str, handle_shape: str):
         self.bar_surface = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)

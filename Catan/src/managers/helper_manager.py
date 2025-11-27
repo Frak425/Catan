@@ -54,6 +54,7 @@ class HelperManager:
     #TODO: proper type annotations for clickables
     def check_clickable_from_dict(self, clickables, mouse_location: tuple[int, int], offset_x = 0, offset_y = 0):
         for name, class_instance in clickables.items():
-            if (self.check_point_in_rect(class_instance.rect, (mouse_location[0] - offset_x, mouse_location[1] - offset_y))):
+            if class_instance.rect.collidepoint(mouse_location[0] - offset_x, mouse_location[1] - offset_y):
                 return class_instance
+                
         return None
