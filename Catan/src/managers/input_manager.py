@@ -32,7 +32,7 @@ class InputManager:
 
         self.dragging = False #true between MBD and MBU with distance > 5 pixels
         self.clicked = False #true between MBD and MBU
-        self.active: Button | Slider | Toggle | Button | Image | None #the currently active clickable object
+        self.active: Button | Slider | Toggle | Button | Image | None = None#the currently active clickable object
         self.start_x = 0
         self.start_y = 0
         self.click_end_x = 0
@@ -257,6 +257,66 @@ class InputManager:
         for s in sliders_list:
             if s.get('name') == name:
                 return s
+        return None
+
+    def get_layout_toggle_props(self, state: str, name: str, tab: str | None = None) -> dict | None:
+        """Return layout props dict for given named toggle (or None if not found)."""
+        layout = getattr(self.game_manager, 'layout', None)
+        if not layout:
+            return None
+        layout_section = self._layout_section_for_state(state)
+        try:
+            if layout_section == 'menu':
+                if not tab:
+                    return None
+                toggles_list = layout[layout_section][tab].get('toggles', [])
+            else:
+                toggles_list = layout[layout_section].get('toggles', [])
+        except Exception:
+            return None
+        for t in toggles_list:
+            if t.get('name') == name:
+                return t
+        return None
+
+    def get_layout_image_props(self, state: str, name: str, tab: str | None = None) -> dict | None:
+        """Return layout props dict for given named image (or None if not found)."""
+        layout = getattr(self.game_manager, 'layout', None)
+        if not layout:
+            return None
+        layout_section = self._layout_section_for_state(state)
+        try:
+            if layout_section == 'menu':
+                if not tab:
+                    return None
+                images_list = layout[layout_section][tab].get('images', [])
+            else:
+                images_list = layout[layout_section].get('images', [])
+        except Exception:
+            return None
+        for i in images_list:
+            if i.get('name') == name:
+                return i
+        return None
+
+    def get_layout_text_display_props(self, state: str, name: str, tab: str | None = None) -> dict | None:
+        """Return layout props dict for given named text_display (or None if not found)."""
+        layout = getattr(self.game_manager, 'layout', None)
+        if not layout:
+            return None
+        layout_section = self._layout_section_for_state(state)
+        try:
+            if layout_section == 'menu':
+                if not tab:
+                    return None
+                tds_list = layout[layout_section][tab].get('text_displays', [])
+            else:
+                tds_list = layout[layout_section].get('text_displays', [])
+        except Exception:
+            return None
+        for td in tds_list:
+            if td.get('name') == name:
+                return td
         return None
     
     def create_menu(self) -> Menu:
@@ -484,16 +544,7 @@ class InputManager:
         """
         Create sliders for the setup.
         """
-        props = self.get_layout_slider_props("setup", "player_num_slider") or {
-            "name": "player_num_slider",
-            "rect": [100, 200, 300, 20],
-            "wrapper_rect": [100, 200, 300, 20],
-            "min_value": 1,
-            "max_value": 4,
-            "bar_color": [0, 100, 0],
-            "handle_color": [100, 0, 0],
-            "handle_radius": 10
-        }
+        props = self.get_layout_slider_props("setup", "player_num_slider") or {"name": "player_num_slider", "rect": [100, 200, 300, 20], "wrapper_rect": [100, 200, 300, 20], "min_value": 1, "max_value": 4, "bar_color": [0, 100, 0], "handle_color": [100, 0, 0], "handle_radius": 10}
 
         player_num_slider = Slider(props, self.game_manager.players_num, self.game_manager, None, callback=None)
         # assign callback after creation so the lambda can reference the slider instance
@@ -562,165 +613,37 @@ class InputManager:
         default_guiding_lines = True
         #Create toggles for the menu.
         
+        # build input toggles using layout props
+        props_controller_vib = self.get_layout_toggle_props("menu", "controller_vibration", tab="input") or {"name":"controller_vibration", "rect":[100,300,150,50], "guiding_lines":default_guiding_lines, "height":default_height, "center_width":default_center_width, "fill_color":list(default_fill_color), "toggle_color":list(default_toggle_color), "toggle_gap":default_toggle_gap, "time_to_flip":default_time_to_flip}
+        props_invert_y = self.get_layout_toggle_props("menu", "invert_y_axis", tab="input") or {"name":"invert_y_axis", "rect":[200,300,150,50], "guiding_lines":default_guiding_lines, "height":default_height, "center_width":default_center_width, "fill_color":list(default_fill_color), "toggle_color":list(default_toggle_color), "toggle_gap":default_toggle_gap, "time_to_flip":default_time_to_flip}
+        props_invert_x = self.get_layout_toggle_props("menu", "invert_x_axis", tab="input") or {"name":"invert_x_axis", "rect":[300,300,150,50], "guiding_lines":default_guiding_lines, "height":default_height, "center_width":default_center_width, "fill_color":list(default_fill_color), "toggle_color":list(default_toggle_color), "toggle_gap":default_toggle_gap, "time_to_flip":default_time_to_flip}
+
         input_toggles = {
-            "controller_vibration": Toggle(
-                0,
-                time_to_flip=default_time_to_flip,
-                location=(100, 300),
-                height=default_height,
-                center_width=default_center_width,
-                fill_color=default_fill_color,
-                toggle_color=default_toggle_color,
-                toggle_gap=default_toggle_gap,
-                toggle_name="controller_vibration",
-                game_manager=self.game_manager,
-                on=default_on,
-                guiding_lines=default_guiding_lines,
-                callback=None,
-            ),
-            "invert_y_axis": Toggle(
-                0,
-                time_to_flip=default_time_to_flip,
-                location=(200, 300),
-                height=default_height,
-                center_width=default_center_width,
-                fill_color=default_fill_color,
-                toggle_color=default_toggle_color,
-                toggle_gap=default_toggle_gap,
-                toggle_name="controller_vibration",
-                game_manager=self.game_manager,
-                on=default_on,
-                guiding_lines=default_guiding_lines,
-                callback=None,
-            ),
-            "invert_x_axis": Toggle(
-                0,
-                time_to_flip=default_time_to_flip,
-                location=(300, 300),
-                height=default_height,
-                center_width=default_center_width,
-                fill_color=default_fill_color,
-                toggle_color=default_toggle_color,
-                toggle_gap=default_toggle_gap,
-                toggle_name="controller_vibration",
-                game_manager=self.game_manager,
-                on=default_on,
-                guiding_lines=default_guiding_lines,
-                callback=None,
-            )
+            "controller_vibration": Toggle(props_controller_vib, 0, self.game_manager, on=default_on, callback=None),
+            "invert_y_axis": Toggle(props_invert_y, 0, self.game_manager, on=default_on, callback=None),
+            "invert_x_axis": Toggle(props_invert_x, 0, self.game_manager, on=default_on, callback=None)
         }
+        props_high_contrast = self.get_layout_toggle_props("menu", "high_contrast_mode", tab="accessibility") or {"name":"high_contrast_mode", "rect":[100,300,150,50], "guiding_lines":default_guiding_lines, "height":default_height, "center_width":default_center_width, "fill_color":list(default_fill_color), "toggle_color":list(default_toggle_color), "toggle_gap":default_toggle_gap, "time_to_flip":default_time_to_flip}
         accessability_toggles = {
-            "high_contrast_mode": Toggle(
-                0,
-                time_to_flip=default_time_to_flip,
-                location=(100, 300),
-                height=default_height,
-                center_width=default_center_width,
-                fill_color=default_fill_color,
-                toggle_color=default_toggle_color,
-                toggle_gap=default_toggle_gap,
-                toggle_name="controller_vibration",
-                game_manager=self.game_manager,
-                on=default_on,
-                guiding_lines=default_guiding_lines,
-                callback=None,
-            )
+            "high_contrast_mode": Toggle(props_high_contrast, 0, self.game_manager, on=default_on, callback=None)
         }
+        props_aa = self.get_layout_toggle_props("menu", "aa", tab="graphics") or {"name":"aa", "rect":[200,300,150,50], "guiding_lines":default_guiding_lines, "height":default_height, "center_width":default_center_width, "fill_color":list(default_fill_color), "toggle_color":list(default_toggle_color), "toggle_gap":default_toggle_gap, "time_to_flip":default_time_to_flip}
+        props_fullscreen = self.get_layout_toggle_props("menu", "fullscreen", tab="graphics") or {"name":"fullscreen", "rect":[300,300,150,50], "guiding_lines":default_guiding_lines, "height":default_height, "center_width":default_center_width, "fill_color":list(default_fill_color), "toggle_color":list(default_toggle_color), "toggle_gap":default_toggle_gap, "time_to_flip":default_time_to_flip}
+        props_shadows = self.get_layout_toggle_props("menu", "shadows", tab="graphics") or {"name":"shadows", "rect":[400,300,150,50], "guiding_lines":default_guiding_lines, "height":default_height, "center_width":default_center_width, "fill_color":list(default_fill_color), "toggle_color":list(default_toggle_color), "toggle_gap":default_toggle_gap, "time_to_flip":default_time_to_flip}
         graphics_toggles = {
-            "aa": Toggle(
-                0,
-                time_to_flip=default_time_to_flip,
-                location=(200, 300),
-                height=default_height,
-                center_width=default_center_width,
-                fill_color=default_fill_color,
-                toggle_color=default_toggle_color,
-                toggle_gap=default_toggle_gap,
-                toggle_name="controller_vibration",
-                game_manager=self.game_manager,
-                on=default_on,
-                guiding_lines=default_guiding_lines,
-                callback=None,
-            ),
-            "fullscreen": Toggle(
-                0,
-                time_to_flip=default_time_to_flip,
-                location=(300, 300),
-                height=default_height,
-                center_width=default_center_width,
-                fill_color=default_fill_color,
-                toggle_color=default_toggle_color,
-                toggle_gap=default_toggle_gap,
-                toggle_name="controller_vibration",
-                game_manager=self.game_manager,
-                on=default_on,
-                guiding_lines=default_guiding_lines,
-                callback=None,
-            ),
-            "shadows": Toggle(
-                0,
-                time_to_flip=default_time_to_flip,
-                location=(400, 300),
-                height=default_height,
-                center_width=default_center_width,
-                fill_color=default_fill_color,
-                toggle_color=default_toggle_color,
-                toggle_gap=default_toggle_gap,
-                toggle_name="controller_vibration",
-                game_manager=self.game_manager,
-                on=default_on,
-                guiding_lines=default_guiding_lines,
-                callback=None,
-            )
+            "aa": Toggle(props_aa, 0, self.game_manager, on=default_on, callback=None),
+            "fullscreen": Toggle(props_fullscreen, 0, self.game_manager, on=default_on, callback=None),
+            "shadows": Toggle(props_shadows, 0, self.game_manager, on=default_on, callback=None)
         }
+        props_sfx = self.get_layout_toggle_props("menu", "sfx", tab="audio") or {"name":"sfx", "rect":[100,300,150,50], "guiding_lines":default_guiding_lines, "height":default_height, "center_width":default_center_width, "fill_color":list(default_fill_color), "toggle_color":list(default_toggle_color), "toggle_gap":default_toggle_gap, "time_to_flip":default_time_to_flip}
         audio_toggles = {
-            "sfx": Toggle(
-                0,
-                time_to_flip=default_time_to_flip,
-                location=(100, 300),
-                height=default_height,
-                center_width=default_center_width,
-                fill_color=default_fill_color,
-                toggle_color=default_toggle_color,
-                toggle_gap=default_toggle_gap,
-                toggle_name="controller_vibration",
-                game_manager=self.game_manager,
-                on=default_on,
-                guiding_lines=default_guiding_lines,
-                callback=None,
-            )
+            "sfx": Toggle(props_sfx, 0, self.game_manager, on=default_on, callback=None)
         }
+        props_hud = self.get_layout_toggle_props("menu", "hud", tab="gameplay") or {"name":"hud", "rect":[100,300,150,50], "guiding_lines":default_guiding_lines, "height":default_height, "center_width":default_center_width, "fill_color":list(default_fill_color), "toggle_color":list(default_toggle_color), "toggle_gap":default_toggle_gap, "time_to_flip":default_time_to_flip}
+        props_language = self.get_layout_toggle_props("menu", "language", tab="gameplay") or {"name":"language", "rect":[200,300,150,50], "guiding_lines":default_guiding_lines, "height":default_height, "center_width":default_center_width, "fill_color":list(default_fill_color), "toggle_color":list(default_toggle_color), "toggle_gap":default_toggle_gap, "time_to_flip":default_time_to_flip}
         gameplay_toggles = {
-            "hud": Toggle(
-                0,
-                time_to_flip=default_time_to_flip,
-                location=(100, 300),
-                height=default_height,
-                center_width=default_center_width,
-                fill_color=default_fill_color,
-                toggle_color=default_toggle_color,
-                toggle_gap=default_toggle_gap,
-                toggle_name="controller_vibration",
-                game_manager=self.game_manager,
-                on=default_on,
-                guiding_lines=default_guiding_lines,
-                callback=None,
-            ),
-            "language": Toggle(
-                0,
-                time_to_flip=default_time_to_flip,
-                location=(200, 300),
-                height=default_height,
-                center_width=default_center_width,
-                fill_color=default_fill_color,
-                toggle_color=default_toggle_color,
-                toggle_gap=default_toggle_gap,
-                toggle_name="controller_vibration",
-                game_manager=self.game_manager,
-                on=default_on,
-                guiding_lines=default_guiding_lines,
-                callback=None,
-            )
+            "hud": Toggle(props_hud, 0, self.game_manager, on=default_on, callback=None),
+            "language": Toggle(props_language, 0, self.game_manager, on=default_on, callback=None)
         }
         return {
             "input": input_toggles,
@@ -744,7 +667,8 @@ class InputManager:
         """
         Create images for the menu.
         """
-        buy_background_image = Image(self.game_manager, "buy_background_image", pygame.Rect(self.game_manager.screen_w / 2, 650, self.game_manager.screen_w / 3, 100))
+        props_buy_background = self.get_layout_image_props("game", "buy_background_image") or {"name": "buy_background_image", "rect": [self.game_manager.screen_w / 2, 650, int(self.game_manager.screen_w / 3), 100], "image_path": ""}
+        buy_background_image = Image(props_buy_background, self.game_manager, callback=None)
 
         return {
             "buy_background_image": buy_background_image
@@ -762,14 +686,8 @@ class InputManager:
         }
     
     def create_setup_text_displays(self) -> Dict[str, TextDisplay]:
-        player_num_text = TextDisplay(
-            name="player_num_text",
-            text="Number of Players: ", 
-            font=self.game_manager.game_font,
-            text_color=(0, 0, 0),
-            rect=pygame.Rect(100, 150, 300, 50),
-            game_manager=self.game_manager
-        )
+        props_player_num_text = self.get_layout_text_display_props("setup", "player_num_text") or {"name":"player_num_text", "rect":[100,150,300,50], "color":[255,255,255], "text":"Number of Players: 2", "text_color":[0,0,0], "padding":5}
+        player_num_text = TextDisplay(props_player_num_text, self.game_manager, self.game_manager.game_font, background_image=None)
         return {
             "player_num_text": player_num_text
         }

@@ -232,8 +232,7 @@ class GameManager:
                 "name": button.name,
                 "rect": [button.rect[0], button.rect[1], button.rect[2], button.rect[3]],
                 "color": [button.color[0], button.color[1], button.color[2]],
-                "text": button.text,
-                "location": [button.location[0], button.location[1]]
+                "text": button.text
             }
             layout_object_list.append(layout_object)
         return layout_object_list

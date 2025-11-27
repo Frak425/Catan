@@ -6,17 +6,25 @@ if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
 class Image:
-    def __init__(self, game_manager: GameManager, name: str, rect: pygame.Rect, image_path: str | None = None, default_color: tuple[int, int, int] = (100, 100, 100), callback: Optional[Callable] = None):
-        self.name = name
+    def __init__(self, layout_props: dict, game_manager: 'GameManager', callback: Optional[Callable] = None):
         self.game_manager = game_manager
-        self.rect = rect
+
+        # initialize defaults so read_layout() can fall back reliably
+        self.name = ""
+        self.rect = pygame.Rect(0, 0, 0, 0)
+        self.image_path = ""
+        self.default_color = (150, 150, 150)
+
+        # read layout and override default values
+        self.read_layout(layout_props)
+
         self.surface = pygame.Surface(self.rect.size, pygame.SRCALPHA)
-        self.image_path = image_path
+        self.shown = True
         if self.image_path:
             self.image = pygame.image.load(self.image_path).convert_alpha()
             self.surface.blit(self.image, (0, 0))
         else:
-            self.surface.fill(default_color)
+            self.surface.fill(self.default_color)
         # optional callback
         self.callback = callback
 
@@ -25,5 +33,35 @@ class Image:
             self.callback()
 
     def draw(self, surface: pygame.surface.Surface):
-        surface.blit(self.surface, (self.rect.x, self.rect.y))
-        
+        if self.shown:
+            surface.blit(self.surface, (self.rect.x, self.rect.y))
+    
+    def read_layout(self, layout: dict) -> None:
+        self.name = layout.get("name", self.name)
+        rect_data = layout.get("rect", [self.rect.x, self.rect.y, self.rect.width, self.rect.height])
+        self.rect = pygame.Rect(rect_data[0], rect_data[1], rect_data[2], rect_data[3])
+        self.image_path = layout.get("image_path", self.image_path)
+        if self.image_path:
+            self.image = pygame.image.load(self.image_path).convert_alpha()
+            self.surface.blit(self.image, (0, 0))
+
+    def get_layout(self) -> dict:
+            layout = {
+                "name": self.name,
+                "rect": [self.rect.x, self.rect.y, self.rect.width, self.rect.height],
+                "image_path": self.image_path,
+                "shown": self.shown
+            }
+            return layout
+    #TODO: implement settings read/write
+    def read_settings(self, settings: dict) -> None:
+        pass
+
+    def get_settings(self) -> dict:
+        return {}
+
+    def hide(self) -> None:
+        self.shown = False
+
+    def show(self) -> None:
+        self.shown = True

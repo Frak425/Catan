@@ -11,13 +11,12 @@ class Button:
     def __init__(self, layout_props: dict, surface: pygame.Surface, font, game_manager: "GameManager", callback: Optional[Callable] = None, shown: bool = True) -> None:
         self.game_manager = game_manager
 
-        #init props
         # Initialize defaults so read_layout() can fall back reliably
         self.name = ""
         self.text = ""
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.color = (0, 0, 0)
-        self.location = (0, 0)
+
         # read layout and override default values
         self.read_layout(layout_props)
 
@@ -41,7 +40,7 @@ class Button:
         surface.blit(text, (self.rect[0], self.rect[1]))
 
     def read_layout(self, layout: dict) -> None:
-        # Schema reference: See [settings.json](./config/layout.json#L23-L41)
+        # Schema reference: See [layout.json](./config/layout.json#L23-L41)
 
         self.name = layout.get("name", self.name)
         rect_data = layout.get("rect", [self.rect.x, self.rect.y, self.rect.width, self.rect.height])
@@ -49,11 +48,21 @@ class Button:
         color_data = layout.get("color", [self.color[0], self.color[1], self.color[2]])
         self.color = (color_data[0], color_data[1], color_data[2])
         self.text = layout.get("text", self.text)
-        location_data = layout.get("location", [self.location[0], self.location[1]])
-        self.location = (location_data[0], location_data[1])
 
+    def get_layout(self) -> dict:
+        return {
+            "name": self.name,
+            "rect": [self.rect.x, self.rect.y, self.rect.width, self.rect.height],
+            "color": [self.color[0], self.color[1], self.color[2]],
+            "text": self.text
+        }
+    
+    #TODO: implement settings read/write
     def read_settings(self, settings: dict) -> None:
         pass
+
+    def get_settings(self) -> dict:
+        return {}
 
     def hide(self) -> None:
         self.shown = False

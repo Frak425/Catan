@@ -22,7 +22,7 @@ class Slider:
         self.handle_shape = "circle"  # or "rectangle" or "stadium"
         self.handle_length = 0  # used if handle_shape is rectangle
 
-        #init props
+        # read layout and override default values
         self.read_layout(layout_props)
 
         self.value = initial_value
@@ -149,35 +149,9 @@ class Slider:
         surface.blit(self.draw_surface, self.wrapper_rect.topleft)
 
     def read_layout(self, layout_props: dict):
+
         # Schema ref: See [layout.json](./config/layout.json#L188-215)
-        """{
-                "name": "player_num_slider",
-                "rect": [
-                    100,
-                    200,
-                    300,
-                    20
-                ],
-                "wrapper_rect": [
-                    100,
-                    200,
-                    300,
-                    20
-                ],
-                "min_value": 1,
-                "max_value": 4,
-                "bar_color": [
-                    0,
-                    100,
-                    0
-                ],
-                "slider_color": [
-                    100,
-                    0,
-                    0
-                ],
-                "slider_radius": 10
-            }"""
+
         self.name: str = layout_props.get("name", self.name)
         rect_data = layout_props.get("rect", [self.rect.x, self.rect.y, self.rect.width, self.rect.height])
         self.rect: pygame.Rect = pygame.Rect(rect_data[0], rect_data[1], rect_data[2], rect_data[3])
@@ -193,3 +167,25 @@ class Slider:
         self.direction: str = layout_props.get("direction", self.direction)
         self.handle_shape: str = layout_props.get("handle_shape", self.handle_shape)
         self.handle_length: int = layout_props.get("handle_length", self.handle_length)
+
+    def get_layout(self) -> dict:
+        return {
+            "name": self.name,
+            "rect": [self.rect.x, self.rect.y, self.rect.width, self.rect.height],
+            "wrapper_rect": [self.wrapper_rect.x, self.wrapper_rect.y, self.wrapper_rect.width, self.wrapper_rect.height],
+            "min_value": self.min_value,
+            "max_value": self.max_value,
+            "bar_color": [self.bar_color[0], self.bar_color[1], self.bar_color[2]],
+            "handle_color": [self.handle_color[0], self.handle_color[1], self.handle_color[2]],
+            "handle_radius": self.handle_radius,
+            "direction": self.direction,
+            "handle_shape": self.handle_shape,
+            "handle_length": self.handle_length
+        }
+    
+    #TODO: implement settings read/write
+    def read_settings(self, settings: dict) -> None:
+        pass
+
+    def get_settings(self) -> dict:
+        return {}
