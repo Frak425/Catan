@@ -17,7 +17,7 @@ from src.managers.player_manager import PlayerManager
 from src.managers.audio_manager import AudioManager
 
 class GameManager:
-    def __init__(self, screen: pygame.Surface) -> None:
+    def init(self, screen: pygame.Surface) -> None:
         #TODO: Refactor this to use config files properly
         self.running = True
         self.edited = False  #whether to use edited settings or layout
@@ -71,6 +71,8 @@ class GameManager:
         self.board = self.init_board()
 
         self.dev_mode = False
+        self.dev_mode_typing = False
+        self.dev_mode_text = ""
 
     def init_board(self) -> Board:
         for i in range(self.players_num):
@@ -232,8 +234,7 @@ class GameManager:
                 "name": button.name,
                 "rect": [button.rect[0], button.rect[1], button.rect[2], button.rect[3]],
                 "color": [button.color[0], button.color[1], button.color[2]],
-                "text": button.text,
-                "location": [button.location[0], button.location[1]]
+                "text": button.text
             }
             layout_object_list.append(layout_object)
         return layout_object_list
