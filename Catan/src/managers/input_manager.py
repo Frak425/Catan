@@ -160,8 +160,7 @@ class InputManager:
             return
 
         if key == pygame.K_m:
-            # TODO: implement audio mute toggle
-            return
+            self.audio_manager.toggle_mute()
 
         # Toggle dev mode (only when NOT typing)
         if not self.game_manager.dev_mode_typing and key == pygame.K_0:
