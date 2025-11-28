@@ -1,12 +1,12 @@
 import pygame
 import math
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Optional
 if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
 class TextDisplay:
-    def __init__(self, layout_props: dict, game_manager: GameManager, font: pygame.font.Font, background_image: pygame.Surface | None = None) -> None:
+    def __init__(self, layout_props: dict, game_manager: GameManager, font: pygame.font.Font, background_image: pygame.Surface | None = None, callback: Optional[Callable] = None) -> None:
         self.game_manager = game_manager
 
         #initialize defaults so read_layout() can fall back reliably
@@ -16,6 +16,9 @@ class TextDisplay:
         self.text = ""
         self.text_color = (0, 0, 0)
         self.padding = 5
+        self.guiding_line_color = (100, 100, 200)
+        self.is_active = False
+        self.callback = callback
 
         # read layout and override default values
         self.read_layout(layout_props)
@@ -41,14 +44,21 @@ class TextDisplay:
         self.text_surface = self.font.render(self.text, True, self.text_color)
         self.text_rect = self.text_surface.get_rect()
 
-    def draw(self, screen: pygame.Surface) -> None:
+    def trigger(self):
+        if self.callback:
+            self.callback()
+
+    def draw(self, surface: pygame.Surface) -> None:
         # Center the text on the background
         self.text_rect.center = self.background_rect.center
 
-        # Blit the background and text to the screen
+        # Blit the background and text to the surface
         self.background_surface.fill(self.background_color)
         self.background_surface.blit(self.text_surface, self.text_rect)
-        screen.blit(self.background_surface, self.background_rect)
+        surface.blit(self.background_surface, self.background_rect)
+
+        if self.is_active:
+            self.draw_guiding_lines(surface)
 
     def read_layout(self, layout_props: dict) -> None:
 
@@ -71,5 +81,18 @@ class TextDisplay:
             "color": [self.background_color[0], self.background_color[1], self.background_color[2]],
             "text": self.text,
             "text_color": [self.text_color[0], self.text_color[1], self.text_color[2]],
-            "padding": self.padding
+            "padding": self.padding,
+            "guiding_line_color": [self.guiding_line_color[0], self.guiding_line_color[1], self.guiding_line_color[2]]
         }
+    
+    def dev_mode_drag(self, x: int, y: int) -> None:
+        self.rect.x += x
+        self.rect.y += y
+
+    def draw_guiding_lines(self, surface: pygame.Surface) -> None:
+        if self.game_manager.dev_mode:
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x + self.rect.width, self.rect.y), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x, self.rect.y + self.rect.height), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x + self.rect.width, self.rect.y), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y + self.rect.height), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
+    

@@ -18,13 +18,7 @@ from src.ui.slider import Slider
 from src.ui.text_display import TextDisplay
 
 class InputManager:
-    def __init__(self):
-        #All of these have to be defined after initialization
-        self.game_manager: GameManager
-        self.graphics_manager: GraphicsManager
-        self.helper_manager: HelperManager
-        self.audio_manager: AudioManager
-        self.player_manager: PlayerManager
+    def init(self):
         
         # Handlers are now passed directly into Button/Slider/Image instances via callback args.
 
@@ -37,10 +31,22 @@ class InputManager:
         self.start_y = 0
         self.click_end_x = 0
         self.click_end_y = 0
+        self.prev_dx = 0
+        self.prev_dy = 0
+
+        #Put all new UI types here
+        self.buttons = self.create_buttons()
+        self.toggles = self.create_toggles()
+        self.sliders = self.create_sliders()
+        self.images = self.create_images()
+        self.menu = self.create_menu()
+        self.text_displays = self.create_text_displays()
+        self.initialize_ui_elements()
 
     def handle_input(self, x, y, event_type) -> None:
         #MBD will only set active clickable object, actions will happen on MBU if mouse is still over the clickable object
         if event_type == pygame.MOUSEBUTTONDOWN:
+            prev_active = self.active
             #create a start x and y to compare with the mouses position on future events
             self.start_x = x
             self.start_y = y
@@ -73,6 +79,11 @@ class InputManager:
             if slider_clicked:
                 self.active = slider_clicked
 
+            if prev_active and prev_active != self.active:
+                prev_active.is_active = False
+            if self.active:
+                self.active.is_active = True
+
         elif event_type == pygame.MOUSEMOTION:
             #find distance from start to current position
             dx = x - self.start_x
@@ -82,12 +93,23 @@ class InputManager:
             drag_distance = math.sqrt(abs(dx)**2 + abs(dy)**2)
             if self.clicked and drag_distance > 5:
                 self.dragging = True
+            if not self.game_manager.dev_mode:
             #handle drag updates
-            if self.dragging and isinstance(self.active, Slider):
-                if self.graphics_manager.menu_open:
-                    self.handle_drag(x - self.game_manager.menu_margins[0], y - self.game_manager.menu_margins[1], self.sliders["menu"][self.menu.active_tab])
-                else:
-                    self.handle_drag(x, y, self.sliders[self.game_manager.game_state])
+                if self.dragging and isinstance(self.active, Slider):
+                    if self.graphics_manager.menu_open:
+                        self.handle_drag(x - self.game_manager.menu_margins[0], y - self.game_manager.menu_margins[1], self.sliders["menu"][self.menu.active_tab])
+                    else:
+                        self.handle_drag(x, y, self.sliders[self.game_manager.game_state])
+            else:
+                #in dev mode, we can move any ui element around
+                if self.active:
+                    if self.dragging:
+                        self.active.dev_mode_drag(dx - self.prev_dx, dy - self.prev_dy)
+                    if not self.active.is_active:
+                        self.active.is_active = True
+
+            self.prev_dx = dx
+            self.prev_dy = dy
 
         elif event_type == pygame.MOUSEBUTTONUP:
             self.click_end_x = x
@@ -95,7 +117,7 @@ class InputManager:
             self.dragging = False
             self.clicked = False
 
-            if self.active:
+            if self.active and not self.game_manager.dev_mode:
                 self.handle_click()
 
     def handle_click(self) -> None:
@@ -127,9 +149,44 @@ class InputManager:
         if self.active and isinstance(self.active, Slider):
             self.active.update_location(x, y)
 
-    def handle_keyboard(self, key: pygame.event.Event):
+    def handle_keyboard(self, key: pygame.event.Event) -> None:
+
+        if key == pygame.K_ESCAPE:
+            if self.graphics_manager.menu_open:
+                self.close_menu()
+
+        elif key == pygame.K_m:
+            #TODO: implement audio manager mute toggle
+            #self.game_manager.audio_manager.toggle_mute()
+            pass
+        
+        #All devmode shortkuts
         if key == pygame.K_0:
             self.game_manager.dev_mode = not self.game_manager.dev_mode
+            #active ui elements lose active state when exiting dev mode
+            if not self.game_manager.dev_mode and self.active:
+                self.active.is_active = False
+
+        if self.game_manager.dev_mode:
+            if key == pygame.K_UP:
+                if self.active:
+                    self.active.dev_mode_drag(0, -1)
+            elif key == pygame.K_DOWN:
+                if self.active:
+                    self.active.dev_mode_drag(0, 1)
+            elif key == pygame.K_LEFT:
+                if self.active:
+                    self.active.dev_mode_drag(-1, 0)
+            elif key == pygame.K_RIGHT:
+                if self.active:
+                    self.active.dev_mode_drag(1, 0)
+
+            elif key == pygame.K_s:
+            #save layout if in dev mode
+                if self.game_manager.dev_mode:
+                    #TODO: implement layout saving
+                    #self.game_manager.save_layout()
+                    pass 
 
     ## --- EVENT FUNCTIONS --- ##
     #TODO: Add return types to functions
@@ -186,21 +243,18 @@ class InputManager:
 
     def set_game_manager(self, game_manager: 'GameManager') -> None:
         self.game_manager = game_manager
-        #Put all new UI types here
-        self.buttons = self.create_buttons()
-        self.toggles = self.create_toggles()
-        self.sliders = self.create_sliders()
-        self.images = self.create_images()
-        self.menu = self.create_menu()
-        self.text_displays = self.create_text_displays()
-        self.initialize_ui_elements()
 
     def set_graphics_manager(self, graphics_manager: 'GraphicsManager') -> None:
         self.graphics_manager = graphics_manager
-        self.change_tab("input")  # Set the initial active tab
-
+        
     def set_helper_manager(self, helper_manager: 'HelperManager') -> None:
         self.helper_manager = helper_manager
+
+    def set_player_manager(self, player_manager: 'PlayerManager') -> None:
+        self.player_manager = player_manager 
+
+    def set_audio_manager(self, audio_manager: 'AudioManager') -> None:
+        self.audio_manager = audio_manager
 
     def _layout_section_for_state(self, state: str) -> str:
         # map internal state names to layout.json sections
@@ -329,6 +383,8 @@ class InputManager:
         player_num_slider = self.sliders["setup"]["player_num_slider"]
         if hasattr(player_num_slider, 'callback') and player_num_slider.callback:
             player_num_slider.callback()
+
+        self.change_tab("input")  # Set the initial active tab
 
     # - CREATE BUTTONS - #
 

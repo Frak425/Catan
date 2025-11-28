@@ -16,6 +16,10 @@ class Button:
         self.text = ""
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.color = (0, 0, 0)
+        self.guiding_line_color = (100, 100, 200)
+
+        #store is_active.inactive state for drawing guiding lines
+        self.is_active = False
 
         # read layout and override default values
         self.read_layout(layout_props)
@@ -39,6 +43,9 @@ class Button:
         text = self.game_font.render(self.text, False, (0, 0, 0))
         surface.blit(text, (self.rect[0], self.rect[1]))
 
+        if self.is_active:
+            self.draw_guiding_lines(surface)
+
     def read_layout(self, layout: dict) -> None:
         # Schema reference: See [layout.json](./config/layout.json#L23-L41)
 
@@ -54,7 +61,9 @@ class Button:
             "name": self.name,
             "rect": [self.rect.x, self.rect.y, self.rect.width, self.rect.height],
             "color": [self.color[0], self.color[1], self.color[2]],
-            "text": self.text
+            "text": self.text,
+            "shown": self.shown,
+            "guiding_line_color": [self.guiding_line_color[0], self.guiding_line_color[1], self.guiding_line_color[2]]
         }
     
     #TODO: implement settings read/write
@@ -69,3 +78,15 @@ class Button:
 
     def show(self) -> None:
         self.shown = True
+
+    def dev_mode_drag(self, x: int, y: int) -> None:
+        self.rect.x += x
+        self.rect.y += y
+
+    def draw_guiding_lines(self, surface: pygame.Surface) -> None:
+        if self.game_manager.dev_mode:
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x + self.rect.width, self.rect.y), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x, self.rect.y + self.rect.height), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x + self.rect.width, self.rect.y), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y + self.rect.height), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
+    

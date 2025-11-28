@@ -21,6 +21,8 @@ class Slider:
         self.direction = "horizontal"  # or "vertical"
         self.handle_shape = "circle"  # or "rectangle" or "stadium"
         self.handle_length = 0  # used if handle_shape is rectangle
+        self.guiding_line_color = (100, 100, 200)
+        self.is_active = False
 
         # read layout and override default values
         self.read_layout(layout_props)
@@ -137,6 +139,10 @@ class Slider:
 
         self.value = self.calculate_value()
 
+    def trigger(self):
+        if self.callback:
+            self.callback()
+
     def draw(self, surface: pygame.Surface):
         # Redraw the bar and slider surfaces
         self.draw_surface.fill((0, 0, 0, 0))  # Clear the drawing surface
@@ -147,6 +153,9 @@ class Slider:
 
         # Draw the bar and slider on the main surface
         surface.blit(self.draw_surface, self.wrapper_rect.topleft)
+
+        if self.is_active:
+            self.draw_guiding_lines(surface)
 
     def read_layout(self, layout_props: dict):
 
@@ -180,7 +189,8 @@ class Slider:
             "handle_radius": self.handle_radius,
             "direction": self.direction,
             "handle_shape": self.handle_shape,
-            "handle_length": self.handle_length
+            "handle_length": self.handle_length,
+            "guiding_line_color": [self.guiding_line_color[0], self.guiding_line_color[1], self.guiding_line_color[2]]
         }
     
     #TODO: implement settings read/write
@@ -189,3 +199,15 @@ class Slider:
 
     def get_settings(self) -> dict:
         return {}
+    
+    def dev_mode_drag(self, x: int, y: int) -> None:
+        self.rect.x += x
+        self.rect.y += y
+
+    def draw_guiding_lines(self, surface: pygame.Surface) -> None:
+        if self.game_manager.dev_mode:
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x + self.rect.width, self.rect.y), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x, self.rect.y + self.rect.height), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x + self.rect.width, self.rect.y), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y + self.rect.height), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
+    

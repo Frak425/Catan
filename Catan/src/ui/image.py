@@ -14,6 +14,8 @@ class Image:
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.image_path = ""
         self.default_color = (150, 150, 150)
+        self.guiding_line_color = (100, 100, 200)
+        self.is_active = False
 
         # read layout and override default values
         self.read_layout(layout_props)
@@ -35,6 +37,8 @@ class Image:
     def draw(self, surface: pygame.surface.Surface):
         if self.shown:
             surface.blit(self.surface, (self.rect.x, self.rect.y))
+        if self.is_active:
+            self.draw_guiding_lines(surface)
     
     def read_layout(self, layout: dict) -> None:
         self.name = layout.get("name", self.name)
@@ -50,7 +54,8 @@ class Image:
                 "name": self.name,
                 "rect": [self.rect.x, self.rect.y, self.rect.width, self.rect.height],
                 "image_path": self.image_path,
-                "shown": self.shown
+                "shown": self.shown,
+                "guiding_line_color": [self.guiding_line_color[0], self.guiding_line_color[1], self.guiding_line_color[2]]
             }
             return layout
     #TODO: implement settings read/write
@@ -65,3 +70,15 @@ class Image:
 
     def show(self) -> None:
         self.shown = True
+
+    def dev_mode_drag(self, x: int, y: int) -> None:
+        self.rect.x += x
+        self.rect.y += y
+
+    def draw_guiding_lines(self, surface: pygame.Surface) -> None:
+        if self.game_manager.dev_mode:
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x + self.rect.width, self.rect.y), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x, self.rect.y + self.rect.height), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x + self.rect.width, self.rect.y), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y + self.rect.height), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
+    

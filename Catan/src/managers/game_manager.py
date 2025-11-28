@@ -17,7 +17,7 @@ from src.managers.player_manager import PlayerManager
 from src.managers.audio_manager import AudioManager
 
 class GameManager:
-    def __init__(self, screen: pygame.Surface) -> None:
+    def init(self, screen: pygame.Surface) -> None:
         #TODO: Refactor this to use config files properly
         self.running = True
         self.edited = False  #whether to use edited settings or layout

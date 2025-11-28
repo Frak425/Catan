@@ -22,6 +22,9 @@ class Toggle:
         self.toggle_radius = self.height / 2 - self.toggle_gap
         self.toggle_gap = 7
         self.time_to_flip = 0.25  # seconds
+        self.guiding_line_color = (100, 100, 200)
+        self.callback = callback
+        self.is_active = False
         # read layout and override default values
         self.read_layout(layout_props)
         
@@ -72,6 +75,10 @@ class Toggle:
             else:
                 self.toggle_center_location = (self.center_width + self.height // 2 - int((self.center_width) * progress), self.height // 2)
     
+    def trigger(self):
+        if self.callback:
+            self.callback()
+
     def draw(self, surface: pygame.Surface, time: int):
         # Draw the toggle on the background and then the background to the surface 
         if self.animating:
@@ -86,6 +93,9 @@ class Toggle:
             pygame.draw.line(self.surface, (100, 100, 200), ((self.height + self.center_width) / 2, 0), ((self.height + self.center_width) / 2, self.height), 1)
         self.surface.blit(self.toggle_circle, (self.toggle_center_location[0] - self.toggle_circle.get_size()[0] / 2, self.toggle_center_location[1] - self.toggle_circle.get_size()[1] / 2))
         surface.blit(self.surface, self.rect.topleft)
+
+        if self.is_active:
+            self.draw_guiding_lines(surface)
 
     def read_layout(self, layout_props: dict):
         # Schema reference: See [layout.json](./config/layout.json#L442-L465)
@@ -117,7 +127,8 @@ class Toggle:
             "fill_color": [self.fill_color[0], self.fill_color[1], self.fill_color[2]],
             "toggle_color": [self.toggle_color[0], self.toggle_color[1], self.toggle_color[2]],
             "toggle_gap": self.toggle_gap,
-            "time_to_flip": self.time_to_flip
+            "time_to_flip": self.time_to_flip,
+            "guiding_line_color": [self.guiding_line_color[0], self.guiding_line_color[1], self.guiding_line_color[2]]
         }
     
     #TODO: implement settings read/write
@@ -126,3 +137,15 @@ class Toggle:
 
     def get_settings(self) -> dict:
         return {}
+    
+    def dev_mode_drag(self, x: int, y: int) -> None:
+        self.rect.x += x
+        self.rect.y += y
+
+    def draw_guiding_lines(self, surface: pygame.Surface) -> None:
+        if self.game_manager.dev_mode:
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x + self.rect.width, self.rect.y), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x, self.rect.y + self.rect.height), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x + self.rect.width, self.rect.y), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
+            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y + self.rect.height), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
+    

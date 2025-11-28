@@ -3,7 +3,7 @@ from typing import Dict
 from src.ui.button import Button
 
 class HelperManager:
-    def __init__(self):
+    def init(self):
         pass
 
     def midpoint(self, point1: tuple[int, int], point2: tuple[int, int]) -> tuple:
@@ -58,3 +58,5 @@ class HelperManager:
                 return class_instance
                 
         return None
+
+    
