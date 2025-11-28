@@ -149,44 +149,221 @@ class InputManager:
         if self.active and isinstance(self.active, Slider):
             self.active.update_location(x, y)
 
-    def handle_keyboard(self, key: pygame.event.Event) -> None:
-
+    def handle_keyboard(self, key: int) -> None:
+        # Global shortcuts
         if key == pygame.K_ESCAPE:
             if self.graphics_manager.menu_open:
                 self.close_menu()
+            elif self.game_manager.dev_mode_typing:
+                self.game_manager.dev_mode_typing = False
+                self.game_manager.dev_mode_text = ""
+            return
 
-        elif key == pygame.K_m:
-            #TODO: implement audio manager mute toggle
-            #self.game_manager.audio_manager.toggle_mute()
-            pass
-        
-        #All devmode shortkuts
-        if key == pygame.K_0:
+        if key == pygame.K_m:
+            # TODO: implement audio mute toggle
+            return
+
+        # Toggle dev mode (only when NOT typing)
+        if not self.game_manager.dev_mode_typing and key == pygame.K_0:
             self.game_manager.dev_mode = not self.game_manager.dev_mode
-            #active ui elements lose active state when exiting dev mode
+
+            # clear active selection
             if not self.game_manager.dev_mode and self.active:
                 self.active.is_active = False
+                self.active = None
 
-        if self.game_manager.dev_mode:
+            # stop typing mode
+            self.game_manager.dev_mode_typing = False
+            self.game_manager.dev_mode_text = ""
+            return
+
+
+        # Dev mode only logic
+        if not self.game_manager.dev_mode:
+            return
+
+        # Move active object (arrow keys)
+        if self.active:
             if key == pygame.K_UP:
-                if self.active:
-                    self.active.dev_mode_drag(0, -1)
-            elif key == pygame.K_DOWN:
-                if self.active:
-                    self.active.dev_mode_drag(0, 1)
-            elif key == pygame.K_LEFT:
-                if self.active:
-                    self.active.dev_mode_drag(-1, 0)
-            elif key == pygame.K_RIGHT:
-                if self.active:
-                    self.active.dev_mode_drag(1, 0)
+                self.active.dev_mode_drag(0, -1)
+                return
+            if key == pygame.K_DOWN:
+                self.active.dev_mode_drag(0, 1)
+                return
+            if key == pygame.K_LEFT:
+                self.active.dev_mode_drag(-1, 0)
+                return
+            if key == pygame.K_RIGHT:
+                self.active.dev_mode_drag(1, 0)
+                return
 
+        # Save layout
+        if key == pygame.K_s:
+            # TODO: implement layout saving
+            return
+
+
+        # Start typing mode
+
+        if key == pygame.K_t and not self.game_manager.dev_mode_typing:
+            self.game_manager.dev_mode_typing = True
+            self.game_manager.dev_mode_text = ""
+            return
+
+
+        # Handle typing mode
+
+        if self.game_manager.dev_mode_typing:
+
+            # submit command
+            if key == pygame.K_RETURN:
+                self.dev_mode_parse_typing()
+                self.game_manager.dev_mode_typing = False
+                self.game_manager.dev_mode_text = ""
+                return
+
+            # backspace
+            if key == pygame.K_BACKSPACE:
+                self.game_manager.dev_mode_text = self.game_manager.dev_mode_text[:-1]
+                return
+
+            # otherwise add characters
+            self.dev_mode_letter_keys(key)
+            self.dev_mode_number_keys(key)
+
+    def dev_mode_letter_keys(self, key: int) -> None:
+        if self.game_manager.dev_mode_typing:
+            if key == pygame.K_a:
+                self.game_manager.dev_mode_text += "a"
+            elif key == pygame.K_b:
+                self.game_manager.dev_mode_text += "b"
+            elif key == pygame.K_c:
+                self.game_manager.dev_mode_text += "c"
+            elif key == pygame.K_d:
+                self.game_manager.dev_mode_text += "d"
+            elif key == pygame.K_e:
+                self.game_manager.dev_mode_text += "e"
+            elif key == pygame.K_f:
+                self.game_manager.dev_mode_text += "f"
+            elif key == pygame.K_g:
+                self.game_manager.dev_mode_text += "g"
+            elif key == pygame.K_h:
+                self.game_manager.dev_mode_text += "h"
+            elif key == pygame.K_i:
+                self.game_manager.dev_mode_text += "i"
+            elif key == pygame.K_j:
+                self.game_manager.dev_mode_text += "j"
+            elif key == pygame.K_k:
+                self.game_manager.dev_mode_text += "k"
+            elif key == pygame.K_l:
+                self.game_manager.dev_mode_text += "l"
+            elif key == pygame.K_m:
+                self.game_manager.dev_mode_text += "m"
+            elif key == pygame.K_n:
+                self.game_manager.dev_mode_text += "n"
+            elif key == pygame.K_o:
+                self.game_manager.dev_mode_text += "o"
+            elif key == pygame.K_p:
+                self.game_manager.dev_mode_text += "p"
+            elif key == pygame.K_q:
+                self.game_manager.dev_mode_text += "q"
+            elif key == pygame.K_r:
+                self.game_manager.dev_mode_text += "r"
             elif key == pygame.K_s:
-            #save layout if in dev mode
-                if self.game_manager.dev_mode:
-                    #TODO: implement layout saving
-                    #self.game_manager.save_layout()
-                    pass 
+                self.game_manager.dev_mode_text += "s"
+            elif key == pygame.K_t:
+                self.game_manager.dev_mode_text += "t"
+            elif key == pygame.K_u:
+                self.game_manager.dev_mode_text += "u"
+            elif key == pygame.K_v:
+                self.game_manager.dev_mode_text += "v"
+            elif key == pygame.K_w:
+                self.game_manager.dev_mode_text += "w"
+            elif key == pygame.K_x:
+                self.game_manager.dev_mode_text += "x"
+            elif key == pygame.K_y:
+                self.game_manager.dev_mode_text += "y"
+            elif key == pygame.K_z:
+                self.game_manager.dev_mode_text 
+
+    def dev_mode_number_keys(self, key: int) -> None:
+        if self.game_manager.dev_mode_typing:
+            if key == pygame.K_0:
+                self.game_manager.dev_mode_text += "0"
+            elif key == pygame.K_1:
+                self.game_manager.dev_mode_text += "1"
+            elif key == pygame.K_2:
+                self.game_manager.dev_mode_text += "2"
+            elif key == pygame.K_3:
+                self.game_manager.dev_mode_text += "3"
+            elif key == pygame.K_4:
+                self.game_manager.dev_mode_text += "4"
+            elif key == pygame.K_5:
+                self.game_manager.dev_mode_text += "5"
+            elif key == pygame.K_6:
+                self.game_manager.dev_mode_text += "6"
+            elif key == pygame.K_7:
+                self.game_manager.dev_mode_text += "7"
+            elif key == pygame.K_8:
+                self.game_manager.dev_mode_text += "8"
+            elif key == pygame.K_9:
+                self.game_manager.dev_mode_text += "9"
+
+    def dev_mode_parse_typing(self) -> None:
+        """
+        x+number -> set x position to number. Example: x150 sets x to 150
+        y+number -> set y position to number. Example: y300 sets y to 300
+        w+number -> set width to number. Example: w200 sets width to 200
+        h+number -> set height to number. Example: h100 sets height to 100
+
+        c+number,number,number -> set color to rgb values. Example: c255,0,0 sets color to red
+        t+text -> set text to text. Example: tHello sets text to Hello
+        tc+number,number,number -> set text color to rgb values. Example: tc0,255,0 sets text color to green
+        """
+
+        if not self.active:
+            return
+        text = self.game_manager.dev_mode_text
+        if text.startswith("x"):
+            try:
+                value = int(text[1:])
+                self.active.rect.x = value
+            except ValueError:
+                pass
+        elif text.startswith("y"):
+            try:
+                value = int(text[1:])
+                self.active.rect.y = value
+            except ValueError:
+                pass
+        elif text.startswith("w"):
+            try:
+                value = int(text[1:])
+                self.active.rect.width = value
+            except ValueError:
+                pass
+        elif text.startswith("h"):
+            try:
+                value = int(text[1:])
+                self.active.rect.height = value
+            except ValueError:
+                pass
+        elif text.startswith("t"):
+            new_text = text[1:]
+            if hasattr(self.active, 'update_text'):
+                assert isinstance(self.active, TextDisplay) or isinstance(self.active, Button)
+                self.active.update_text(new_text)
+        elif text.startswith("tc"):
+            try:
+                color_values = text[2:].split(",")
+                r = int(color_values[0])
+                g = int(color_values[1])
+                b = int(color_values[2])
+                if hasattr(self.active, 'text_color'):
+                    assert isinstance(self.active, TextDisplay) or isinstance(self.active, Button)
+                    self.active.text_color = (r,g,b)
+            except (ValueError, IndexError):
+                pass
 
     ## --- EVENT FUNCTIONS --- ##
     #TODO: Add return types to functions

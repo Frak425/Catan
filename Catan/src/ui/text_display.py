@@ -6,6 +6,9 @@ if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
 class TextDisplay:
+
+    text_color: tuple[int, int, int]
+
     def __init__(self, layout_props: dict, game_manager: GameManager, font: pygame.font.Font, background_image: pygame.Surface | None = None, callback: Optional[Callable] = None) -> None:
         self.game_manager = game_manager
 

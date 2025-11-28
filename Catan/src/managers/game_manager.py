@@ -71,6 +71,8 @@ class GameManager:
         self.board = self.init_board()
 
         self.dev_mode = False
+        self.dev_mode_typing = False
+        self.dev_mode_text = ""
 
     def init_board(self) -> Board:
         for i in range(self.players_num):

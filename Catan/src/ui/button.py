@@ -8,6 +8,9 @@ if TYPE_CHECKING:
 
 
 class Button:
+
+    text_color: tuple[int, int, int]
+
     def __init__(self, layout_props: dict, surface: pygame.Surface, font, game_manager: "GameManager", callback: Optional[Callable] = None, shown: bool = True) -> None:
         self.game_manager = game_manager
 
@@ -17,6 +20,7 @@ class Button:
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.color = (0, 0, 0)
         self.guiding_line_color = (100, 100, 200)
+        self.text_color = (0, 0, 0)
 
         #store is_active.inactive state for drawing guiding lines
         self.is_active = False
@@ -72,6 +76,9 @@ class Button:
 
     def get_settings(self) -> dict:
         return {}
+
+    def update_text(self, new_text: str) -> None:
+        self.text = new_text
 
     def hide(self) -> None:
         self.shown = False
