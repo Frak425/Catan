@@ -4,7 +4,7 @@ from src.entities.player import Player
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
-    from src.managers.input_manager import InputManager
+    from src.managers.input.input_manager import InputManager
     from src.managers.helper_manager import HelperManager
     from src.managers.audio_manager import AudioManager
     from src.managers.graphics_manager import GraphicsManager

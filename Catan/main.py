@@ -6,7 +6,7 @@ from src.managers.game_manager import GameManager
 from src.managers.audio_manager import AudioManager
 from src.managers.graphics_manager import GraphicsManager
 from src.managers.helper_manager import HelperManager
-from src.managers.input_manager import InputManager
+from src.managers.input.input_manager import InputManager
 from src.managers.player_manager import PlayerManager
 
 #initialize game
@@ -36,17 +36,19 @@ input_manager = InputManager()
 helper_manager = HelperManager()
 
 #set dependencies
-graphics_manager.set_game_manager(game_manager)
-graphics_manager.set_input_manager(input_manager)
-graphics_manager.set_helper_manager(helper_manager)
-graphics_manager.set_player_manager(player_manager)
-graphics_manager.set_audio_manager(audio_manager)
+
 
 input_manager.set_game_manager(game_manager)
 input_manager.set_graphics_manager(graphics_manager)
 input_manager.set_helper_manager(helper_manager)
 input_manager.set_player_manager(player_manager)
 input_manager.set_audio_manager(audio_manager)
+
+graphics_manager.set_game_manager(game_manager)
+graphics_manager.set_input_manager(input_manager)
+graphics_manager.set_helper_manager(helper_manager)
+graphics_manager.set_player_manager(player_manager)
+graphics_manager.set_audio_manager(audio_manager)
 
 game_manager.set_graphics_manager(graphics_manager)
 game_manager.set_audio_manager(audio_manager)
@@ -67,10 +69,10 @@ player_manager.set_audio_manager(audio_manager)
 player_manager.set_graphics_manager(graphics_manager)
 
 #init all managers
+input_manager.init()
+graphics_manager.init(pygame.time.get_ticks())
 audio_manager.init()
 player_manager.init([])
-graphics_manager.init(pygame.time.get_ticks())
-input_manager.init()
 helper_manager.init()
 
 

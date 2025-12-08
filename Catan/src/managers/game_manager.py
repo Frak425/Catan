@@ -10,7 +10,7 @@ from src.ui.toggle import Toggle
 from src.entities.player import Player
 from src.entities.board import Board
 from src.ui.menu import Menu
-from src.managers.input_manager import InputManager
+from src.managers.input.input_manager import InputManager
 from src.managers.helper_manager import HelperManager
 from src.managers.graphics_manager import GraphicsManager
 from src.managers.player_manager import PlayerManager
@@ -31,7 +31,7 @@ class GameManager:
         self.screen_h = self.screen_size[1]
         self.font_size = 20
         self.game_font = pygame.font.SysFont('Comic Sans', self.font_size)
-        self.game_state = "main_menu" # main menu -> game setup -> init -> game ongoing -> game over -> main menu
+        self.game_state = "home" # main menu -> game setup -> init -> game ongoing -> game over -> main menu
         self.player_state = "roll" # roll -> trade -> buy -> place
         self.settings_open = False
         self.players_num = 2
@@ -143,7 +143,7 @@ class GameManager:
             }
         }
 
-        layout["home"] = self.save_layout_by_section("main_menu")
+        layout["home"] = self.save_layout_by_section("home")
         layout["setup"] = self.save_layout_by_section("setup")
         layout["game"] = self.save_layout_by_section("game")
         layout["menu"] = self.save_layout_by_section("menu")
@@ -307,7 +307,7 @@ class GameManager:
 
     #loag config from file into game manager
     def load_config(self, file: str) -> None:
-        CONFIG_PATH = self.get_config_path(file)
+        CONFIG_PATH = self.config_path_by_name(file, False)
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)  # Ensure directories exist
 
         if CONFIG_PATH.exists():
@@ -326,33 +326,42 @@ class GameManager:
             self.settings = data
 
     #save settings from game manager into file
-    def save_config(self, config: dict, file: str) -> None:
-        CONFIG_PATH = self.get_config_path(file)
+    def save_config(self, file: str, overriding: bool) -> None:
+        CONFIG_PATH = self.config_path_by_name(file, overriding)
 
         with open(CONFIG_PATH, "w") as f:
-            json.dump(self.get_config_file(CONFIG_PATH), f, indent=4)
-
-    def override_config(self, config: dict, file: str) -> None:
-            if file == "layout":
-                CONFIG_PATH = self.LAYOUT_STATE_CONFIG_PATH
-            elif file == "settings":
-                CONFIG_PATH = self.SETTINGS_STATE_CONFIG_PATH
-            with open(CONFIG_PATH, "w") as f:
-                json.dump(config, f, indent=4)
+            json.dump(self.reload_config(CONFIG_PATH), f, indent=4)
 
     #return config as object
-    def get_config_path(self, file: str) -> Path:
+    def config_path_by_name(self, file: str, overriding: bool) -> Path:
         if file == "layout":
             CONFIG_PATH = self.LAYOUT_STATE_CONFIG_PATH
+            if overriding:
+                CONFIG_PATH = self.LAYOUT_CONFIG_PATH
         elif file == "settings":
             CONFIG_PATH = self.SETTINGS_STATE_CONFIG_PATH
+            if overriding:
+                CONFIG_PATH = self.SETTINGS_CONFIG_PATH
 
         return CONFIG_PATH
     
     #get config data based on path. could be better but for now it works
-    def get_config_file(self, path: Path) -> dict:
+    def reload_config(self, path: Path) -> dict:
         if path == self.LAYOUT_STATE_CONFIG_PATH:
-            return self.layout
+            return self.get_layout()
         elif path == self.SETTINGS_STATE_CONFIG_PATH:
-            return self.settings
+            return self.get_settings()
         return {}
+    
+    #loads default config file into game manager
+    def restore_config(self, file: str) -> None:
+        CONFIG_PATH = self.config_path_by_name(file, True)
+
+        with open(CONFIG_PATH, "r") as f:
+            data = json.load(f)
+
+        # Assign loaded data to the correct attribute
+        if file == "layout":
+            self.layout = data
+        elif file == "settings":
+            self.settings = data

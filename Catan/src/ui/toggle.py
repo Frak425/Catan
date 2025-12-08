@@ -3,7 +3,7 @@ import pytweening as tween
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from Catan.src.managers.game_manager import GameManager
+    from src.managers.game_manager import GameManager
 
 class Toggle:
     def __init__(self, layout_props: dict, time: int, game_manager: GameManager, on: bool = False, callback=None) -> None:

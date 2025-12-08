@@ -3,7 +3,7 @@ import numpy as np
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from game_manager import GameManager
-    from input_manager import InputManager
+    from src.managers.input.input_manager import InputManager
     from helper_manager import HelperManager
     from player_manager import PlayerManager
     from audio_manager import AudioManager
@@ -13,9 +13,17 @@ class GraphicsManager:
         self.menu_open = False
         self.time = time
 
-        self.main_menu_ui_draw_funcs = [self.draw_main_menu_buttons, self.draw_main_menu_images, self.draw_main_menu_text_displays]
-        self.setup_ui_draw_funcs = [self.draw_setup_buttons, self.draw_setup_sliders, self.draw_setup_text_displays]
-        self.game_ui_draw_funcs = [self.draw_game_buttons, self.draw_game_images, self.draw_game_text_displays]
+        self.ui_by_type = {
+            "buttons": self.input_manager.buttons,
+            "images": self.input_manager.images,
+            "text_displays": self.input_manager.text_displays,
+            "sliders": self.input_manager.sliders,
+            "toggles": self.input_manager.toggles
+        }
+
+        self.home_ui_draw_funcs = [lambda: self.draw_ui("buttons", "home"), lambda: self.draw_ui("text_displays", "home"), lambda: self.draw_ui("images", "home")]
+        self.setup_ui_draw_funcs = [lambda: self.draw_ui("buttons", "setup"), lambda: self.draw_ui("text_displays", "setup"), lambda: self.draw_ui("images", "setup")]
+        self.game_ui_draw_funcs = [lambda: self.draw_ui("buttons", "game"), lambda: self.draw_ui("text_displays", "game"), lambda: self.draw_ui("images", "game")]
 
     def set_game_manager(self, game_manager: 'GameManager'):
         self.game_manager = game_manager
@@ -36,8 +44,8 @@ class GraphicsManager:
         assert self.game_manager is not None, "GraphicsManager: game_manager not set"
         assert self.input_manager is not None, "GraphicsManager: input_manager not set"
 
-        if (self.game_manager.game_state == "main_menu"):
-            for func in self.main_menu_ui_draw_funcs:
+        if (self.game_manager.game_state == "home"):
+            for func in self.home_ui_draw_funcs:
                 func()
 
         elif (self.game_manager.game_state == "setup"):       
@@ -65,38 +73,6 @@ class GraphicsManager:
             assert self.input_manager is not None, "GraphicsManager: menu not set in InputManager"
             self.input_manager.menu.draw(self.time)
 
-    def draw_main_menu_buttons(self):
-        for button_name, button in self.input_manager.buttons["main_menu"].items():
-            button.draw(self.game_manager.screen)
-
-    def draw_main_menu_images(self):
-        for image_name, image in self.input_manager.images["main_menu"].items():
-            self.game_manager.screen.blit(image.surface, image.rect)
-
-    def draw_main_menu_text_displays(self):
-        for text_display_name, text_display in self.input_manager.text_displays["main_menu"].items():
-            text_display.draw(self.game_manager.screen)
-
-    def draw_setup_buttons(self):
-        for button_name, button in self.input_manager.buttons["setup"].items():
-            button.draw(self.game_manager.screen)
-
-    def draw_setup_sliders(self):
-        for slider_name, slider in self.input_manager.sliders["setup"].items():
-            slider.draw(self.game_manager.screen)
-
-    def draw_setup_text_displays(self):
-        for text_display_name, text_display in self.input_manager.text_displays["setup"].items():
-            text_display.draw(self.game_manager.screen)
-
-    def draw_game_buttons(self):
-        for button_name, button in self.input_manager.buttons["game"].items():
-            button.draw(self.game_manager.screen)
-
-    def draw_game_images(self):
-        for image_name, image in self.input_manager.images["game"].items():
-            self.game_manager.screen.blit(image.surface, image.rect)
-
-    def draw_game_text_displays(self):
-        for text_display_name, text_display in self.input_manager.text_displays["game"].items():
-            text_display.draw(self.game_manager.screen)
+    def draw_ui(self, type: str, layer: str):
+        for element_name, element in self.ui_by_type[type][layer].items():
+            element.draw(self.game_manager.screen)

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
-    from src.managers.input_manager import InputManager
+    from src.managers.input.input_manager import InputManager
     from src.managers.helper_manager import HelperManager
     from src.managers.player_manager import PlayerManager
     from src.managers.graphics_manager import GraphicsManager
@@ -16,6 +16,7 @@ class AudioManager:
 
         self.sound_effects: dict[str, pygame.mixer.Sound] = {}
         self.music_tracks: dict[str, pygame.mixer.Sound] = {}
+        self.ui_effects: dict[str, pygame.mixer.Sound] = {}
 
         self.master_volume = 1.0
         self.music_volume = 1.0
@@ -28,12 +29,31 @@ class AudioManager:
         self.channel_music = pygame.mixer.Channel(1)
         self.channel_ui = pygame.mixer.Channel(2)
 
+        self.fx_by_type = {
+            "music": self.music_tracks,
+            "ui": self.ui_effects,
+            "sfx": self.sound_effects
+        }
+
+        self.channel_by_type = {
+            "music": self.channel_music,
+            "ui": self.channel_ui,
+            "sfx": self.channel_sfx
+        }
+
+        self.volume_by_type = {
+            "master": self.master_volume,
+            "music": self.music_volume,
+            "ui": self.ui_volume,
+            "sfx": self.sfx_volume
+        }
         self.load_assets(Path("assets/audio"))
 
     def load_assets(self, asset_path: Path):
         sfx_path = asset_path / "sfx"
         music_path = asset_path / "music"
 
+        # Load sound effects and music tracks
         for sound_file in sfx_path.glob("*"):
             self.sound_effects[sound_file.stem] = pygame.mixer.Sound(sound_file)
             self.sound_effects[sound_file.stem].set_volume(self.sfx_volume)
@@ -42,36 +62,24 @@ class AudioManager:
             self.music_tracks[music_file.stem] = pygame.mixer.Sound(music_file)
             self.music_tracks[music_file.stem].set_volume(self.music_volume)
 
-    def play_music(self, name: str, loop=False, fade_ms=500):
-        if name not in self.music_tracks:
+    def play_sound(self, type: str, name: str, loop=False, fade_ms=500):
+        if name not in self.fx_by_type[type]:
             return
+        
+        if type == "music":
+            self.channel_music.fadeout(fade_ms)
 
-        self.channel_music.fadeout(fade_ms)
-        self.channel_music.set_volume(self.music_volume if not self.muted else 0)
-        self.channel_music.play(self.music_tracks[name], loops=-1 if loop else 0, fade_ms=fade_ms)
-
-    def play_sound_effect(self, name: str):
-        if name not in self.sound_effects:
-            return
-
-        self.channel_sfx.set_volume(self.sfx_volume if not self.muted else 0)
-        self.channel_sfx.play(self.sound_effects[name])
-
-    def play_ui_sound(self, name: str):
-        if name not in self.sound_effects:
-            return
-
-        self.channel_ui.set_volume(self.ui_volume if not self.muted else 0)
-        self.channel_ui.play(self.sound_effects[name])
+        self.channel_by_type[type].set_volume(self.volume_by_type[type] if not self.muted else 0)
+        self.channel_by_type[type].play(self.fx_by_type[type][name], loops=-1 if loop else 0, fade_ms=fade_ms)
 
     def toggle_mute(self):
         self.muted = not self.muted
         new_music_volume = 0 if self.muted else self.music_volume
         new_sfx_volume = 0 if self.muted else self.sfx_volume
         new_ui_volume = 0 if self.muted else self.ui_volume
-        self.update_sound(self.master_volume, new_ui_volume, new_music_volume, new_sfx_volume)
+        self.update_volumes(self.master_volume, new_ui_volume, new_music_volume, new_sfx_volume)
         
-    def update_sound(self, master_volume: float, ui_volume: float, music_volume: float, sfx_volume: float):
+    def update_volumes(self, master_volume: float, ui_volume: float, music_volume: float, sfx_volume: float):
         #update music channel volume
         pygame.mixer.music.set_volume(master_volume)
         self.channel_music.set_volume(music_volume)
