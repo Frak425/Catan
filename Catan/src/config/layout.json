@@ -4,8 +4,8 @@
             {
                 "name": "play",
                 "rect": [
-                    583,
-                    341,
+                    811,
+                    287,
                     200,
                     75
                 ],
@@ -14,11 +14,7 @@
                     100,
                     0
                 ],
-                "text": "PLAY",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "PLAY"
             },
             {
                 "name": "quit",
@@ -33,11 +29,7 @@
                     0,
                     0
                 ],
-                "text": "QUIT",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "QUIT"
             }
         ],
         "images": [],
@@ -62,11 +54,7 @@
                     0,
                     0
                 ],
-                "text": "easy",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "easy"
             },
             {
                 "name": "difficulty_level_medium",
@@ -81,11 +69,7 @@
                     0,
                     0
                 ],
-                "text": "medium",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "medium"
             },
             {
                 "name": "difficulty_level_hard",
@@ -100,11 +84,7 @@
                     0,
                     0
                 ],
-                "text": "hard",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "hard"
             },
             {
                 "name": "open_menu",
@@ -119,11 +99,7 @@
                     0,
                     0
                 ],
-                "text": "image",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "image"
             },
             {
                 "name": "player_choose_color_cycle",
@@ -138,11 +114,7 @@
                     0,
                     0
                 ],
-                "text": "->",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "->"
             },
             {
                 "name": "game_start",
@@ -157,11 +129,7 @@
                     0,
                     0
                 ],
-                "text": "Start",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "Start"
             },
             {
                 "name": "game_setup_back",
@@ -176,11 +144,7 @@
                     0,
                     0
                 ],
-                "text": "Back",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "Back"
             }
         ],
         "images": [],
@@ -206,12 +170,12 @@
                     100,
                     0
                 ],
-                "slider_color": [
+                "handle_color": [
                     100,
                     0,
                     0
                 ],
-                "slider_radius": 10
+                "handle_radius": 10
             }
         ],
         "toggles": [],
@@ -256,11 +220,7 @@
                     0,
                     0
                 ],
-                "text": "image",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "image"
             },
             {
                 "name": "board_buy_city",
@@ -275,11 +235,7 @@
                     0,
                     0
                 ],
-                "text": "image",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "image"
             },
             {
                 "name": "board_buy_road",
@@ -294,11 +250,7 @@
                     0,
                     0
                 ],
-                "text": "image",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "image"
             },
             {
                 "name": "board_buy_development",
@@ -313,11 +265,7 @@
                     0,
                     0
                 ],
-                "text": "image",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "image"
             },
             {
                 "name": "board_roll_dice",
@@ -332,11 +280,7 @@
                     0,
                     0
                 ],
-                "text": "image",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "image"
             },
             {
                 "name": "settings_menu",
@@ -351,11 +295,7 @@
                     0,
                     0
                 ],
-                "text": "image",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "image"
             },
             {
                 "name": "back",
@@ -370,11 +310,7 @@
                     100,
                     200
                 ],
-                "text": "back",
-                "location": [
-                    0,
-                    0
-                ]
+                "text": "back"
             }
         ],
         "images": [],
@@ -400,11 +336,7 @@
                         50,
                         100
                     ],
-                    "text": "test3",
-                    "location": [
-                        0,
-                        0
-                    ]
+                    "text": "test3"
                 }
             ],
             "images": [],
@@ -430,17 +362,17 @@
                         100,
                         0
                     ],
-                    "slider_color": [
+                    "handle_color": [
                         100,
                         0,
                         0
                     ],
-                    "slider_radius": 10
+                    "handle_radius": 10
                 }
             ],
             "toggles": [
                 {
-                    "name": "controller_vibration",
+                    "name": "aa",
                     "rect": [
                         200,
                         300,
@@ -464,7 +396,7 @@
                     "time_to_flip": 0.25
                 },
                 {
-                    "name": "controller_vibration",
+                    "name": "fullscreen",
                     "rect": [
                         300,
                         300,
@@ -488,7 +420,7 @@
                     "time_to_flip": 0.25
                 },
                 {
-                    "name": "controller_vibration",
+                    "name": "shadows",
                     "rect": [
                         400,
                         300,
@@ -531,11 +463,7 @@
                         50,
                         100
                     ],
-                    "text": "test3",
-                    "location": [
-                        0,
-                        0
-                    ]
+                    "text": "test3"
                 }
             ],
             "images": [],
@@ -561,17 +489,17 @@
                         100,
                         0
                     ],
-                    "slider_color": [
+                    "handle_color": [
                         100,
                         0,
                         0
                     ],
-                    "slider_radius": 10
+                    "handle_radius": 10
                 }
             ],
             "toggles": [
                 {
-                    "name": "controller_vibration",
+                    "name": "aa",
                     "rect": [
                         200,
                         300,
@@ -595,7 +523,7 @@
                     "time_to_flip": 0.25
                 },
                 {
-                    "name": "controller_vibration",
+                    "name": "fullscreen",
                     "rect": [
                         300,
                         300,
@@ -619,7 +547,7 @@
                     "time_to_flip": 0.25
                 },
                 {
-                    "name": "controller_vibration",
+                    "name": "shadows",
                     "rect": [
                         400,
                         300,
@@ -662,11 +590,7 @@
                         50,
                         100
                     ],
-                    "text": "test3",
-                    "location": [
-                        0,
-                        0
-                    ]
+                    "text": "test3"
                 }
             ],
             "images": [],
@@ -692,17 +616,17 @@
                         100,
                         0
                     ],
-                    "slider_color": [
+                    "handle_color": [
                         100,
                         0,
                         0
                     ],
-                    "slider_radius": 10
+                    "handle_radius": 10
                 }
             ],
             "toggles": [
                 {
-                    "name": "controller_vibration",
+                    "name": "aa",
                     "rect": [
                         200,
                         300,
@@ -726,7 +650,7 @@
                     "time_to_flip": 0.25
                 },
                 {
-                    "name": "controller_vibration",
+                    "name": "fullscreen",
                     "rect": [
                         300,
                         300,
@@ -750,7 +674,7 @@
                     "time_to_flip": 0.25
                 },
                 {
-                    "name": "controller_vibration",
+                    "name": "shadows",
                     "rect": [
                         400,
                         300,
@@ -793,11 +717,7 @@
                         50,
                         100
                     ],
-                    "text": "test3",
-                    "location": [
-                        0,
-                        0
-                    ]
+                    "text": "test3"
                 }
             ],
             "images": [],
@@ -823,17 +743,17 @@
                         100,
                         0
                     ],
-                    "slider_color": [
+                    "handle_color": [
                         100,
                         0,
                         0
                     ],
-                    "slider_radius": 10
+                    "handle_radius": 10
                 }
             ],
             "toggles": [
                 {
-                    "name": "controller_vibration",
+                    "name": "aa",
                     "rect": [
                         200,
                         300,
@@ -857,7 +777,7 @@
                     "time_to_flip": 0.25
                 },
                 {
-                    "name": "controller_vibration",
+                    "name": "fullscreen",
                     "rect": [
                         300,
                         300,
@@ -881,7 +801,7 @@
                     "time_to_flip": 0.25
                 },
                 {
-                    "name": "controller_vibration",
+                    "name": "shadows",
                     "rect": [
                         400,
                         300,
@@ -924,11 +844,7 @@
                         50,
                         100
                     ],
-                    "text": "test3",
-                    "location": [
-                        0,
-                        0
-                    ]
+                    "text": "test3"
                 }
             ],
             "images": [],
@@ -954,17 +870,17 @@
                         100,
                         0
                     ],
-                    "slider_color": [
+                    "handle_color": [
                         100,
                         0,
                         0
                     ],
-                    "slider_radius": 10
+                    "handle_radius": 10
                 }
             ],
             "toggles": [
                 {
-                    "name": "controller_vibration",
+                    "name": "aa",
                     "rect": [
                         200,
                         300,
@@ -988,7 +904,7 @@
                     "time_to_flip": 0.25
                 },
                 {
-                    "name": "controller_vibration",
+                    "name": "fullscreen",
                     "rect": [
                         300,
                         300,
@@ -1012,7 +928,7 @@
                     "time_to_flip": 0.25
                 },
                 {
-                    "name": "controller_vibration",
+                    "name": "shadows",
                     "rect": [
                         400,
                         300,

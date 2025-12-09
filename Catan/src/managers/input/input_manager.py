@@ -25,8 +25,20 @@ class InputManager:
         self.mouse_handler = MouseInputHandler()
         self.keyboard_handler = KeyboardInputHandler()
         self.dev_mode_handler = DevModeHandler()
-        self.ui_factory = UIFactory(self.game_manager)
 
+        #initialize ui elements, can call again to update ui
+        self.reset_ui()
+
+        self.mouse_handler.set_managers(self.game_manager, self.graphics_manager, self.helper_manager)
+
+        # Set up mouse handler with required managers
+        self.keyboard_handler.set_managers(self.game_manager, self.graphics_manager, self.audio_manager, self.mouse_handler)
+        self.keyboard_handler.set_dev_mode_handler(self.dev_mode_handler)
+        # Set up dev mode handler
+        self.dev_mode_handler.set_managers(self.game_manager, self.mouse_handler)
+
+    def reset_ui(self):
+        self.ui_factory = UIFactory(self.game_manager)
         # Create all UI elements using the factory
         callbacks = self._create_callbacks()
         self.buttons = self.ui_factory.create_all_buttons(callbacks)
@@ -36,19 +48,22 @@ class InputManager:
         self.text_displays = self.ui_factory.create_all_text_displays(callbacks)
         self.menu = self.ui_factory.create_menu(self.buttons, self.toggles, self.sliders)
         
+        # Update mouse handler with new UI elements (if mouse_handler exists)
+        if hasattr(self, 'mouse_handler'):
+            self.mouse_handler.set_ui_elements(self.buttons, self.toggles, self.sliders, self.menu)
+        
+        # Update graphics manager's UI references (if graphics_manager exists)
+        if hasattr(self, 'graphics_manager') and hasattr(self.graphics_manager, 'ui_by_type'):
+            self.graphics_manager.ui_by_type = {
+                "buttons": self.buttons,
+                "images": self.images,
+                "text_displays": self.text_displays,
+                "sliders": self.sliders,
+                "toggles": self.toggles
+            }
+        
         # Initialize UI elements
         self.initialize_ui_elements()
-
-        self.mouse_handler.set_managers(self.game_manager, self.graphics_manager, self.helper_manager)
-        self.mouse_handler.set_ui_elements(self.buttons, self.toggles, self.sliders, self.menu)
-
-        # Set up mouse handler with required managers
-        self.keyboard_handler.set_managers(self.game_manager, self.graphics_manager, self.audio_manager, self.mouse_handler)
-        self.keyboard_handler.set_dev_mode_handler(self.dev_mode_handler)
-        # Set up dev mode handler
-        self.dev_mode_handler.set_managers(self.game_manager, self.mouse_handler)
-
-
 
     def handle_input(self, x: int, y: int, event_type: int) -> None:
         """Delegate mouse input handling to MouseInputHandler."""

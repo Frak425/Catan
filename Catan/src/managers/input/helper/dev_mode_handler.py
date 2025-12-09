@@ -111,6 +111,8 @@ class DevModeHandler:
             self.game_manager.save_config("layout", True)
         elif text == "overrides":
             self.game_manager.save_config("settings", True)
+        elif text == "refreshui":
+            self.game_manager.input_manager.reset_ui()
 
     def _set_x_position(self, text: str) -> None:
         assert self.mouse_handler.active is not None

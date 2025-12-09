@@ -61,13 +61,11 @@ class KeyboardInputHandler:
             self.game_manager.save_config("layout", False)
             self.game_manager.save_config("settings", False)
 
-        #restore settings
+        #restore configs
         if key == pygame.K_r:
             self.game_manager.restore_config("settings")
             self.game_manager.restore_config("layout")
 
-            self.game_manager.save_config("layout", False)
-            self.game_manager.save_config("settings", False)
 
 
         # Start typing mode

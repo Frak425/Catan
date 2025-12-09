@@ -87,7 +87,7 @@ class GameManager:
 
     def set_input_manager(self, input_manager: InputManager):
         self.input_manager = input_manager
-        self.load_config("layout")
+        self.load_config("layout", False)
         #self.get_layout()
 
     def set_audio_manager(self, audio_manager: AudioManager):
@@ -306,8 +306,8 @@ class GameManager:
     ## --- SET/GET CONFIG FROM FILES --- ##
 
     #loag config from file into game manager
-    def load_config(self, file: str) -> None:
-        CONFIG_PATH = self.config_path_by_name(file, False)
+    def load_config(self, file: str, overriding: bool) -> None:
+        CONFIG_PATH = self.config_path_by_name(file, overriding)
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)  # Ensure directories exist
 
         if CONFIG_PATH.exists():
@@ -345,23 +345,27 @@ class GameManager:
 
         return CONFIG_PATH
     
+    def ref_by_name(self, file: str):
+        if file == "layout":
+            return self.layout
+        elif file == "settings":
+            return self.settings
+
     #get config data based on path. could be better but for now it works
     def reload_config(self, path: Path) -> dict:
         if path == self.LAYOUT_STATE_CONFIG_PATH:
             return self.get_layout()
         elif path == self.SETTINGS_STATE_CONFIG_PATH:
             return self.get_settings()
+        elif path == self.LAYOUT_CONFIG_PATH:
+            return self.get_layout()
+        elif path == self.SETTINGS_CONFIG_PATH:
+            return self.get_settings()
+        
         return {}
     
     #loads default config file into game manager
     def restore_config(self, file: str) -> None:
-        CONFIG_PATH = self.config_path_by_name(file, True)
+        self.load_config(file, True)
 
-        with open(CONFIG_PATH, "r") as f:
-            data = json.load(f)
-
-        # Assign loaded data to the correct attribute
-        if file == "layout":
-            self.layout = data
-        elif file == "settings":
-            self.settings = data
+        self.input_manager.reset_ui()
