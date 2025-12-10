@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from graphics_manager import GraphicsManager
     from helper_manager import HelperManager
 
+from src.ui.text_display import TextDisplay
 from src.ui.button import Button
 from src.ui.slider import Slider
 from src.ui.toggle import Toggle
@@ -16,8 +17,8 @@ from src.ui.menu import Menu
 
 class MouseInputHandler:
     """Handles all mouse input events including clicks, drags, and motion."""
-    active: Button | Slider | Toggle | Button | Image | None = None  # the currently active clickable object
-    prev_active: Button | Slider | Toggle | Button | Image | None = None  # previously active clickable object
+    active: Button | Slider | Toggle | Button | Image | TextDisplay | None = None  # the currently active clickable object
+    prev_active: Button | Slider | Toggle | Button | Image | TextDisplay | None = None  # previously active clickable object
     # Manager references (set after initialization)
     game_manager: 'GameManager'
     graphics_manager: 'GraphicsManager'
@@ -45,11 +46,13 @@ class MouseInputHandler:
         self.graphics_manager = graphics_manager
         self.helper_manager = helper_manager
 
-    def set_ui_elements(self, buttons, toggles, sliders, menu):
+    def set_ui_elements(self, buttons, toggles, sliders, images, text_display, menu):
         """Set UI element references."""
         self.buttons = buttons
         self.toggles = toggles
         self.sliders = sliders
+        self.images = images
+        self.text_display = text_display
         self.menu = menu
 
     def handle_mouse_input(self, x: int, y: int, event_type: int) -> None:
@@ -92,6 +95,18 @@ class MouseInputHandler:
                 self.game_manager.menu_margins[0], 
                 self.game_manager.menu_margins[1]
             )
+            text_display_clicked: TextDisplay | None = self.helper_manager.check_clickable_from_dict(
+                self.text_display["menu"][self.menu.active_tab], 
+                (x, y),
+                self.game_manager.menu_margins[0],
+                self.game_manager.menu_margins[1]
+            )
+            image_clicked: Image | None = self.helper_manager.check_clickable_from_dict(
+                self.images["menu"][self.menu.active_tab], 
+                (x, y),
+                self.game_manager.menu_margins[0],
+                self.game_manager.menu_margins[1]
+            )
             
             # If not, check the tabs of the menu
             if not button_clicked:
@@ -102,7 +117,6 @@ class MouseInputHandler:
                     self.game_manager.menu_margins[1]
                 )
 
-            self.active = slider_clicked
         else:
             # If the menu is not open, we check the buttons for the current game state
             button_clicked: Button | None = self.helper_manager.check_clickable_from_dict(
@@ -114,6 +128,12 @@ class MouseInputHandler:
             slider_clicked: Slider | None = self.helper_manager.check_clickable_from_dict(
                 self.sliders[state], (x, y)
             )
+            text_display_clicked: TextDisplay | None = self.helper_manager.check_clickable_from_dict(
+                self.text_display[state], (x, y)
+            )
+            image_clicked: Image | None = self.helper_manager.check_clickable_from_dict(
+                self.images[state], (x, y)
+            )
 
         if button_clicked:
             self.active = button_clicked
@@ -123,6 +143,12 @@ class MouseInputHandler:
 
         if slider_clicked:
             self.active = slider_clicked
+
+        if text_display_clicked:
+            self.active = text_display_clicked
+
+        if image_clicked:
+            self.active = image_clicked
 
         if self.prev_active and self.prev_active != self.active:
             self.prev_active.is_active = False

@@ -71,7 +71,7 @@ class GraphicsManager:
     def draw_menu(self):
         if self.menu_open:
             assert self.input_manager is not None, "GraphicsManager: menu not set in InputManager"
-            self.input_manager.menu.draw(self.time)
+            self.input_manager.menu.draw(self.game_manager.screen, self.time)
 
     def draw_ui(self, type: str, layer: str):
         for element_name, element in self.ui_by_type[type][layer].items():

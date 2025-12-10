@@ -46,6 +46,7 @@ class GameManager:
         self.points_to_win = 10
         self.game_difficulty = "easy"
         self.menu_margins = (50, 50) #top, bottom
+        self.menu_rect = pygame.Rect(self.menu_margins[0], self.menu_margins[1], self.screen_w - 2 * self.menu_margins[0], self.screen_h - 2 * self.menu_margins[1])
         self.menu_size = (self.screen_w - 2 * self.menu_margins[0], self.screen_h - 2 * self.menu_margins[1])
         self.init_location = (self.screen_w + self.menu_margins[0], self.menu_margins[1]) #of top left corner
         self.final_location = self.menu_margins #of top left corner
@@ -73,6 +74,15 @@ class GameManager:
         self.dev_mode = False
         self.dev_mode_typing = False
         self.dev_mode_text = ""
+
+        self.default_time_to_flip = 0.25
+        self.default_height = 50
+        self.default_center_width = 100
+        self.default_fill_color = (0, 100, 0)
+        self.default_handle_color = (100, 0, 0)
+        self.default_toggle_gap = 7
+        self.default_on = False
+        self.default_guiding_lines = True
 
     def init_board(self) -> Board:
         for i in range(self.players_num):
@@ -276,7 +286,7 @@ class GameManager:
                 "height": toggle.height,
                 "center_width": toggle.center_width,
                 "fill_color": [toggle.fill_color[0], toggle.fill_color[1], toggle.fill_color[2]],
-                "toggle_color": [toggle.toggle_color[0], toggle.toggle_color[1], toggle.toggle_color[2]],
+                "handle_color": [toggle.handle_color[0], toggle.handle_color[1], toggle.handle_color[2]],
                 "toggle_gap": toggle.toggle_gap,
                 "time_to_flip": toggle.time_to_flip
             }

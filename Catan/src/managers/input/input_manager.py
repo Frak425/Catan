@@ -35,10 +35,10 @@ class InputManager:
         self.keyboard_handler.set_managers(self.game_manager, self.graphics_manager, self.audio_manager, self.mouse_handler)
         self.keyboard_handler.set_dev_mode_handler(self.dev_mode_handler)
         # Set up dev mode handler
-        self.dev_mode_handler.set_managers(self.game_manager, self.mouse_handler)
+        self.dev_mode_handler.set_managers(self.game_manager, self.mouse_handler, self)
 
     def reset_ui(self):
-        self.ui_factory = UIFactory(self.game_manager)
+        self.ui_factory = UIFactory(self.game_manager, input_manager=self)
         # Create all UI elements using the factory
         callbacks = self._create_callbacks()
         self.buttons = self.ui_factory.create_all_buttons(callbacks)
@@ -50,7 +50,7 @@ class InputManager:
         
         # Update mouse handler with new UI elements (if mouse_handler exists)
         if hasattr(self, 'mouse_handler'):
-            self.mouse_handler.set_ui_elements(self.buttons, self.toggles, self.sliders, self.menu)
+            self.mouse_handler.set_ui_elements(self.buttons, self.toggles, self.sliders, self.images, self.text_displays, self.menu)
         
         # Update graphics manager's UI references (if graphics_manager exists)
         if hasattr(self, 'graphics_manager') and hasattr(self.graphics_manager, 'ui_by_type'):

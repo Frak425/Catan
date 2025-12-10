@@ -4,7 +4,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from game_manager import GameManager
     from src.managers.input.helper.mouse_input_handler import MouseInputHandler
+    from input_manager import InputManager
 
+from src.ui.image import Image
+from src.ui.toggle import Toggle
+from src.ui.slider import Slider
 from src.ui.button import Button
 from src.ui.text_display import TextDisplay
 
@@ -17,10 +21,11 @@ class DevModeHandler:
         # Manager references (set after initialization)
         pass
 
-    def set_managers(self, game_manager, mouse_handler):
+    def set_managers(self, game_manager: 'GameManager', mouse_handler: 'MouseInputHandler', input_manager: 'InputManager'):
         """Set manager references."""
         self.game_manager = game_manager
         self.mouse_handler = mouse_handler
+        self.input_manager = input_manager
 
     def add_letter_key(self, key: int) -> None:
         """Add a letter key to the dev mode text input."""
@@ -107,6 +112,94 @@ class DevModeHandler:
             self._set_text(text)
         elif text.startswith("tc"):
             self._set_text_color(text)
+        elif text.startswith("add"):
+            # Example: addbutton, addtoggle, addslider, addtextdisplay
+            element_type = text[3:]
+            if element_type == "button":
+                layoout_props = {
+                    "name": "new_button",
+                    "rect": [
+                        0, 0, 150, 50
+                    ],
+                    "color": [0, 100, 0],
+                    "text": "new button",
+                }
+                new_button = Button(layoout_props, self.game_manager.game_font, self.game_manager, callback=None, shown=True)
+                if self.input_manager.menu.open:
+                    self.game_manager.input_manager.buttons["menu"][self.input_manager.menu.active_tab].append(new_button)
+                else:
+                    self.game_manager.input_manager.buttons[self.game_manager.game_state]["new_button"].append(new_button)
+
+                self.update_ui()
+            
+            elif element_type == "slider":
+                layout_props = {
+                    "name": "new_slider",
+                    "rect": [
+                        0, 0, 200, 40
+                    ],
+                    "color": [100, 0, 0],
+                    "min_value": 0,
+                    "max_value": 100,
+                    "initial_value": 50,
+                }
+                new_slider = Slider(layout_props, 50, self.game_manager)
+                if self.input_manager.menu.open:
+                    self.game_manager.input_manager.sliders["menu"][self.input_manager.menu.active_tab].append(new_slider)
+                else:
+                    self.game_manager.input_manager.sliders[self.game_manager.game_state]["new_slider"].append(new_slider)
+                self.update_ui()
+            
+            elif element_type == "display_text":
+                layout_props = {
+                    "name": "new_text_display",
+                    "rect": [
+                        0, 0, 200, 50
+                    ],
+                    "color": [200, 200, 200],
+                    "text": "new text display",
+                }
+                new_text_display = TextDisplay(layout_props,self.game_manager, self.game_manager.game_font, shown=True)
+                if self.input_manager.menu.open:
+                    self.game_manager.input_manager.text_displays["menu"][self.input_manager.menu.active_tab].append(new_text_display)
+                else:
+                    self.game_manager.input_manager.text_displays[self.game_manager.game_state]["new_text_display"].append(new_text_display)
+                
+            elif element_type == "image":
+                layout_props = {
+                    "name": "new_image",
+                    "rect": [
+                        0, 0, 100, 100
+                    ],
+                    "image_path": "path/to/image.png",
+                }
+                # Assuming Image class exists
+                new_image = Image(layout_props, self.game_manager)
+                if self.input_manager.menu.open:
+                    self.game_manager.input_manager.images["menu"][self.input_manager.menu.active_tab].append(new_image)
+                else:
+                    self.game_manager.input_manager.images[self.game_manager.game_state]["new_image"].append(new_image)
+                self.update_ui()
+            
+            elif element_type == "toggle":
+                layout_props = {
+                    "name": "new_toggle",
+                    "rect": [100, 300, 150, 50], 
+                    "guiding_lines": self.game_manager.default_guiding_lines,
+                    "height": self.game_manager.default_height, 
+                    "center_width": self.game_manager.default_center_width, 
+                    "fill_color": list(self.game_manager.default_fill_color),
+                    "handle_color": list(self.game_manager.default_handle_color), 
+                    "toggle_gap": self.game_manager.default_toggle_gap, 
+                    "time_to_flip": self.game_manager.default_time_to_flip
+                }
+                new_toggle = Toggle(layout_props, self.game_manager.graphics_manager.time, self.game_manager, on=False, callback=None, shown=True)
+                if self.input_manager.menu.open:
+                    self.game_manager.input_manager.toggles["menu"][self.input_manager.menu.active_tab].append(new_toggle)
+                else:
+                    self.game_manager.input_manager.toggles[self.game_manager.game_state]["new_toggle"].append(new_toggle)
+                self.update_ui()
+            
         elif text == "overridel":
             self.game_manager.save_config("layout", True)
         elif text == "overrides":
@@ -169,3 +262,13 @@ class DevModeHandler:
                 self.mouse_handler.active.text_color = (r, g, b)
         except (ValueError, IndexError):
             pass
+
+    def update_ui(self):
+        self.input_manager.mouse_handler.set_ui_elements(
+            self.input_manager.buttons,
+            self.input_manager.toggles,
+            self.input_manager.sliders,
+            self.input_manager.images,
+            self.input_manager.text_displays,
+            self.input_manager.menu
+        )

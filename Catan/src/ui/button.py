@@ -11,7 +11,7 @@ class Button:
 
     text_color: tuple[int, int, int]
 
-    def __init__(self, layout_props: dict, surface: pygame.Surface, font, game_manager: "GameManager", callback: Optional[Callable] = None, shown: bool = True) -> None:
+    def __init__(self, layout_props: dict, font, game_manager: "GameManager", callback: Optional[Callable] = None, shown: bool = True) -> None:
         self.game_manager = game_manager
 
         # Initialize defaults so read_layout() can fall back reliably
@@ -28,7 +28,6 @@ class Button:
         # read layout and override default values
         self.read_layout(layout_props)
 
-        self.surface = surface
         self.game_font = font
         self.shown = shown
         self.hovering = False

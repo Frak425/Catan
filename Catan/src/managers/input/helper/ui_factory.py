@@ -3,6 +3,7 @@ from typing import Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from game_manager import GameManager
+    from input_manager import InputManager
 
 from src.ui.button import Button
 from src.ui.slider import Slider
@@ -15,8 +16,9 @@ from src.ui.menu import Menu
 class UIFactory:
     """Factory class for creating all UI elements (buttons, sliders, toggles, etc.)."""
     
-    def __init__(self, game_manager: 'GameManager'):
+    def __init__(self, game_manager: 'GameManager', input_manager: 'InputManager'):
         self.game_manager = game_manager
+        self.input_manager = input_manager
 
     def _get_from_layout(self, element_type: str, state: str, name: str, tab: str | None = None):
         """Helper to retrieve element from layout or return None."""
@@ -55,7 +57,7 @@ class UIFactory:
             ],
             "color": [0, 100, 0],
             "text": "PLAY",
-            "location": [0, 0]
+            
         }
         props_quit = self._get_from_layout('buttons', "home", "quit") or {
             "name": "quit",
@@ -67,19 +69,19 @@ class UIFactory:
             ],
             "color": [100, 0, 0],
             "text": "QUIT",
-            "location": [0, 0]
+            
         }
 
         play_button = Button(
             props_play,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_game_state_setup']
         )
         quit_button = Button(
             props_quit,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['quit']
@@ -100,7 +102,7 @@ class UIFactory:
             ],
             "color": [100, 0, 0],
             "text": "Back",
-            "location": [0, 0]
+            
         }
         props_game_start = self._get_from_layout('buttons', "setup", "game_start") or {
             "name": "game_start",
@@ -112,19 +114,19 @@ class UIFactory:
             ],
             "color": [100, 0, 0],
             "text": "Start",
-            "location": [0, 0]
+            
         }
 
         game_setup_back_button = Button(
             props_game_setup_back,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_game_state_home']
         )
         game_start_button = Button(
             props_game_start,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['start_game']
@@ -135,11 +137,11 @@ class UIFactory:
             "rect": [10, 10, 10, 10],
             "color": [0, 0, 0],
             "text": "->",
-            "location": [0, 0]
+            
         }
         player_choose_color_cycle_button = Button(
             props_choose_color,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['choose_player_color_cycle']
@@ -150,40 +152,40 @@ class UIFactory:
             "rect": [10, 10, 10, 10],
             "color": [0, 0, 0],
             "text": "easy",
-            "location": [0, 0]
+            
         }
         props_medium = self._get_from_layout('buttons', "setup", "difficulty_level_medium") or {
             "name": "difficulty_level_medium",
             "rect": [10, 10, 10, 10],
             "color": [0, 0, 0],
             "text": "medium",
-            "location": [0, 0]
+            
         }
         props_hard = self._get_from_layout('buttons', "setup", "difficulty_level_hard") or {
             "name": "difficulty_level_hard",
             "rect": [10, 10, 10, 10],
             "color": [0, 0, 0],
             "text": "hard",
-            "location": [0, 0]
+            
         }
 
         difficulty_level_easy_button = Button(
             props_easy,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_diff_level_easy']
         )
         difficulty_level_medium_button = Button(
             props_medium,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_diff_level_medium']
         )
         difficulty_level_hard_button = Button(
             props_hard,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_diff_level_hard']
@@ -199,11 +201,11 @@ class UIFactory:
             ],
             "color": [100, 0, 0],
             "text": "image",
-            "location": [0, 0]
+            
         }
         open_menu_button = Button(
             props_open_menu,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['open_menu']
@@ -226,11 +228,11 @@ class UIFactory:
             "rect": [10, 10, 70, 40],
             "color": [100, 100, 200],
             "text": "back",
-            "location": [0, 0]
+            
         }
         back_button = Button(
             props_back,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_game_state_home']
@@ -241,64 +243,64 @@ class UIFactory:
             "rect": [700, 650, 40, 40],
             "color": [0, 0, 0],
             "text": "image",
-            "location": [0, 0]
+            
         }
         props_buy_city = self._get_from_layout('buttons', "game", "board_buy_city") or {
             "name": "board_buy_city",
             "rect": [800, 650, 40, 40],
             "color": [0, 0, 0],
             "text": "image",
-            "location": [0, 0]
+            
         }
         props_buy_road = self._get_from_layout('buttons', "game", "board_buy_road") or {
             "name": "board_buy_road",
             "rect": [900, 10, 10, 40],
             "color": [0, 0, 0],
             "text": "image",
-            "location": [0, 0]
+            
         }
         props_buy_dev = self._get_from_layout('buttons', "game", "board_buy_development") or {
             "name": "board_buy_development",
             "rect": [1000, 40, 40, 40],
             "color": [0, 0, 0],
             "text": "image",
-            "location": [0, 0]
+            
         }
         props_roll_dice = self._get_from_layout('buttons', "game", "board_roll_dice") or {
             "name": "board_roll_dice",
             "rect": [1050, 600, 40, 40],
             "color": [0, 0, 0],
             "text": "image",
-            "location": [0, 0]
+            
         }
 
         board_buy_settlement_button = Button(
             props_buy_settlement,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager
         )
         board_buy_city_button = Button(
             props_buy_city,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager
         )
         board_buy_road_button = Button(
             props_buy_road,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager
         )
         board_buy_development_button = Button(
             props_buy_dev,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager
         )
         board_roll_dice_button = Button(
             props_roll_dice,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager
         )
@@ -313,11 +315,11 @@ class UIFactory:
             ],
             "color": [100, 0, 0],
             "text": "image",
-            "location": [0, 0]
+            
         }
         settings_menu_button = Button(
             props_settings_menu,
-            self.game_manager.screen,
+            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['open_menu']
@@ -337,43 +339,43 @@ class UIFactory:
         """Create menu tab buttons and content buttons."""
         tabs = {
             "input": Button(
-                {"name": "input", "rect": [300, self.game_manager.menu_tab_margin_top, self.game_manager.menu_input_tab_size[0], self.game_manager.menu_input_tab_size[1]], "color": [100, 0, 0], "text": "Input", "location": [0, 0]},
-                self.game_manager.screen,
+                {"name": "input", "rect": [300, self.game_manager.menu_tab_margin_top, self.game_manager.menu_input_tab_size[0], self.game_manager.menu_input_tab_size[1]], "color": [100, 0, 0], "text": "Input", },
+                
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['change_tab_input']
             ),
             "accessibility": Button(
-                {"name": "accessibility", "rect": [400, self.game_manager.menu_tab_margin_top, self.game_manager.menu_accessibility_tab_size[0], self.game_manager.menu_accessibility_tab_size[1]], "color": [100, 0, 0], "text": "Accessibility", "location": [0, 0]},
-                self.game_manager.screen,
+                {"name": "accessibility", "rect": [400, self.game_manager.menu_tab_margin_top, self.game_manager.menu_accessibility_tab_size[0], self.game_manager.menu_accessibility_tab_size[1]], "color": [100, 0, 0], "text": "Accessibility", },
+                
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['change_tab_accessibility']
             ),
             "gameplay": Button(
-                {"name": "gameplay", "rect": [self.game_manager.menu_size[0] / 2 - self.game_manager.menu_gameplay_tab_size[0] / 2, self.game_manager.menu_tab_margin_top, self.game_manager.menu_gameplay_tab_size[0], self.game_manager.menu_gameplay_tab_size[1]], "color": [100, 0, 0], "text": "Gameplay", "location": [0, 0]},
-                self.game_manager.screen,
+                {"name": "gameplay", "rect": [self.game_manager.menu_size[0] / 2 - self.game_manager.menu_gameplay_tab_size[0] / 2, self.game_manager.menu_tab_margin_top, self.game_manager.menu_gameplay_tab_size[0], self.game_manager.menu_gameplay_tab_size[1]], "color": [100, 0, 0], "text": "Gameplay", },
+                
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['change_tab_gameplay']
             ),
             "audio": Button(
-                {"name": "audio", "rect": [700, self.game_manager.menu_tab_margin_top, self.game_manager.menu_audio_tab_size[0], self.game_manager.menu_audio_tab_size[1]], "color": [100, 0, 0], "text": "Audio", "location": [0, 0]},
-                self.game_manager.screen,
+                {"name": "audio", "rect": [700, self.game_manager.menu_tab_margin_top, self.game_manager.menu_audio_tab_size[0], self.game_manager.menu_audio_tab_size[1]], "color": [100, 0, 0], "text": "Audio", },
+                
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['change_tab_audio']
             ),
             "graphics": Button(
-                {"name": "graphics", "rect": [800, self.game_manager.menu_tab_margin_top, self.game_manager.menu_graphics_tab_size[0], self.game_manager.menu_graphics_tab_size[1]], "color": [100, 0, 0], "text": "Graphics", "location": [0, 0]},
-                self.game_manager.screen,
+                {"name": "graphics", "rect": [800, self.game_manager.menu_tab_margin_top, self.game_manager.menu_graphics_tab_size[0], self.game_manager.menu_graphics_tab_size[1]], "color": [100, 0, 0], "text": "Graphics", },
+                
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['change_tab_graphics']
             ),
             "close_menu": Button(
-                {"name": "close_menu", "rect": [self.game_manager.menu_size[0] - self.game_manager.close_menu_size[0] - self.game_manager.close_menu_margins[0], self.game_manager.close_menu_margins[1], self.game_manager.close_menu_size[0], self.game_manager.close_menu_size[1]], "color": [100, 0, 0], "text": "Close", "location": [0, 0]},
-                self.game_manager.screen,
+                {"name": "close_menu", "rect": [self.game_manager.menu_size[0] - self.game_manager.close_menu_size[0] - self.game_manager.close_menu_margins[0], self.game_manager.close_menu_margins[1], self.game_manager.close_menu_size[0], self.game_manager.close_menu_size[1]], "color": [100, 0, 0], "text": "Close", },
+                
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['close_menu']
@@ -382,38 +384,38 @@ class UIFactory:
 
         # Content buttons for each tab
         props_test1 = self._get_from_layout('buttons', "menu", "test1", tab="input") or {
-            "name": "test1", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test1", "location": [0, 0]
+            "name": "test1", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test1", 
         }
         input_buttons = {
-            "test1": Button(props_test1, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
+            "test1": Button(props_test1,  self.game_manager.game_font, self.game_manager)
         }
 
         props_test2 = self._get_from_layout('buttons', "menu", "test2", tab="accessibility") or {
-            "name": "test2", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test2", "location": [0, 0]
+            "name": "test2", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test2", 
         }
         accessability_buttons = {
-            "test2": Button(props_test2, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
+            "test2": Button(props_test2,  self.game_manager.game_font, self.game_manager)
         }
 
         props_test3_graphics = self._get_from_layout('buttons', "menu", "test3", tab="graphics") or {
-            "name": "test3", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test3", "location": [0, 0]
+            "name": "test3", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test3", 
         }
         graphics_buttons = {
-            "test3": Button(props_test3_graphics, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
+            "test3": Button(props_test3_graphics,  self.game_manager.game_font, self.game_manager)
         }
 
         props_test4 = self._get_from_layout('buttons', "menu", "test4", tab="audio") or {
-            "name": "test4", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test4", "location": [0, 0]
+            "name": "test4", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test4", 
         }
         audio_buttons = {
-            "test4": Button(props_test4, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
+            "test4": Button(props_test4,  self.game_manager.game_font, self.game_manager)
         }
 
         props_test5 = self._get_from_layout('buttons', "menu", "test5", tab="gameplay") or {
-            "name": "test5", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test5", "location": [0, 0]
+            "name": "test5", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test5", 
         }
         gameplay_buttons = {
-            "test5": Button(props_test5, self.game_manager.screen, self.game_manager.game_font, self.game_manager)
+            "test5": Button(props_test5,  self.game_manager.game_font, self.game_manager)
         }
 
         return {
@@ -538,90 +540,82 @@ class UIFactory:
 
     def create_menu_toggles(self, callbacks) -> Dict[str, Dict[str, Toggle]]:
         """Create toggles for the menu."""
-        default_time_to_flip = 0.25
-        default_height = 50
-        default_center_width = 100
-        default_fill_color = (0, 100, 0)
-        default_toggle_color = (100, 0, 0)
-        default_toggle_gap = 7
-        default_on = False
-        default_guiding_lines = True
 
         # Build input toggles using layout props
         props_controller_vib = self._get_from_layout('toggles', "menu", "controller_vibration", tab="input") or {
-            "name": "controller_vibration", "rect": [100, 300, 150, 50], "guiding_lines": default_guiding_lines,
-            "height": default_height, "center_width": default_center_width, "fill_color": list(default_fill_color),
-            "toggle_color": list(default_toggle_color), "toggle_gap": default_toggle_gap, "time_to_flip": default_time_to_flip
+            "name": "controller_vibration", "rect": [100, 300, 150, 50], "guiding_lines": self.game_manager.default_guiding_lines,
+            "height": self.game_manager.default_height, "center_width": self.game_manager.default_center_width, "fill_color": list(self.game_manager.default_fill_color),
+            "handle_color": list(self.game_manager.default_handle_color), "toggle_gap": self.game_manager.default_toggle_gap, "time_to_flip": self.game_manager.default_time_to_flip
         }
         props_invert_y = self._get_from_layout('toggles', "menu", "invert_y_axis", tab="input") or {
-            "name": "invert_y_axis", "rect": [200, 300, 150, 50], "guiding_lines": default_guiding_lines,
-            "height": default_height, "center_width": default_center_width, "fill_color": list(default_fill_color),
-            "toggle_color": list(default_toggle_color), "toggle_gap": default_toggle_gap, "time_to_flip": default_time_to_flip
+            "name": "invert_y_axis", "rect": [200, 300, 150, 50], "guiding_lines": self.game_manager.default_guiding_lines,
+            "height": self.game_manager.default_height, "center_width": self.game_manager.default_center_width, "fill_color": list(self.game_manager.default_fill_color),
+            "handle_color": list(self.game_manager.default_handle_color), "toggle_gap": self.game_manager.default_toggle_gap, "time_to_flip": self.game_manager.default_time_to_flip
         }
         props_invert_x = self._get_from_layout('toggles', "menu", "invert_x_axis", tab="input") or {
-            "name": "invert_x_axis", "rect": [300, 300, 150, 50], "guiding_lines": default_guiding_lines,
-            "height": default_height, "center_width": default_center_width, "fill_color": list(default_fill_color),
-            "toggle_color": list(default_toggle_color), "toggle_gap": default_toggle_gap, "time_to_flip": default_time_to_flip
+            "name": "invert_x_axis", "rect": [300, 300, 150, 50], "guiding_lines": self.game_manager.default_guiding_lines,
+            "height": self.game_manager.default_height, "center_width": self.game_manager.default_center_width, "fill_color": list(self.game_manager.default_fill_color),
+            "handle_color": list(self.game_manager.default_handle_color), "toggle_gap": self.game_manager.default_toggle_gap, "time_to_flip": self.game_manager.default_time_to_flip
         }
 
         input_toggles = {
-            "controller_vibration": Toggle(props_controller_vib, 0, self.game_manager, on=default_on, callback=None),
-            "invert_y_axis": Toggle(props_invert_y, 0, self.game_manager, on=default_on, callback=None),
-            "invert_x_axis": Toggle(props_invert_x, 0, self.game_manager, on=default_on, callback=None)
+            "controller_vibration": Toggle(props_controller_vib, 0, self.game_manager, on=self.game_manager.default_on, callback=None),
+            "invert_y_axis": Toggle(props_invert_y, 0, self.game_manager, on=self.game_manager.default_on, callback=None),
+            "invert_x_axis": Toggle(props_invert_x, 0, self.game_manager, on=self.game_manager.default_on, callback=None)
         }
         
         props_high_contrast = self._get_from_layout('toggles', "menu", "high_contrast_mode", tab="accessibility") or {
-            "name": "high_contrast_mode", "rect": [100, 300, 150, 50], "guiding_lines": default_guiding_lines,
-            "height": default_height, "center_width": default_center_width, "fill_color": list(default_fill_color),
-            "toggle_color": list(default_toggle_color), "toggle_gap": default_toggle_gap, "time_to_flip": default_time_to_flip
+            "name": "high_contrast_mode", "rect": [100, 300, 150, 50], "guiding_lines": self.game_manager.default_guiding_lines,
+            "height": self.game_manager.default_height, "center_width": self.game_manager.default_center_width, "fill_color": list(self.game_manager.default_fill_color),
+            "handle_color": list(self.game_manager.default_handle_color), "toggle_gap": self.game_manager.default_toggle_gap, "time_to_flip": self.game_manager.default_time_to_flip
         }
         accessability_toggles = {
-            "high_contrast_mode": Toggle(props_high_contrast, 0, self.game_manager, on=default_on, callback=None)
+            "high_contrast_mode": Toggle(props_high_contrast, 0, self.game_manager, on=self.game_manager.default_on, callback=None)
         }
         
         props_aa = self._get_from_layout('toggles', "menu", "aa", tab="graphics") or {
-            "name": "aa", "rect": [200, 300, 150, 50], "guiding_lines": default_guiding_lines,
-            "height": default_height, "center_width": default_center_width, "fill_color": list(default_fill_color),
-            "toggle_color": list(default_toggle_color), "toggle_gap": default_toggle_gap, "time_to_flip": default_time_to_flip
+            "name": "aa", "rect": [200, 300, 150, 50], "guiding_lines": self.game_manager.default_guiding_lines,
+            "height": self.game_manager.default_height, "center_width": self.game_manager.default_center_width, "fill_color": list(self.game_manager.default_fill_color),
+            "handle_color": list(self.game_manager.default_handle_color), "toggle_gap": self.game_manager.default_toggle_gap, "time_to_flip": self.game_manager.default_time_to_flip
         }
         props_fullscreen = self._get_from_layout('toggles', "menu", "fullscreen", tab="graphics") or {
-            "name": "fullscreen", "rect": [300, 300, 150, 50], "guiding_lines": default_guiding_lines,
-            "height": default_height, "center_width": default_center_width, "fill_color": list(default_fill_color),
-            "toggle_color": list(default_toggle_color), "toggle_gap": default_toggle_gap, "time_to_flip": default_time_to_flip
+            "name": "fullscreen", "rect": [300, 300, 150, 50], "guiding_lines": self.game_manager.default_guiding_lines,
+            "height": self.game_manager.default_height, "center_width": self.game_manager.default_center_width, "fill_color": list(self.game_manager.default_fill_color),
+            "handle_color": list(self.game_manager.default_handle_color), "toggle_gap": self.game_manager.default_toggle_gap, "time_to_flip": self.game_manager.default_time_to_flip
         }
         props_shadows = self._get_from_layout('toggles', "menu", "shadows", tab="graphics") or {
-            "name": "shadows", "rect": [400, 300, 150, 50], "guiding_lines": default_guiding_lines,
-            "height": default_height, "center_width": default_center_width, "fill_color": list(default_fill_color),
-            "toggle_color": list(default_toggle_color), "toggle_gap": default_toggle_gap, "time_to_flip": default_time_to_flip
+            "name": "shadows", "rect": [400, 300, 150, 50], "guiding_lines": self.game_manager.default_guiding_lines,
+            "height": self.game_manager.default_height, "center_width": self.game_manager.default_center_width, "fill_color": list(self.game_manager.default_fill_color),
+            "handle_color": list(self.game_manager.default_handle_color), "toggle_gap": self.game_manager.default_toggle_gap, "time_to_flip": self.game_manager.default_time_to_flip
         }
         graphics_toggles = {
-            "aa": Toggle(props_aa, 0, self.game_manager, on=default_on, callback=None),
-            "fullscreen": Toggle(props_fullscreen, 0, self.game_manager, on=default_on, callback=None),
-            "shadows": Toggle(props_shadows, 0, self.game_manager, on=default_on, callback=None)
+            "aa": Toggle(props_aa, 0, self.game_manager, on=self.game_manager.default_on, callback=None),
+            "fullscreen": Toggle(props_fullscreen, 0, self.game_manager, on=self.game_manager.default_on, callback=None),
+            "shadows": Toggle(props_shadows, 0, self.game_manager, on=self.game_manager.default_on, callback=None)
         }
         
         props_sfx = self._get_from_layout('toggles', "menu", "sfx", tab="audio") or {
-            "name": "sfx", "rect": [100, 300, 150, 50], "guiding_lines": default_guiding_lines,
-            "height": default_height, "center_width": default_center_width, "fill_color": list(default_fill_color),
-            "toggle_color": list(default_toggle_color), "toggle_gap": default_toggle_gap, "time_to_flip": default_time_to_flip
+            "name": "sfx", "rect": [100, 300, 150, 50], "guiding_lines": self.game_manager.default_guiding_lines,
+            "height": self.game_manager.default_height, "center_width": self.game_manager.default_center_width, "fill_color": list(self.game_manager.default_fill_color),
+            "handle_color": list(self.game_manager.default_handle_color), "toggle_gap": self.game_manager.default_toggle_gap, "time_to_flip": self.game_manager.default_time_to_flip
         }
         audio_toggles = {
-            "sfx": Toggle(props_sfx, 0, self.game_manager, on=default_on, callback=None)
+            "sfx": Toggle(props_sfx, 0, self.game_manager, on=self.game_manager.default_on, callback=None)
         }
         
         props_hud = self._get_from_layout('toggles', "menu", "hud", tab="gameplay") or {
-            "name": "hud", "rect": [100, 300, 150, 50], "guiding_lines": default_guiding_lines,
-            "height": default_height, "center_width": default_center_width, "fill_color": list(default_fill_color),
-            "toggle_color": list(default_toggle_color), "toggle_gap": default_toggle_gap, "time_to_flip": default_time_to_flip
+            "name": "hud", "rect": [100, 300, 150, 50], "guiding_lines": self.game_manager.default_guiding_lines,
+            "height": self.game_manager.default_height, "center_width": self.game_manager.default_center_width, "fill_color": list(self.game_manager.default_fill_color),
+            "handle_color": list(self.game_manager.default_handle_color), "toggle_gap": self.game_manager.default_toggle_gap, "time_to_flip": self.game_manager.default_time_to_flip
         }
         props_language = self._get_from_layout('toggles', "menu", "language", tab="gameplay") or {
-            "name": "language", "rect": [200, 300, 150, 50], "guiding_lines": default_guiding_lines,
-            "height": default_height, "center_width": default_center_width, "fill_color": list(default_fill_color),
-            "toggle_color": list(default_toggle_color), "toggle_gap": default_toggle_gap, "time_to_flip": default_time_to_flip
+            "name": "language", "rect": [200, 300, 150, 50], "guiding_lines": self.game_manager.default_guiding_lines,
+            "height": self.game_manager.default_height, "center_width": self.game_manager.default_center_width, "fill_color": list(self.game_manager.default_fill_color),
+            "handle_color": list(self.game_manager.default_handle_color), "toggle_gap": self.game_manager.default_toggle_gap, "time_to_flip": self.game_manager.default_time_to_flip
         }
         gameplay_toggles = {
-            "hud": Toggle(props_hud, 0, self.game_manager, on=default_on, callback=None),
-            "language": Toggle(props_language, 0, self.game_manager, on=default_on, callback=None)
+            "hud": Toggle(props_hud, 0, self.game_manager, on=self.game_manager.default_on, callback=None),
+            "language": Toggle(props_language, 0, self.game_manager, on=self.game_manager.default_on, callback=None)
         }
         
         return {
@@ -712,13 +706,11 @@ class UIFactory:
     def create_menu(self, buttons, toggles, sliders) -> Menu:
         """Create the main menu."""
         menu = Menu(
-            self.game_manager.screen,
+            self.game_manager.menu_rect,
             self.game_manager.game_font,
-            "static",
             buttons['menu'],
             toggles["menu"],
             sliders["menu"],
-            self.game_manager.menu_size,
             self.game_manager.init_location,
             self.game_manager.final_location,
             bckg_color=self.game_manager.menu_background_color

@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
 class Toggle:
-    def __init__(self, layout_props: dict, time: int, game_manager: GameManager, on: bool = False, callback=None) -> None:
+    def __init__(self, layout_props: dict, time: int, game_manager: GameManager, on: bool = False, callback=None, shown: bool = True) -> None:
         self.game_manager = game_manager
 
         # Initialize defaults so read_layout() can fall back reliably
@@ -17,9 +17,9 @@ class Toggle:
         self.radius = self.height / 2
         self.center_width = 100
         self.fill_color = (0, 100, 0)
-        self.toggle_color = (100, 0, 0)
+        self.handle_color = (100, 0, 0)
         self.toggle_gap = 7
-        self.toggle_radius = self.height / 2 - self.toggle_gap
+        self.handle_radius = self.height / 2 - self.toggle_gap
         self.toggle_gap = 7
         self.time_to_flip = 0.25  # seconds
         self.guiding_line_color = (100, 100, 200)
@@ -53,7 +53,7 @@ class Toggle:
         #Create the toggle circle
         self.toggle_circle = pygame.Surface((self.height - self.toggle_gap * 2, self.height - self.toggle_gap * 2), pygame.SRCALPHA)
         self.toggle_circle.fill((0, 0, 0, 0))  # Transparent background
-        pygame.draw.circle(self.toggle_circle, self.toggle_color, self.toggle_circle.get_rect().center, self.toggle_radius)
+        pygame.draw.circle(self.toggle_circle, self.handle_color, self.toggle_circle.get_rect().center, self.handle_radius)
     
     def set_animating(self, time: int):
         if not self.animating:
@@ -108,14 +108,14 @@ class Toggle:
         self.center_width = layout_props.get("center_width", self.center_width)
         fill_color_data = layout_props.get("fill_color", [self.fill_color[0], self.fill_color[1], self.fill_color[2]])
         self.fill_color = (fill_color_data[0], fill_color_data[1], fill_color_data[2])
-        toggle_color_data = layout_props.get("toggle_color", [self.toggle_color[0], self.toggle_color[1], self.toggle_color[2]])
-        self.toggle_color = (toggle_color_data[0], toggle_color_data[1], toggle_color_data[2]) 
+        toggle_color_data = layout_props.get("handle_color", [self.handle_color[0], self.handle_color[1], self.handle_color[2]])
+        self.handle_color = (toggle_color_data[0], toggle_color_data[1], toggle_color_data[2]) 
         self.toggle_gap = layout_props.get("toggle_gap", self.toggle_gap)
         self.time_to_flip = layout_props.get("time_to_flip", self.time_to_flip)
 
         # Recalculate dependent properties
         self.radius = self.height / 2
-        self.toggle_radius = self.height / 2 - self.toggle_gap
+        self.handle_radius = self.height / 2 - self.toggle_gap
         
     def get_layout(self) -> dict:
         return {
@@ -125,7 +125,7 @@ class Toggle:
             "height": self.height,
             "center_width": self.center_width,
             "fill_color": [self.fill_color[0], self.fill_color[1], self.fill_color[2]],
-            "toggle_color": [self.toggle_color[0], self.toggle_color[1], self.toggle_color[2]],
+            "handle_color": [self.handle_color[0], self.handle_color[1], self.handle_color[2]],
             "toggle_gap": self.toggle_gap,
             "time_to_flip": self.time_to_flip,
             "guiding_line_color": [self.guiding_line_color[0], self.guiding_line_color[1], self.guiding_line_color[2]]

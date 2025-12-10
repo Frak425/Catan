@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
 class Slider:
-    def __init__(self, layout_props: dict, initial_value: int | float, game_manager: "GameManager",  bar_image: pygame.Surface | None, callback: Optional[Callable] = None) -> None:
+    def __init__(self, layout_props: dict, initial_value: int | float, game_manager: "GameManager",  bar_image: pygame.Surface | None = None, handle_image: pygame.Surface | None = None, callback: Optional[Callable] = None, shown: bool = True) -> None:
         self.game_manager = game_manager
 
         #initialize defaults so read_layout() can fall back reliably

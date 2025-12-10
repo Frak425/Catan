@@ -9,7 +9,7 @@ class TextDisplay:
 
     text_color: tuple[int, int, int]
 
-    def __init__(self, layout_props: dict, game_manager: GameManager, font: pygame.font.Font, background_image: pygame.Surface | None = None, callback: Optional[Callable] = None) -> None:
+    def __init__(self, layout_props: dict, game_manager: GameManager, font: pygame.font.Font, background_image: pygame.Surface | None = None, callback: Optional[Callable] = None, shown: bool = True) -> None:
         self.game_manager = game_manager
 
         #initialize defaults so read_layout() can fall back reliably
@@ -22,6 +22,7 @@ class TextDisplay:
         self.guiding_line_color = (100, 100, 200)
         self.is_active = False
         self.callback = callback
+        self.shown = shown
 
         # read layout and override default values
         self.read_layout(layout_props)
@@ -35,12 +36,10 @@ class TextDisplay:
 
         # Create the background surface
         if self.background_image:
-            self.background_surface = self.background_image
+            self.surface = self.background_image
         else:
-            self.background_surface = pygame.Surface((self.text_rect.width + 2 * self.padding, self.text_rect.height + 2 * self.padding))
-            self.background_surface.fill(self.background_color)
-
-        self.background_rect = self.background_surface.get_rect()
+            self.surface = pygame.Surface((self.text_rect.width + 2 * self.padding, self.text_rect.height + 2 * self.padding))
+            self.surface.fill(self.background_color)
 
     def update_text(self, new_text: str) -> None:
         self.text = new_text
@@ -53,12 +52,12 @@ class TextDisplay:
 
     def draw(self, surface: pygame.Surface) -> None:
         # Center the text on the background
-        self.text_rect.center = self.background_rect.center
+        self.text_rect.center = self.surface.get_rect().center
 
         # Blit the background and text to the surface
-        self.background_surface.fill(self.background_color)
-        self.background_surface.blit(self.text_surface, self.text_rect)
-        surface.blit(self.background_surface, self.background_rect)
+        self.surface.fill(self.background_color)
+        self.surface.blit(self.text_surface, self.text_rect)
+        surface.blit(self.surface, self.rect)
 
         if self.is_active:
             self.draw_guiding_lines(surface)
