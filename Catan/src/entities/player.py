@@ -12,7 +12,7 @@ class Player:
             "wheat": 0,
             "wood": 0
         }
-        #TO-DO: Figure out all development card in catan. Treat this structure similarly to resources, as these are also cards in the ral game
+        #TO-DO: Figure out all development card in  Treat this structure similarly to resources, as these are also cards in the ral game
         self.development = {}
         self.points_to_win = points_to_win
         self.points = 0 #in base: 10, in kights and cities: 13

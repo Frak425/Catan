@@ -1,5 +1,5 @@
 import pygame
-from slider import Slider
+from src.ui.elements.slider import Slider
 
 from typing import TYPE_CHECKING
 
@@ -48,19 +48,23 @@ class ScrollableArea:
         else:
             self.scroll_bar_rect = pygame.Rect(self.rect.x + self.exterior_padding, self.rect.y + self.exterior_padding, self.scroll_bar_width, self.rect.height - 2 * self.exterior_padding)
         
+        layout_props = {
+            "name": "scroll_slider",
+            "rect": [0, 0, self.scroll_bar_width, 50],
+            "wrapper_rect": [self.scroll_bar_rect.x, self.scroll_bar_rect.y, self.scroll_bar_rect.width, self.scroll_bar_rect.height],
+            "min_value": 0,
+            "max_value": self.max_scroll,
+            "bar_color": [self.scroll_bar_color[0], self.scroll_bar_color[1], self.scroll_bar_color[2]],
+            "handle_color": [self.scroll_handle_color[0], self.scroll_handle_color[1], self.scroll_handle_color[2]],
+            "handle_radius": self.scroll_bar_width // 2,
+            "direction": "vertical",
+            "handle_shape": "stadium"
+        }
+        
         self.scroll_slider = Slider(
-            name="scroll_slider",
-            wrapper_rect=self.scroll_bar_rect,
-            rect=pygame.Rect(0, 0, self.scroll_bar_width, 50),
-            min_value=0,
-            max_value=self.max_scroll,
-            initial_value=0,
-            bar_color=self.scroll_bar_color,
-            handle_color=self.scroll_handle_color,
-            handle_radius=self.scroll_bar_width // 2,
-            game_manager=self.game_manager,
-            direction="vertical",
-            handle_shape="stadium",
+            layout_props,
+            1,  # initial_value
+            self.game_manager,
             bar_image=self.scroll_bar_image
         )
 

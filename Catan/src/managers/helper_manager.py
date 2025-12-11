@@ -1,6 +1,6 @@
 import pygame
 from typing import Dict
-from src.ui.button import Button
+from src.ui.elements.button import Button
 
 class HelperManager:
     def init(self):

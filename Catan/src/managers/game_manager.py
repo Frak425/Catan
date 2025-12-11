@@ -2,14 +2,14 @@ import json
 from pathlib import Path
 import pygame
 
-from src.ui.button import Button
-from src.ui.image import Image
-from src.ui.slider import Slider
-from src.ui.text_display import TextDisplay
-from src.ui.toggle import Toggle
+from src.ui.elements.button import Button
+from src.ui.elements.image import Image
+from src.ui.elements.slider import Slider
+from src.ui.elements.text_display import TextDisplay
+from src.ui.elements.toggle import Toggle
 from src.entities.player import Player
 from src.entities.board import Board
-from src.ui.menu import Menu
+from src.ui.elements.menu import Menu
 from src.managers.input.input_manager import InputManager
 from src.managers.helper_manager import HelperManager
 from src.managers.graphics_manager import GraphicsManager

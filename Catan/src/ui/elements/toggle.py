@@ -2,16 +2,14 @@ import pygame
 import pytweening as tween
 
 from typing import TYPE_CHECKING
+from src.ui.ui_element import UIElement
+
 if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
-class Toggle:
+class Toggle(UIElement):
     def __init__(self, layout_props: dict, time: int, game_manager: GameManager, on: bool = False, callback=None, shown: bool = True) -> None:
-        self.game_manager = game_manager
-
-        # Initialize defaults so read_layout() can fall back reliably
-        self.name = ""
-        self.rect = pygame.Rect(0, 0, 0, 0)
+        # Initialize element-specific defaults
         self.guiding_lines = False
         self.height = 50
         self.radius = self.height / 2
@@ -20,11 +18,11 @@ class Toggle:
         self.handle_color = (100, 0, 0)
         self.toggle_gap = 7
         self.handle_radius = self.height / 2 - self.toggle_gap
-        self.toggle_gap = 7
         self.time_to_flip = 0.25  # seconds
-        self.guiding_line_color = (100, 100, 200)
-        self.callback = callback
-        self.is_active = False
+        
+        # Call parent constructor
+        super().__init__(layout_props, game_manager, callback, shown)
+        
         # read layout and override default values
         self.read_layout(layout_props)
         
@@ -74,10 +72,6 @@ class Toggle:
                 self.toggle_center_location = (self.height // 2 + int((self.center_width) * progress), self.height // 2)
             else:
                 self.toggle_center_location = (self.center_width + self.height // 2 - int((self.center_width) * progress), self.height // 2)
-    
-    def trigger(self):
-        if self.callback:
-            self.callback()
 
     def draw(self, surface: pygame.Surface, time: int):
         # Draw the toggle on the background and then the background to the surface 
@@ -99,10 +93,8 @@ class Toggle:
 
     def read_layout(self, layout_props: dict):
         # Schema reference: See [layout.json](./config/layout.json#L442-L465)
+        self._read_common_layout(layout_props)
         
-        self.name = layout_props.get("name", self.name)
-        rect_data = layout_props.get("rect", [self.rect.x, self.rect.y, self.rect.width, self.rect.height])
-        self.rect = pygame.Rect(rect_data[0], rect_data[1], rect_data[2], rect_data[3])
         self.guiding_lines = layout_props.get("guiding_lines", self.guiding_lines)
         self.height = layout_props.get("height", self.height)
         self.center_width = layout_props.get("center_width", self.center_width)
@@ -118,34 +110,16 @@ class Toggle:
         self.handle_radius = self.height / 2 - self.toggle_gap
         
     def get_layout(self) -> dict:
-        return {
-            "name": self.name,
-            "rect": [self.rect.x, self.rect.y, self.rect.width, self.rect.height],
+        layout = self._get_common_layout()
+        layout.update({
             "guiding_lines": self.guiding_lines,
             "height": self.height,
             "center_width": self.center_width,
             "fill_color": [self.fill_color[0], self.fill_color[1], self.fill_color[2]],
             "handle_color": [self.handle_color[0], self.handle_color[1], self.handle_color[2]],
             "toggle_gap": self.toggle_gap,
-            "time_to_flip": self.time_to_flip,
-            "guiding_line_color": [self.guiding_line_color[0], self.guiding_line_color[1], self.guiding_line_color[2]]
-        }
+            "time_to_flip": self.time_to_flip
+        })
+        return layout
     
-    #TODO: implement settings read/write
-    def read_settings(self, settings: dict) -> None:
-        pass
-
-    def get_settings(self) -> dict:
-        return {}
-    
-    def dev_mode_drag(self, x: int, y: int) -> None:
-        self.rect.x += x
-        self.rect.y += y
-
-    def draw_guiding_lines(self, surface: pygame.Surface) -> None:
-        if self.game_manager.dev_mode:
-            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x + self.rect.width, self.rect.y), 1)
-            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x, self.rect.y + self.rect.height), 1)
-            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x + self.rect.width, self.rect.y), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
-            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y + self.rect.height), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
     

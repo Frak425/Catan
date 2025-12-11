@@ -21,9 +21,9 @@ class GraphicsManager:
             "toggles": self.input_manager.toggles
         }
 
-        self.home_ui_draw_funcs = [lambda: self.draw_ui("buttons", "home"), lambda: self.draw_ui("text_displays", "home"), lambda: self.draw_ui("images", "home")]
-        self.setup_ui_draw_funcs = [lambda: self.draw_ui("buttons", "setup"), lambda: self.draw_ui("text_displays", "setup"), lambda: self.draw_ui("images", "setup")]
-        self.game_ui_draw_funcs = [lambda: self.draw_ui("buttons", "game"), lambda: self.draw_ui("text_displays", "game"), lambda: self.draw_ui("images", "game")]
+        self.home_ui_draw_funcs = [lambda: self.draw_ui("buttons", "home"), lambda: self.draw_ui("text_displays", "home"), lambda: self.draw_ui("images", "home"), lambda: self.draw_ui("sliders", "home"), lambda: self.draw_ui("toggles", "home")]
+        self.setup_ui_draw_funcs = [lambda: self.draw_ui("buttons", "setup"), lambda: self.draw_ui("text_displays", "setup"), lambda: self.draw_ui("images", "setup"), lambda: self.draw_ui("sliders", "setup"), lambda: self.draw_ui("toggles", "setup")]
+        self.game_ui_draw_funcs = [lambda: self.draw_ui("buttons", "game"), lambda: self.draw_ui("text_displays", "game"), lambda: self.draw_ui("images", "game"), lambda: self.draw_ui("sliders", "game"), lambda: self.draw_ui("toggles", "game")]
 
     def set_game_manager(self, game_manager: 'GameManager'):
         self.game_manager = game_manager

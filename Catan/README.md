@@ -20,7 +20,7 @@ This project showcases modular game architecture using manager classes to handle
 
 ## About
 
-As a board game lover, I have many board games, but nobody to play them with. Since my family is very busy, I have found myself lacking the players to play my favorite game: Settlers of Catan. My inspiration for this project was to fix that problem while also teaching myself the essence of game development. Although this is my first game development project, I hope you enjoy it!
+As a board game lover, I have many board games, but nobody to play them with. Since my family is very busy, I have found myself lacking the players to play my favorite game: Settlers of  My inspiration for this project was to fix that problem while also teaching myself the essence of game development. Although this is my first game development project, I hope you enjoy it!
 
 ---
 
@@ -37,7 +37,7 @@ As a board game lover, I have many board games, but nobody to play them with. Si
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/Frak425/Catan.git
+   git clone https://github.com/Frak425/git
    cd catan
    ```
 2. Install dependencies:

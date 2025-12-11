@@ -7,12 +7,12 @@ if TYPE_CHECKING:
     from graphics_manager import GraphicsManager
     from helper_manager import HelperManager
 
-from src.ui.text_display import TextDisplay
-from src.ui.button import Button
-from src.ui.slider import Slider
-from src.ui.toggle import Toggle
-from src.ui.image import Image
-from src.ui.menu import Menu
+from src.ui.elements.text_display import TextDisplay
+from src.ui.elements.button import Button
+from src.ui.elements.slider import Slider
+from src.ui.elements.toggle import Toggle
+from src.ui.elements.image import Image
+from src.ui.elements.menu import Menu
 
 
 class MouseInputHandler:
@@ -102,6 +102,7 @@ class MouseInputHandler:
                 self.game_manager.menu_margins[1]
             )
             image_clicked: Image | None = self.helper_manager.check_clickable_from_dict(
+                
                 self.images["menu"][self.menu.active_tab], 
                 (x, y),
                 self.game_manager.menu_margins[0],
@@ -195,6 +196,13 @@ class MouseInputHandler:
 
         if self.active and not self.game_manager.dev_mode:
             self.handle_click()
+
+        if isinstance(self.active, Slider):
+            self.active.is_active = False
+            # Trigger slider callback after drag completes, regardless of mouse position
+            if self.active.callback:
+                self.active.callback()
+            self.active = None
 
     def handle_click(self) -> None:
         """Process a click event on the active UI element."""

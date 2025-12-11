@@ -1,9 +1,9 @@
 import pygame
 from typing import Dict
 from src.managers import *
-from src.ui.button import Button
-from src.ui.toggle import Toggle
-from src.ui.slider import Slider
+from src.ui.elements.button import Button
+from src.ui.elements.toggle import Toggle
+from src.ui.elements.slider import Slider
 
 #import pytweening as tween
 

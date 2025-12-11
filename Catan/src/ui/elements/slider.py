@@ -1,17 +1,14 @@
 import pygame
 
 from typing import TYPE_CHECKING, Callable, Optional
+from src.ui.ui_element import UIElement
 
 if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
-class Slider:
+class Slider(UIElement):
     def __init__(self, layout_props: dict, initial_value: int | float, game_manager: "GameManager",  bar_image: pygame.Surface | None = None, handle_image: pygame.Surface | None = None, callback: Optional[Callable] = None, shown: bool = True) -> None:
-        self.game_manager = game_manager
-
-        #initialize defaults so read_layout() can fall back reliably
-        self.name = ""
-        self.rect = pygame.Rect(0, 0, 0, 0)
+        # Initialize element-specific defaults
         self.wrapper_rect = pygame.Rect(0, 0, 0, 0)
         self.min_value = 0
         self.max_value = 100
@@ -21,8 +18,9 @@ class Slider:
         self.direction = "horizontal"  # or "vertical"
         self.handle_shape = "circle"  # or "rectangle" or "stadium"
         self.handle_length = 0  # used if handle_shape is rectangle
-        self.guiding_line_color = (100, 100, 200)
-        self.is_active = False
+        
+        # Call parent constructor
+        super().__init__(layout_props, game_manager, callback, shown)
 
         # read layout and override default values
         self.read_layout(layout_props)
@@ -41,8 +39,6 @@ class Slider:
         self.draw_surface.fill((0, 0, 0, 0))  # Transparent background
 
         self.create_surfaces(self.direction, self.handle_shape)
-        # optional callback triggered on slider click/interaction
-        self.callback = callback
 
     def create_surfaces(self, direction: str, handle_shape: str):
         self.bar_surface = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
@@ -139,10 +135,6 @@ class Slider:
 
         self.value = self.calculate_value()
 
-    def trigger(self):
-        if self.callback:
-            self.callback()
-
     def draw(self, surface: pygame.Surface):
         # Redraw the bar and slider surfaces
         self.draw_surface.fill((0, 0, 0, 0))  # Clear the drawing surface
@@ -158,12 +150,9 @@ class Slider:
             self.draw_guiding_lines(surface)
 
     def read_layout(self, layout_props: dict):
-
         # Schema ref: See [layout.json](./config/layout.json#L188-215)
-
-        self.name: str = layout_props.get("name", self.name)
-        rect_data = layout_props.get("rect", [self.rect.x, self.rect.y, self.rect.width, self.rect.height])
-        self.rect: pygame.Rect = pygame.Rect(rect_data[0], rect_data[1], rect_data[2], rect_data[3])
+        self._read_common_layout(layout_props)
+        
         wrapper_rect_data = layout_props.get("wrapper_rect", [self.wrapper_rect.x, self.wrapper_rect.y, self.wrapper_rect.width, self.wrapper_rect.height])
         self.wrapper_rect = pygame.Rect(wrapper_rect_data[0], wrapper_rect_data[1], wrapper_rect_data[2], wrapper_rect_data[3])
         self.min_value: int = layout_props.get("min_value", self.min_value)
@@ -178,9 +167,8 @@ class Slider:
         self.handle_length: int = layout_props.get("handle_length", self.handle_length)
 
     def get_layout(self) -> dict:
-        return {
-            "name": self.name,
-            "rect": [self.rect.x, self.rect.y, self.rect.width, self.rect.height],
+        layout = self._get_common_layout()
+        layout.update({
             "wrapper_rect": [self.wrapper_rect.x, self.wrapper_rect.y, self.wrapper_rect.width, self.wrapper_rect.height],
             "min_value": self.min_value,
             "max_value": self.max_value,
@@ -189,25 +177,7 @@ class Slider:
             "handle_radius": self.handle_radius,
             "direction": self.direction,
             "handle_shape": self.handle_shape,
-            "handle_length": self.handle_length,
-            "guiding_line_color": [self.guiding_line_color[0], self.guiding_line_color[1], self.guiding_line_color[2]]
-        }
-    
-    #TODO: implement settings read/write
-    def read_settings(self, settings: dict) -> None:
-        pass
-
-    def get_settings(self) -> dict:
-        return {}
-    
-    def dev_mode_drag(self, x: int, y: int) -> None:
-        self.rect.x += x
-        self.rect.y += y
-
-    def draw_guiding_lines(self, surface: pygame.Surface) -> None:
-        if self.game_manager.dev_mode:
-            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x + self.rect.width, self.rect.y), 1)
-            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y), (self.rect.x, self.rect.y + self.rect.height), 1)
-            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x + self.rect.width, self.rect.y), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
-            pygame.draw.line(surface, self.guiding_line_color, (self.rect.x, self.rect.y + self.rect.height), (self.rect.x + self.rect.width, self.rect.y + self.rect.height), 1)
+            "handle_length": self.handle_length
+        })
+        return layout
     

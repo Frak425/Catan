@@ -5,12 +5,12 @@ if TYPE_CHECKING:
     from game_manager import GameManager
     from input_manager import InputManager
 
-from src.ui.button import Button
-from src.ui.slider import Slider
-from src.ui.toggle import Toggle
-from src.ui.image import Image
-from src.ui.text_display import TextDisplay
-from src.ui.menu import Menu
+from src.ui.elements.button import Button
+from src.ui.elements.slider import Slider
+from src.ui.elements.toggle import Toggle
+from src.ui.elements.image import Image
+from src.ui.elements.text_display import TextDisplay
+from src.ui.elements.menu import Menu
 
 
 class UIFactory:
@@ -74,14 +74,12 @@ class UIFactory:
 
         play_button = Button(
             props_play,
-            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_game_state_setup']
         )
         quit_button = Button(
             props_quit,
-            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['quit']
@@ -119,14 +117,12 @@ class UIFactory:
 
         game_setup_back_button = Button(
             props_game_setup_back,
-            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_game_state_home']
         )
         game_start_button = Button(
             props_game_start,
-            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['start_game']
@@ -141,7 +137,6 @@ class UIFactory:
         }
         player_choose_color_cycle_button = Button(
             props_choose_color,
-            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['choose_player_color_cycle']
@@ -171,21 +166,18 @@ class UIFactory:
 
         difficulty_level_easy_button = Button(
             props_easy,
-            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_diff_level_easy']
         )
         difficulty_level_medium_button = Button(
             props_medium,
-            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_diff_level_medium']
         )
         difficulty_level_hard_button = Button(
             props_hard,
-            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_diff_level_hard']
@@ -205,7 +197,6 @@ class UIFactory:
         }
         open_menu_button = Button(
             props_open_menu,
-            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['open_menu']
@@ -232,7 +223,6 @@ class UIFactory:
         }
         back_button = Button(
             props_back,
-            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['set_game_state_home']
@@ -276,31 +266,26 @@ class UIFactory:
 
         board_buy_settlement_button = Button(
             props_buy_settlement,
-            
             self.game_manager.game_font,
             self.game_manager
         )
         board_buy_city_button = Button(
             props_buy_city,
-            
             self.game_manager.game_font,
             self.game_manager
         )
         board_buy_road_button = Button(
             props_buy_road,
-            
             self.game_manager.game_font,
             self.game_manager
         )
         board_buy_development_button = Button(
             props_buy_dev,
-            
             self.game_manager.game_font,
             self.game_manager
         )
         board_roll_dice_button = Button(
             props_roll_dice,
-            
             self.game_manager.game_font,
             self.game_manager
         )
@@ -319,7 +304,6 @@ class UIFactory:
         }
         settings_menu_button = Button(
             props_settings_menu,
-            
             self.game_manager.game_font,
             self.game_manager,
             callback=callbacks['open_menu']
@@ -339,43 +323,37 @@ class UIFactory:
         """Create menu tab buttons and content buttons."""
         tabs = {
             "input": Button(
-                {"name": "input", "rect": [300, self.game_manager.menu_tab_margin_top, self.game_manager.menu_input_tab_size[0], self.game_manager.menu_input_tab_size[1]], "color": [100, 0, 0], "text": "Input", },
-                
+                {"name": "input", "rect": [300, self.game_manager.menu_tab_margin_top, self.game_manager.menu_input_tab_size[0], self.game_manager.menu_input_tab_size[1]], "color": [100, 0, 0], "text": "Input"},
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['change_tab_input']
             ),
             "accessibility": Button(
-                {"name": "accessibility", "rect": [400, self.game_manager.menu_tab_margin_top, self.game_manager.menu_accessibility_tab_size[0], self.game_manager.menu_accessibility_tab_size[1]], "color": [100, 0, 0], "text": "Accessibility", },
-                
+                {"name": "accessibility", "rect": [400, self.game_manager.menu_tab_margin_top, self.game_manager.menu_accessibility_tab_size[0], self.game_manager.menu_accessibility_tab_size[1]], "color": [100, 0, 0], "text": "Accessibility"},
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['change_tab_accessibility']
             ),
             "gameplay": Button(
-                {"name": "gameplay", "rect": [self.game_manager.menu_size[0] / 2 - self.game_manager.menu_gameplay_tab_size[0] / 2, self.game_manager.menu_tab_margin_top, self.game_manager.menu_gameplay_tab_size[0], self.game_manager.menu_gameplay_tab_size[1]], "color": [100, 0, 0], "text": "Gameplay", },
-                
+                {"name": "gameplay", "rect": [self.game_manager.menu_size[0] / 2 - self.game_manager.menu_gameplay_tab_size[0] / 2, self.game_manager.menu_tab_margin_top, self.game_manager.menu_gameplay_tab_size[0], self.game_manager.menu_gameplay_tab_size[1]], "color": [100, 0, 0], "text": "Gameplay"},
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['change_tab_gameplay']
             ),
             "audio": Button(
-                {"name": "audio", "rect": [700, self.game_manager.menu_tab_margin_top, self.game_manager.menu_audio_tab_size[0], self.game_manager.menu_audio_tab_size[1]], "color": [100, 0, 0], "text": "Audio", },
-                
+                {"name": "audio", "rect": [700, self.game_manager.menu_tab_margin_top, self.game_manager.menu_audio_tab_size[0], self.game_manager.menu_audio_tab_size[1]], "color": [100, 0, 0], "text": "Audio"},
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['change_tab_audio']
             ),
             "graphics": Button(
-                {"name": "graphics", "rect": [800, self.game_manager.menu_tab_margin_top, self.game_manager.menu_graphics_tab_size[0], self.game_manager.menu_graphics_tab_size[1]], "color": [100, 0, 0], "text": "Graphics", },
-                
+                {"name": "graphics", "rect": [800, self.game_manager.menu_tab_margin_top, self.game_manager.menu_graphics_tab_size[0], self.game_manager.menu_graphics_tab_size[1]], "color": [100, 0, 0], "text": "Graphics"},
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['change_tab_graphics']
             ),
             "close_menu": Button(
-                {"name": "close_menu", "rect": [self.game_manager.menu_size[0] - self.game_manager.close_menu_size[0] - self.game_manager.close_menu_margins[0], self.game_manager.close_menu_margins[1], self.game_manager.close_menu_size[0], self.game_manager.close_menu_size[1]], "color": [100, 0, 0], "text": "Close", },
-                
+                {"name": "close_menu", "rect": [self.game_manager.menu_size[0] - self.game_manager.close_menu_size[0] - self.game_manager.close_menu_margins[0], self.game_manager.close_menu_margins[1], self.game_manager.close_menu_size[0], self.game_manager.close_menu_size[1]], "color": [100, 0, 0], "text": "Close"},
                 self.game_manager.game_font,
                 self.game_manager,
                 callback=callbacks['close_menu']
@@ -384,38 +362,38 @@ class UIFactory:
 
         # Content buttons for each tab
         props_test1 = self._get_from_layout('buttons', "menu", "test1", tab="input") or {
-            "name": "test1", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test1", 
+            "name": "test1", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test1"
         }
         input_buttons = {
-            "test1": Button(props_test1,  self.game_manager.game_font, self.game_manager)
+            "test1": Button(props_test1, self.game_manager.game_font, self.game_manager)
         }
 
         props_test2 = self._get_from_layout('buttons', "menu", "test2", tab="accessibility") or {
-            "name": "test2", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test2", 
+            "name": "test2", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test2"
         }
         accessability_buttons = {
-            "test2": Button(props_test2,  self.game_manager.game_font, self.game_manager)
+            "test2": Button(props_test2, self.game_manager.game_font, self.game_manager)
         }
 
         props_test3_graphics = self._get_from_layout('buttons', "menu", "test3", tab="graphics") or {
-            "name": "test3", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test3", 
+            "name": "test3", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test3"
         }
         graphics_buttons = {
-            "test3": Button(props_test3_graphics,  self.game_manager.game_font, self.game_manager)
+            "test3": Button(props_test3_graphics, self.game_manager.game_font, self.game_manager)
         }
 
         props_test4 = self._get_from_layout('buttons', "menu", "test4", tab="audio") or {
-            "name": "test4", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test4", 
+            "name": "test4", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test4"
         }
         audio_buttons = {
-            "test4": Button(props_test4,  self.game_manager.game_font, self.game_manager)
+            "test4": Button(props_test4, self.game_manager.game_font, self.game_manager)
         }
 
         props_test5 = self._get_from_layout('buttons', "menu", "test5", tab="gameplay") or {
-            "name": "test5", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test5", 
+            "name": "test5", "rect": [200, 100, 100, 50], "color": [200, 50, 100], "text": "test5"
         }
         gameplay_buttons = {
-            "test5": Button(props_test5,  self.game_manager.game_font, self.game_manager)
+            "test5": Button(props_test5, self.game_manager.game_font, self.game_manager)
         }
 
         return {
@@ -634,7 +612,7 @@ class UIFactory:
             "home": {},
             "setup": {},
             "game": self.create_game_images(callbacks),
-            "menu": {}
+            "menu": self.create_menu_images(callbacks)
         }
 
     def create_game_images(self, callbacks) -> Dict[str, Image]:
@@ -648,6 +626,22 @@ class UIFactory:
 
         return {
             "buy_background_image": buy_background_image
+        }
+
+    def create_menu_images(self, callbacks) -> Dict[str, Dict[str, Image]]:
+        """Create images for the menu."""
+        input_images = {}
+        accessibility_images = {}
+        graphics_images = {}
+        audio_images = {}
+        gameplay_images = {}
+
+        return {
+            "input": input_images,
+            "accessibility": accessibility_images,
+            "graphics": graphics_images,
+            "audio": audio_images,
+            "gameplay": gameplay_images
         }
 
     # --- TEXT DISPLAY CREATION --- #

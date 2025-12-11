@@ -6,11 +6,11 @@ if TYPE_CHECKING:
     from src.managers.input.helper.mouse_input_handler import MouseInputHandler
     from input_manager import InputManager
 
-from src.ui.image import Image
-from src.ui.toggle import Toggle
-from src.ui.slider import Slider
-from src.ui.button import Button
-from src.ui.text_display import TextDisplay
+from src.ui.elements.image import Image
+from src.ui.elements.toggle import Toggle
+from src.ui.elements.slider import Slider
+from src.ui.elements.button import Button
+from src.ui.elements.text_display import TextDisplay
 
 
 class DevModeHandler:
