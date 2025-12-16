@@ -86,13 +86,42 @@ class DevModeHandler:
         Parse and execute dev mode commands.
         
         Available commands:
-        - x+number -> set x position to number. Example: x150 sets x to 150
-        - y+number -> set y position to number. Example: y300 sets y to 300
-        - w+number -> set width to number. Example: w200 sets width to 200
-        - h+number -> set height to number. Example: h100 sets height to 100
-        - c+number,number,number -> set color to rgb values. Example: c255,0,0 sets color to red
-        - t+text -> set text to text. Example: tHello sets text to Hello
-        - tc+number,number,number -> set text color to rgb values. Example: tc0,255,0 sets text color to green
+        Position & Size:
+        - x+number -> set x position. Example: x150
+        - y+number -> set y position. Example: y300
+        - w+number -> set width. Example: w200
+        - h+number -> set height. Example: h100
+        
+        Colors:
+        - c+r,g,b -> set background/fill color. Example: c255,0,0 (red)
+        - tc+r,g,b -> set text color. Example: tc0,255,0 (green)
+        - hc+r,g,b -> set handle color (toggles). Example: hc100,100,100
+        
+        Text:
+        - t+text -> set text. Example: tHello World
+        - fs+number -> set font size. Example: fs24
+        - align+value -> set text alignment (left/center/right). Example: aligncenter
+        
+        Slider:
+        - sv+number -> set slider value. Example: sv75
+        - smin+number -> set slider min value. Example: smin0
+        - smax+number -> set slider max value. Example: smax200
+        
+        Toggle:
+        - ton -> turn toggle on
+        - toff -> turn toggle off
+        - tflip -> flip toggle state
+        
+        General:
+        - n+name -> set element name. Example: nmy_button
+        - a+number -> set alpha/opacity (0-255). Example: a200
+        
+        System:
+        - add+type -> add new element (button/slider/toggle/image/text_display)
+        - overridel -> save layout config
+        - overrides -> save settings config
+        - refreshui -> refresh UI elements
+        - centertext -> center text in element
         """
         if not self.mouse_handler.active:
             return
@@ -100,18 +129,51 @@ class DevModeHandler:
         text = self.game_manager.dev_mode_text
         print(f"Dev Mode Command: {text}")
         
-        if text.startswith("x"):
-            self._set_x_position(text)
-        elif text.startswith("y"):
-            self._set_y_position(text)
-        elif text.startswith("w"):
-            self._set_width(text)
-        elif text.startswith("h"):
-            self._set_height(text)
-        elif text.startswith("t"):
-            self._set_text(text)
-        elif text.startswith("tc"):
+        # Color commands (check tc before t, hc before h)
+        if text.startswith("tc"):
             self._set_text_color(text)
+        elif text.startswith("hc"):
+            self._set_handle_color(text)
+        elif text.startswith("c"):
+            self._set_color(text)
+        
+        # Slider commands (check before general s commands)
+        elif text.startswith("smin"):
+            self._set_slider_min(text)
+        elif text.startswith("smax"):
+            self._set_slider_max(text)
+        elif text.startswith("sv"):
+            self._set_slider_value(text)
+        
+        # Toggle commands (check before general t commands)
+        elif text == "ton":
+            self._toggle_on()
+        elif text == "toff":
+            self._toggle_off()
+        elif text == "tflip":
+            self._toggle_flip()
+        
+        # Text commands
+        elif text.startswith("t") and not text.startswith("tc"):
+            self._set_text(text)
+        
+        # Font size
+        elif text.startswith("fs"):
+            self._set_font_size(text)
+        
+        # Alignment
+        elif text.startswith("align"):
+            self._set_alignment(text)
+        
+        # Name
+        elif text.startswith("n"):
+            self._set_name(text)
+        
+        # Alpha
+        elif text.startswith("a"):
+            self._set_alpha(text)
+        
+        # Add elements
         elif text.startswith("add"):
             # Example: addbutton, addtoggle, addslider, addtextdisplay
             element_type = text[3:]
@@ -126,9 +188,9 @@ class DevModeHandler:
                 }
                 new_button = Button(layoout_props, self.game_manager.game_font, self.game_manager, callback=None, shown=True)
                 if self.input_manager.menu.open:
-                    self.game_manager.input_manager.buttons["menu"][self.input_manager.menu.active_tab].append(new_button)
+                    self.game_manager.input_manager.buttons["menu"][self.input_manager.menu.active_tab]["new_button"] = new_button
                 else:
-                    self.game_manager.input_manager.buttons[self.game_manager.game_state]["new_button"].append(new_button)
+                    self.game_manager.input_manager.buttons[self.game_manager.game_state]["new_button"] = new_button
 
                 self.update_ui()
             
@@ -150,7 +212,7 @@ class DevModeHandler:
                     self.game_manager.input_manager.sliders[self.game_manager.game_state]["new_slider"].append(new_slider)
                 self.update_ui()
             
-            elif element_type == "display_text":
+            elif element_type == "text_display":
                 layout_props = {
                     "name": "new_text_display",
                     "rect": [
@@ -199,13 +261,28 @@ class DevModeHandler:
                 else:
                     self.game_manager.input_manager.toggles[self.game_manager.game_state]["new_toggle"].append(new_toggle)
                 self.update_ui()
-            
+    
+        # Position and size
+        elif text.startswith("x"):
+            self._set_x_position(text)
+        elif text.startswith("y"):
+            self._set_y_position(text)
+        elif text.startswith("w"):
+            self._set_width(text)
+        elif text.startswith("h"):
+            self._set_height(text)
+        
+        # System commands
         elif text == "overridel":
             self.game_manager.save_config("layout", True)
         elif text == "overrides":
             self.game_manager.save_config("settings", True)
         elif text == "refreshui":
             self.game_manager.input_manager.reset_ui()
+        elif text == "centertext":
+            if hasattr(self.mouse_handler.active, 'text_rect') and hasattr(self.mouse_handler.active, 'surface'):
+                assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
+                self.mouse_handler.active.text_rect.center = self.mouse_handler.active.surface.get_rect().center
 
     def _set_x_position(self, text: str) -> None:
         assert self.mouse_handler.active is not None
@@ -260,8 +337,190 @@ class DevModeHandler:
             if hasattr(self.mouse_handler.active, 'text_color'):
                 assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
                 self.mouse_handler.active.text_color = (r, g, b)
+                # Regenerate text surface for TextDisplay
+                if isinstance(self.mouse_handler.active, TextDisplay):
+                    self.mouse_handler.active.text_surface = self.mouse_handler.active.font.render(
+                        self.mouse_handler.active.text, True, self.mouse_handler.active.text_color
+                    )
+                    self.mouse_handler.active.text_rect = self.mouse_handler.active.text_surface.get_rect()
         except (ValueError, IndexError):
             pass
+
+    def _set_color(self, text: str) -> None:
+        """Set background/fill color of active element."""
+        try:
+            color_values = text[1:].split(",")
+            r = int(color_values[0])
+            g = int(color_values[1])
+            b = int(color_values[2])
+            
+            # For buttons and text displays
+            if hasattr(self.mouse_handler.active, 'color'):
+                assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
+                self.mouse_handler.active.color = (r, g, b)
+            
+            # For toggles (use color now)
+            if isinstance(self.mouse_handler.active, Toggle):
+                self.mouse_handler.active.color = (r, g, b)
+            
+            # For sliders (use color now)
+            if isinstance(self.mouse_handler.active, Slider):
+                self.mouse_handler.active.color = (r, g, b)
+        except (ValueError, IndexError):
+            pass
+
+    def _set_handle_color(self, text: str) -> None:
+        """Set handle color for toggles."""
+        try:
+            color_values = text[2:].split(",")
+            r = int(color_values[0])
+            g = int(color_values[1])
+            b = int(color_values[2])
+            
+            if hasattr(self.mouse_handler.active, 'handle_color'):
+                assert isinstance(self.mouse_handler.active, Toggle)
+                self.mouse_handler.active.handle_color = (r, g, b)
+        except (ValueError, IndexError):
+            pass
+
+    def _set_font_size(self, text: str) -> None:
+        """Set font size for text elements."""
+        try:
+            size = int(text[2:])
+            if hasattr(self.mouse_handler.active, 'font'):
+                new_font = pygame.font.Font(None, size)
+                assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
+                self.mouse_handler.active.font = new_font
+                
+                # Regenerate text surface
+                if isinstance(self.mouse_handler.active, TextDisplay):
+                    self.mouse_handler.active.text_surface = new_font.render(
+                        self.mouse_handler.active.text, True, self.mouse_handler.active.text_color
+                    )
+                    self.mouse_handler.active.text_rect = self.mouse_handler.active.text_surface.get_rect()
+                elif isinstance(self.mouse_handler.active, Button):
+                    self.mouse_handler.active.update_text(self.mouse_handler.active.text)
+        except ValueError:
+            pass
+
+    def _set_alignment(self, text: str) -> None:
+        """Set text alignment for text elements."""
+        alignment = text[5:].lower()
+        if alignment in ["left", "center", "right"]:
+            if hasattr(self.mouse_handler.active, 'alignment'):
+                assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
+                self.mouse_handler.active.text_align = alignment
+            
+            # Reposition text based on alignment
+            if hasattr(self.mouse_handler.active, 'text_rect') and hasattr(self.mouse_handler.active, 'surface'):
+                assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
+                if alignment == "left":
+                    self.mouse_handler.active.text_rect.left = self.mouse_handler.active.surface.get_rect().left
+                elif alignment == "center":
+                    self.mouse_handler.active.text_rect.center = self.mouse_handler.active.surface.get_rect().center
+                elif alignment == "right":
+                    self.mouse_handler.active.text_rect.right = self.mouse_handler.active.surface.get_rect().right
+
+    def _set_name(self, text: str) -> None:
+        """Set name of active element."""
+        new_name = text[1:]
+        if hasattr(self.mouse_handler.active, 'name'):
+            assert isinstance(self.mouse_handler.active, (Button, TextDisplay, Slider, Toggle, Image))
+            self.mouse_handler.active.name = new_name
+
+    def _set_alpha(self, text: str) -> None:
+        """Set alpha/opacity of active element."""
+        try:
+            alpha = int(text[1:])
+            alpha = max(0, min(255, alpha))  # Clamp between 0-255
+            
+            if hasattr(self.mouse_handler.active, 'surface'):
+                assert isinstance(self.mouse_handler.active, (Button, TextDisplay, Image))
+                self.mouse_handler.active.surface.set_alpha(alpha)
+        except ValueError:
+            pass
+
+    def _set_slider_value(self, text: str) -> None:
+        """Set current value of slider."""
+        try:
+            value = float(text[2:])
+            if isinstance(self.mouse_handler.active, Slider):
+                self.mouse_handler.active.value = max(
+                    self.mouse_handler.active.min_value,
+                    min(self.mouse_handler.active.max_value, value)
+                )
+        except ValueError:
+            pass
+
+    def _set_slider_min(self, text: str) -> None:
+        """Set minimum value of slider."""
+        try:
+            min_val = int(text[4:])
+            if isinstance(self.mouse_handler.active, Slider):
+                self.mouse_handler.active.min_value = min_val
+                # Ensure current value is still valid
+                if self.mouse_handler.active.value < min_val:
+                    self.mouse_handler.active.value = min_val
+        except ValueError:
+            pass
+
+    def _set_slider_max(self, text: str) -> None:
+        """Set maximum value of slider."""
+        try:
+            max_val = int(text[4:])
+            if isinstance(self.mouse_handler.active, Slider):
+                self.mouse_handler.active.max_value = max_val
+                # Ensure current value is still valid
+                if self.mouse_handler.active.value > max_val:
+                    self.mouse_handler.active.value = max_val
+        except ValueError:
+            pass
+
+    def _toggle_on(self) -> None:
+        """Turn toggle on."""
+        if isinstance(self.mouse_handler.active, Toggle):
+            self.mouse_handler.active.on = True
+
+    def _toggle_off(self) -> None:
+        """Turn toggle off."""
+        if isinstance(self.mouse_handler.active, Toggle):
+            self.mouse_handler.active.on = False
+
+    def _toggle_flip(self) -> None:
+        """Flip toggle state."""
+        if isinstance(self.mouse_handler.active, Toggle):
+            self.mouse_handler.active.on = not self.mouse_handler.active.on
+
+    def _delete_active(self) -> None:
+        """Delete the currently active UI element."""
+        if not self.mouse_handler.active:
+            return
+        
+        # Determine which collection the active element belongs to
+        collections = [
+            self.input_manager.buttons,
+            self.input_manager.toggles,
+            self.input_manager.sliders,
+            self.input_manager.images,
+            self.input_manager.text_displays
+        ]
+        
+        for collection in collections:
+            for state, elements in collection.items():
+                if isinstance(elements, dict):
+                    # For buttons in menu tabs
+                    for tab, tab_elements in elements.items():
+                        if self.mouse_handler.active.name in tab_elements:
+                            del tab_elements[self.mouse_handler.active.name]
+                            self.mouse_handler.active = None
+                            return
+                else:
+                    # For lists of elements
+                    for i, element in enumerate(elements):
+                        if element == self.mouse_handler.active:
+                            del elements[i]
+                            self.mouse_handler.active = None
+                            return
 
     def update_ui(self):
         self.input_manager.mouse_handler.set_ui_elements(

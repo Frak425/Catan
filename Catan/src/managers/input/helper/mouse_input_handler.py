@@ -95,12 +95,15 @@ class MouseInputHandler:
                 self.game_manager.menu_margins[0], 
                 self.game_manager.menu_margins[1]
             )
-            text_display_clicked: TextDisplay | None = self.helper_manager.check_clickable_from_dict(
-                self.text_display["menu"][self.menu.active_tab], 
-                (x, y),
-                self.game_manager.menu_margins[0],
-                self.game_manager.menu_margins[1]
-            )
+            # TextDisplay is display-only, but selectable in dev mode
+            text_display_clicked: TextDisplay | None = None
+            if self.game_manager.dev_mode:
+                text_display_clicked = self.helper_manager.check_clickable_from_dict(
+                    self.text_display["menu"][self.menu.active_tab], 
+                    (x, y),
+                    self.game_manager.menu_margins[0],
+                    self.game_manager.menu_margins[1]
+                )
             image_clicked: Image | None = self.helper_manager.check_clickable_from_dict(
                 
                 self.images["menu"][self.menu.active_tab], 
@@ -129,9 +132,12 @@ class MouseInputHandler:
             slider_clicked: Slider | None = self.helper_manager.check_clickable_from_dict(
                 self.sliders[state], (x, y)
             )
-            text_display_clicked: TextDisplay | None = self.helper_manager.check_clickable_from_dict(
-                self.text_display[state], (x, y)
-            )
+            # TextDisplay is display-only, but selectable in dev mode
+            text_display_clicked: TextDisplay | None = None
+            if self.game_manager.dev_mode:
+                text_display_clicked = self.helper_manager.check_clickable_from_dict(
+                    self.text_display[state], (x, y)
+                )
             image_clicked: Image | None = self.helper_manager.check_clickable_from_dict(
                 self.images[state], (x, y)
             )

@@ -14,7 +14,7 @@ class Toggle(UIElement):
         self.height = 50
         self.radius = self.height / 2
         self.center_width = 100
-        self.fill_color = (0, 100, 0)
+        self.color = (0, 100, 0)
         self.handle_color = (100, 0, 0)
         self.toggle_gap = 7
         self.handle_radius = self.height / 2 - self.toggle_gap
@@ -40,9 +40,9 @@ class Toggle(UIElement):
         self.surface = pygame.Surface((self.center_width + self.height, self.height), pygame.SRCALPHA)
         self.surface.fill((0, 0, 0, 0))  # Transparent background
         #draw endpoints and center rectangle
-        pygame.draw.circle(self.surface, self.fill_color, (self.radius, self.height // 2), self.radius)
-        pygame.draw.circle(self.surface, self.fill_color, (self.center_width + self.radius, self.height // 2), self.radius)
-        pygame.draw.rect(self.surface, self.fill_color, (self.height / 2, 0, self.center_width, self.height))
+        pygame.draw.circle(self.surface, self.color, (self.radius, self.height // 2), self.radius)
+        pygame.draw.circle(self.surface, self.color, (self.center_width + self.radius, self.height // 2), self.radius)
+        pygame.draw.rect(self.surface, self.color, (self.height / 2, 0, self.center_width, self.height))
         
         if self.guiding_lines:
             pygame.draw.line(self.surface, (100, 100, 200), (0, self.height / 2), (self.height + self. center_width, self.height / 2), 1)
@@ -79,9 +79,9 @@ class Toggle(UIElement):
             self.update(time)
             # Redraw the toggle background
             self.surface.fill((0, 0, 0, 0))  # Transparent background
-            pygame.draw.circle(self.surface, self.fill_color, (self.radius, self.height // 2), self.radius)
-            pygame.draw.circle(self.surface, self.fill_color, (self.center_width + self.height - self.radius, self.height // 2), self.radius)
-            pygame.draw.rect(self.surface, self.fill_color, (self.height / 2, 0, self.center_width, self.height))
+            pygame.draw.circle(self.surface, self.color, (self.radius, self.height // 2), self.radius)
+            pygame.draw.circle(self.surface, self.color, (self.center_width + self.height - self.radius, self.height // 2), self.radius)
+            pygame.draw.rect(self.surface, self.color, (self.height / 2, 0, self.center_width, self.height))
         if self.guiding_lines:
             pygame.draw.line(self.surface, (100, 100, 200), (0, self.height / 2), (self.height + self. center_width, self.height / 2), 1)
             pygame.draw.line(self.surface, (100, 100, 200), ((self.height + self.center_width) / 2, 0), ((self.height + self.center_width) / 2, self.height), 1)
@@ -98,8 +98,8 @@ class Toggle(UIElement):
         self.guiding_lines = layout_props.get("guiding_lines", self.guiding_lines)
         self.height = layout_props.get("height", self.height)
         self.center_width = layout_props.get("center_width", self.center_width)
-        fill_color_data = layout_props.get("fill_color", [self.fill_color[0], self.fill_color[1], self.fill_color[2]])
-        self.fill_color = (fill_color_data[0], fill_color_data[1], fill_color_data[2])
+        color_data = layout_props.get("color", [self.color[0], self.color[1], self.color[2]])
+        self.color = (color_data[0], color_data[1], color_data[2])
         toggle_color_data = layout_props.get("handle_color", [self.handle_color[0], self.handle_color[1], self.handle_color[2]])
         self.handle_color = (toggle_color_data[0], toggle_color_data[1], toggle_color_data[2]) 
         self.toggle_gap = layout_props.get("toggle_gap", self.toggle_gap)
@@ -115,7 +115,7 @@ class Toggle(UIElement):
             "guiding_lines": self.guiding_lines,
             "height": self.height,
             "center_width": self.center_width,
-            "fill_color": [self.fill_color[0], self.fill_color[1], self.fill_color[2]],
+            "color": [self.color[0], self.color[1], self.color[2]],
             "handle_color": [self.handle_color[0], self.handle_color[1], self.handle_color[2]],
             "toggle_gap": self.toggle_gap,
             "time_to_flip": self.time_to_flip

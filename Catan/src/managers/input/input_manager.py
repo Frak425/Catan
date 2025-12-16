@@ -47,6 +47,7 @@ class InputManager:
         self.images = self.ui_factory.create_all_images(callbacks)
         self.text_displays = self.ui_factory.create_all_text_displays(callbacks)
         self.menu = self.ui_factory.create_menu(self.buttons, self.toggles, self.sliders)
+        self.graphics_manager.set_ui_by_type()
         
         # Update mouse handler with new UI elements (if mouse_handler exists)
         if hasattr(self, 'mouse_handler'):
@@ -132,12 +133,12 @@ class InputManager:
     def open_menu(self):
         self.menu.open_menu()
         self.graphics_manager.menu_open = True
-        self.buttons["setup"]["open_menu_button"].hide()
+        self.buttons["setup"]["open_menu"].hide()
 
     def close_menu(self):
         self.menu.close_menu()
         self.graphics_manager.menu_open = False
-        self.buttons["setup"]["open_menu_button"].show()
+        self.buttons["setup"]["open_menu"].show()
 
     def set_game_state(self, state: str):
         self.game_manager.game_state = state

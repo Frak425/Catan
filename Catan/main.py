@@ -69,8 +69,9 @@ player_manager.set_audio_manager(audio_manager)
 player_manager.set_graphics_manager(graphics_manager)
 
 #init all managers
-input_manager.init()
 graphics_manager.init(pygame.time.get_ticks())
+input_manager.init()
+
 audio_manager.init()
 player_manager.init([])
 helper_manager.init()

@@ -12,7 +12,7 @@ class Slider(UIElement):
         self.wrapper_rect = pygame.Rect(0, 0, 0, 0)
         self.min_value = 0
         self.max_value = 100
-        self.bar_color = (0, 100, 0)
+        self.color = (0, 100, 0)
         self.handle_color = (100, 0, 0)
         self.handle_radius = 10
         self.direction = "horizontal"  # or "vertical"
@@ -44,9 +44,9 @@ class Slider(UIElement):
         self.bar_surface = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
         self.bar_surface.fill((0, 0, 0, 0))
         if direction == "horizontal":
-            pygame.draw.rect(self.bar_surface, self.bar_color, (self.rect.height / 2, 0, self.rect.width - self.rect.height, self.rect.height))  # Draw the bar
-            pygame.draw.circle(self.bar_surface, self.bar_color, (self.rect.height / 2, self.rect.height / 2), self.rect.height / 2)  # Draw the slider circle
-            pygame.draw.circle(self.bar_surface, self.bar_color, (self.rect.width - self.rect.height / 2, self.rect.height / 2), self.rect.height / 2)  # Draw the slider circle
+            pygame.draw.rect(self.bar_surface, self.color, (self.rect.height / 2, 0, self.rect.width - self.rect.height, self.rect.height))  # Draw the bar
+            pygame.draw.circle(self.bar_surface, self.color, (self.rect.height / 2, self.rect.height / 2), self.rect.height / 2)  # Draw the slider circle
+            pygame.draw.circle(self.bar_surface, self.color, (self.rect.width - self.rect.height / 2, self.rect.height / 2), self.rect.height / 2)  # Draw the slider circle
             # Create the handle surface
             
             if handle_shape == "stadium":
@@ -56,9 +56,9 @@ class Slider(UIElement):
                 pygame.draw.circle(self.handle_surface, self.handle_color, (self.handle_radius, self.rect.height / 2), self.handle_radius)
                 pygame.draw.circle(self.handle_surface, self.handle_color, (self.rect.height - self.handle_radius, self.rect.height / 2), self.handle_radius)
         else:
-            pygame.draw.rect(self.bar_surface, self.bar_color, (0, self.rect.width / 2, self.rect.width, self.rect.height - self.rect.width))  # Draw the bar
-            pygame.draw.circle(self.bar_surface, self.bar_color, (self.rect.width / 2, self.rect.width / 2), self.rect.width / 2)  # Draw the slider circle
-            pygame.draw.circle(self.bar_surface, self.bar_color, (self.rect.width / 2, self.rect.height - self.rect.width / 2), self.rect.width / 2)  # Draw the slider circle
+            pygame.draw.rect(self.bar_surface, self.color, (0, self.rect.width / 2, self.rect.width, self.rect.height - self.rect.width))  # Draw the bar
+            pygame.draw.circle(self.bar_surface, self.color, (self.rect.width / 2, self.rect.width / 2), self.rect.width / 2)  # Draw the slider circle
+            pygame.draw.circle(self.bar_surface, self.color, (self.rect.width / 2, self.rect.height - self.rect.width / 2), self.rect.width / 2)  # Draw the slider circle
 
             if handle_shape == "stadium":
                 self.handle_surface = pygame.Surface((self.rect.width, self.rect.width), pygame.SRCALPHA)
@@ -157,8 +157,8 @@ class Slider(UIElement):
         self.wrapper_rect = pygame.Rect(wrapper_rect_data[0], wrapper_rect_data[1], wrapper_rect_data[2], wrapper_rect_data[3])
         self.min_value: int = layout_props.get("min_value", self.min_value)
         self.max_value: int = layout_props.get("max_value", self.max_value)
-        bar_color_data = layout_props.get("bar_color", [self.bar_color[0], self.bar_color[1], self.bar_color[2]])
-        self.bar_color: tuple[int, int, int] = (bar_color_data[0], bar_color_data[1], bar_color_data[2])
+        color_data = layout_props.get("color", [self.color[0], self.color[1], self.color[2]])
+        self.color: tuple[int, int, int] = (color_data[0], color_data[1], color_data[2])
         handle_color_data = layout_props.get("handle_color", [self.handle_color[0], self.handle_color[1], self.handle_color[2]])
         self.handle_color: tuple[int, int, int] = (handle_color_data[0], handle_color_data[1], handle_color_data[2])
         self.handle_radius: int = layout_props.get("handle_radius", self.handle_radius)
@@ -172,7 +172,7 @@ class Slider(UIElement):
             "wrapper_rect": [self.wrapper_rect.x, self.wrapper_rect.y, self.wrapper_rect.width, self.wrapper_rect.height],
             "min_value": self.min_value,
             "max_value": self.max_value,
-            "bar_color": [self.bar_color[0], self.bar_color[1], self.bar_color[2]],
+            "color": [self.color[0], self.color[1], self.color[2]],
             "handle_color": [self.handle_color[0], self.handle_color[1], self.handle_color[2]],
             "handle_radius": self.handle_radius,
             "direction": self.direction,

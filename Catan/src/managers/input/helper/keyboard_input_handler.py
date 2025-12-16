@@ -38,12 +38,19 @@ class KeyboardInputHandler:
         if key == pygame.K_ESCAPE:
             self._handle_escape()
             return
-
+        
+        
+        # Handle typing mode
+        if self.game_manager.dev_mode_typing:
+            self._handle_typing_mode(key)
+            return
+        
+        #if not typing, handle other global keys
         if key == pygame.K_m:
             self.audio_manager.toggle_mute()
 
-        # Toggle dev mode (only when NOT typing)
-        if not self.game_manager.dev_mode_typing and key == pygame.K_0:
+        # Toggle dev mode
+        if key == pygame.K_0:
             self._toggle_dev_mode()
             return
 
@@ -60,11 +67,13 @@ class KeyboardInputHandler:
         if key == pygame.K_s:
             self.game_manager.save_config("layout", False)
             self.game_manager.save_config("settings", False)
+            return
 
         #restore configs
         if key == pygame.K_r:
             self.game_manager.restore_config("settings")
             self.game_manager.restore_config("layout")
+            return
 
 
 
@@ -74,9 +83,6 @@ class KeyboardInputHandler:
             self.game_manager.dev_mode_text = ""
             return
 
-        # Handle typing mode
-        if self.game_manager.dev_mode_typing:
-            self._handle_typing_mode(key)
 
     def _handle_escape(self) -> None:
         """Handle escape key press."""
@@ -135,6 +141,7 @@ class KeyboardInputHandler:
         if self.dev_mode_handler:
             self.dev_mode_handler.add_letter_key(key)
             self.dev_mode_handler.add_number_key(key)
+            self.dev_mode_handler.add_special_key(key)
 
     def _close_menu(self) -> None:
         """Close the menu (called from escape handler)."""

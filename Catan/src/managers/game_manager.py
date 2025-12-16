@@ -172,26 +172,34 @@ class GameManager:
         return settings_defaults
             
     def save_layout_by_section(self, section: str) -> dict:
-        section_defaults = {
-            "buttons": [],
-            "images": [],
-            "sliders": [],
-            "toggles": [],
-            "text_displays": [],
-            "text_inputs": [],
-            "multi_selects": []
-        }
+        def create_section_defaults():
+            """Create a new section defaults dict to avoid reference issues."""
+            return {
+                "buttons": [],
+                "images": [],
+                "sliders": [],
+                "toggles": [],
+                "text_displays": [],
+                "text_inputs": [],
+                "multi_selects": []
+            }
 
         #create defaults for each section here
         if section == "menu":
             menu = {
-                "input": section_defaults,
-                "accessibility": section_defaults,
-                "gameplay": section_defaults,
-                "audio": section_defaults,
-                "graphics": section_defaults
+                "tabs": create_section_defaults(),
+                "input": create_section_defaults(),
+                "accessibility": create_section_defaults(),
+                "gameplay": create_section_defaults(),
+                "audio": create_section_defaults(),
+                "graphics": create_section_defaults()
             }
 
+            # Save tab buttons
+            tab_buttons = self.input_manager.buttons["menu"]["tabs"]
+            menu["tabs"]["buttons"] = self.convert_buttons_to_list(tab_buttons)
+
+            # Save content for each tab
             for tab_name in self.input_manager.menu.tabs:
                 buttons = self.input_manager.buttons["menu"][tab_name]
                 menu[tab_name]["buttons"] = self.convert_buttons_to_list(buttons)
@@ -214,26 +222,28 @@ class GameManager:
             return menu
             
         else:
+            section_data = create_section_defaults()
+            
             buttons = self.input_manager.buttons[section]
-            section_defaults["buttons"] = self.convert_buttons_to_list(buttons)
+            section_data["buttons"] = self.convert_buttons_to_list(buttons)
 
             sliders = self.input_manager.sliders[section]
-            section_defaults["sliders"] = self.convert_sliders_to_list(sliders)
+            section_data["sliders"] = self.convert_sliders_to_list(sliders)
 
             toggles = self.input_manager.toggles[section]
-            section_defaults["toggles"] = self.convert_toggles_to_list(toggles)
+            section_data["toggles"] = self.convert_toggles_to_list(toggles)
 
             text_displays = self.input_manager.text_displays[section]
-            section_defaults["text_displays"] = self.convert_text_displays_to_list(text_displays)
+            section_data["text_displays"] = self.convert_text_displays_to_list(text_displays)
 
             #TODO: implement these
             #text_inputs = self.input_manager.text_inputs[section]
-            #section_defaults["text_inputs"] = self.convert_text_inputs_to_list(text_inputs)
+            #section_data["text_inputs"] = self.convert_text_inputs_to_list(text_inputs)
 
             #multi_selects = self.input_manager.multi_selects[section]
-            #section_defaults["multi_selects"] = self.convert_multi_selects_to_list(multi_selects)
+            #section_data["multi_selects"] = self.convert_multi_selects_to_list(multi_selects)
 
-            return section_defaults
+            return section_data
 
     ## --- CONVERT OBJECTS TO --- ##
 
@@ -244,8 +254,28 @@ class GameManager:
                 "name": button.name,
                 "rect": [button.rect[0], button.rect[1], button.rect[2], button.rect[3]],
                 "color": [button.color[0], button.color[1], button.color[2]],
-                "text": button.text
+                "text": button.text,
+                "text_color": [button.text_color[0], button.text_color[1], button.text_color[2]],
+                "padding": button.padding
             }
+            # Store callback name if it exists (for config-driven loading)
+            if hasattr(button, 'callback') and button.callback:
+                # Do reverse lookup in callback registry to find the name
+                callback_name = None
+                if hasattr(self.input_manager, 'ui_factory') and hasattr(self.input_manager.ui_factory, 'callback_registry'):
+                    for name, func in self.input_manager.ui_factory.callback_registry.items():
+                        if func == button.callback:
+                            callback_name = name
+                            break
+                
+                # Fallback to __name__ if reverse lookup fails (but skip if it's "<lambda>")
+                if not callback_name:
+                    callback_name = getattr(button.callback, '__name__', None)
+                    if callback_name == "<lambda>":
+                        callback_name = None
+                
+                if callback_name:
+                    layout_object["callback"] = callback_name
             layout_object_list.append(layout_object)
         return layout_object_list
 
@@ -269,10 +299,24 @@ class GameManager:
                 "wrapper_rect": [slider.wrapper_rect[0], slider.wrapper_rect[1], slider.wrapper_rect[2], slider.wrapper_rect[3]],
                 "min_value": slider.min_value,
                 "max_value": slider.max_value,
-                "bar_color": [slider.bar_color[0], slider.bar_color[1], slider.bar_color[2]],
+                "color": [slider.color[0], slider.color[1], slider.color[2]],
                 "handle_color": [slider.handle_color[0], slider.handle_color[1], slider.handle_color[2]],
                 "handle_radius": slider.handle_radius
             }
+            # Store callback name if it exists
+            if hasattr(slider, 'callback') and slider.callback:
+                callback_name = None
+                if hasattr(self.input_manager, 'ui_factory') and hasattr(self.input_manager.ui_factory, 'callback_registry'):
+                    for name, func in self.input_manager.ui_factory.callback_registry.items():
+                        if func == slider.callback:
+                            callback_name = name
+                            break
+                if not callback_name:
+                    callback_name = getattr(slider.callback, '__name__', None)
+                    if callback_name == "<lambda>":
+                        callback_name = None
+                if callback_name:
+                    layout_object["callback"] = callback_name
             layout_object_list.append(layout_object)
         return layout_object_list
 
@@ -285,11 +329,25 @@ class GameManager:
                 "guiding_lines": toggle.guiding_lines,
                 "height": toggle.height,
                 "center_width": toggle.center_width,
-                "fill_color": [toggle.fill_color[0], toggle.fill_color[1], toggle.fill_color[2]],
+                "color": [toggle.color[0], toggle.color[1], toggle.color[2]],
                 "handle_color": [toggle.handle_color[0], toggle.handle_color[1], toggle.handle_color[2]],
                 "toggle_gap": toggle.toggle_gap,
                 "time_to_flip": toggle.time_to_flip
             }
+            # Store callback name if it exists
+            if hasattr(toggle, 'callback') and toggle.callback:
+                callback_name = None
+                if hasattr(self.input_manager, 'ui_factory') and hasattr(self.input_manager.ui_factory, 'callback_registry'):
+                    for name, func in self.input_manager.ui_factory.callback_registry.items():
+                        if func == toggle.callback:
+                            callback_name = name
+                            break
+                if not callback_name:
+                    callback_name = getattr(toggle.callback, '__name__', None)
+                    if callback_name == "<lambda>":
+                        callback_name = None
+                if callback_name:
+                    layout_object["callback"] = callback_name
             layout_object_list.append(layout_object)
         return layout_object_list
 
@@ -299,7 +357,7 @@ class GameManager:
             layout_object = {
                 "name": text_display.name,
                 "rect": [text_display.rect[0], text_display.rect[1], text_display.rect[2], text_display.rect[3]],
-                "color": [text_display.background_color[0], text_display.background_color[1], text_display.background_color[2]],
+                "color": [text_display.color[0], text_display.color[1], text_display.color[2]],
                 "text": text_display.text,
                 "text_color": [text_display.text_color[0], text_display.text_color[1], text_display.text_color[2]],
                 "padding": text_display.padding
