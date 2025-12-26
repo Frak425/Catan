@@ -75,6 +75,49 @@ As a board game lover, I have many board games, but nobody to play them with. Si
 
 ---
 
+## DevMode Commands
+
+Available commands:
+   - 0: toggle devmode
+
+   Position & Size:
+   - x+number -> set x position. Example: x150
+   - y+number -> set y position. Example: y300
+   - w+number -> set width. Example: w200
+   - h+number -> set height. Example: h100
+   
+   Colors:
+   - c+r,g,b -> set background/fill color. Example: c255,0,0 (red)
+   - tc+r,g,b -> set text color. Example: tc0,255,0 (green)
+   - hc+r,g,b -> set handle color (toggles). Example: hc100,100,100
+   
+   Text:
+   - t+text -> set text. Example: tHello World
+   - fs+number -> set font size. Example: fs24
+   - align+value -> set text alignment (left/center/right). Example: aligncenter
+   
+   Slider:
+   - sv+number -> set slider value. Example: sv75
+   - smin+number -> set slider min value. Example: smin0
+   - smax+number -> set slider max value. Example: smax200
+   
+   Toggle:
+   - ton -> turn toggle on
+   - toff -> turn toggle off
+   - tflip -> flip toggle state
+   
+   General:
+   - n+name -> set element name. Example: nmy_button
+   - a+number -> set alpha/opacity (0-255). Example: a200
+   
+   System:
+   - add+type -> add new element (button/slider/toggle/image/text_display)
+   - overridel -> save layout config
+   - overrides -> save settings config
+   - refreshui -> refresh UI elements
+   - centertext -> center text in element
+   - del -> delete ui element **(CANT UNDO. USE WITH CAUTION)**
+
 ## Contributing
 
 Contributions are welcome!

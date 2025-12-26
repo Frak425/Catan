@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+import time
 
 from src.managers.game_manager import GameManager
 from src.managers.audio_manager import AudioManager
@@ -76,38 +77,79 @@ audio_manager.init()
 player_manager.init([])
 helper_manager.init()
 
+frame_times = []
+event_times = []
+input_times = []
+draw_times = []
+update_times = []
 
-#game loop
 while game_manager.running:
+    frame_start = time.perf_counter()
 
     clock.tick(game_manager.framerates[game_manager.framerate_index])
     screen.fill((30, 80, 150))
 
     #handles events
+    event_start = time.perf_counter()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_manager.running = False
         #on a mouse click
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
+            input_start = time.perf_counter()
             input_manager.handle_input(x, y, pygame.MOUSEBUTTONDOWN)
+            input_times.append((time.perf_counter() - input_start) * 1000)
 
         elif event.type == pygame.MOUSEMOTION:
             x, y = event.pos
+            input_start = time.perf_counter()
             input_manager.handle_input(x, y, pygame.MOUSEMOTION)
+            input_times.append((time.perf_counter() - input_start) * 1000)
         
         elif event.type == pygame.MOUSEBUTTONUP:
             x, y = event.pos
+            input_start = time.perf_counter()
             input_manager.handle_input(x, y, pygame.MOUSEBUTTONUP)
+            input_times.append((time.perf_counter() - input_start) * 1000)
 
         #on a keyboard press
         elif event.type == pygame.KEYDOWN:
             key = event.key
+            input_start = time.perf_counter()
             input_manager.handle_keyboard(key)
+            input_times.append((time.perf_counter() - input_start) * 1000)
+    
+    event_times.append((time.perf_counter() - event_start) * 1000)
 
+    draw_start = time.perf_counter()
     graphics_manager.draw_screen()
     graphics_manager.time = pygame.time.get_ticks()
+    draw_times.append((time.perf_counter() - draw_start) * 1000)
 
+    update_start = time.perf_counter()
     pygame.display.update()
+    update_times.append((time.perf_counter() - update_start) * 1000)
+
+    frame_times.append((time.perf_counter() - frame_start) * 1000)
+    
+    if game_manager.debugging:
+        # Print stats every 60 frames (once per second at 60fps)
+        if len(frame_times) >= 60:
+            print("\n=== Performance Stats (last 60 frames) ===")
+            print(f"Total Frame Time: avg={sum(frame_times)/len(frame_times):.2f}ms, max={max(frame_times):.2f}ms")
+            print(f"Event Handling:   avg={sum(event_times)/len(event_times):.2f}ms, max={max(event_times):.2f}ms")
+            if input_times:
+                print(f"Input Processing: avg={sum(input_times)/len(input_times):.2f}ms, max={max(input_times):.2f}ms, count={len(input_times)}")
+            print(f"Draw Screen:      avg={sum(draw_times)/len(draw_times):.2f}ms, max={max(draw_times):.2f}ms")
+            print(f"Display Update:   avg={sum(update_times)/len(update_times):.2f}ms, max={max(update_times):.2f}ms")
+            print(f"Current FPS:      {clock.get_fps():.1f}")
+            
+            # Clear for next batch
+            frame_times.clear()
+            event_times.clear()
+            input_times.clear()
+            draw_times.clear()
+            update_times.clear()
 
 pygame.quit()

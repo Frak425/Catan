@@ -11,6 +11,7 @@ from src.ui.elements.toggle import Toggle
 from src.ui.elements.slider import Slider
 from src.ui.elements.button import Button
 from src.ui.elements.text_display import TextDisplay
+from src.ui.elements.menu import Menu
 
 
 class DevModeHandler:
@@ -81,8 +82,16 @@ class DevModeHandler:
         if key in key_map:
             self.game_manager.dev_mode_text += key_map[key]
 
-    def parse_typing(self) -> None:
-        """
+    def update_ui(self):
+        self.input_manager.mouse_handler.set_ui_elements(
+            self.input_manager.buttons,
+            self.input_manager.toggles,
+            self.input_manager.sliders,
+            self.input_manager.images,
+            self.input_manager.text_displays,
+            self.input_manager.menu
+        )
+    """
         Parse and execute dev mode commands.
         
         Available commands:
@@ -115,6 +124,8 @@ class DevModeHandler:
         General:
         - n+name -> set element name. Example: nmy_button
         - a+number -> set alpha/opacity (0-255). Example: a200
+        - del -> delete active element
+        - radius+type(opt)+number -> set border radius. Example: radius10, radiustop_left5
         
         System:
         - add+type -> add new element (button/slider/toggle/image/text_display)
@@ -123,166 +134,130 @@ class DevModeHandler:
         - refreshui -> refresh UI elements
         - centertext -> center text in element
         """
-        if not self.mouse_handler.active:
-            return
-            
+        
+    def parse_typing(self) -> None:
+        """Parse and execute dev mode commands."""
         text = self.game_manager.dev_mode_text
         print(f"Dev Mode Command: {text}")
         
-        # Color commands (check tc before t, hc before h)
-        if text.startswith("tc"):
-            self._set_text_color(text)
-        elif text.startswith("hc"):
-            self._set_handle_color(text)
-        elif text.startswith("c"):
-            self._set_color(text)
+        # Commands that don't require an active element
+        if text.startswith("add"):
+            self._handle_add_element(text)
+            return
+        elif text == "overridel":
+            self.game_manager.save_config("layout", True)
+            return
+        elif text == "overrides":
+            self.game_manager.save_config("settings", True)
+            return
+        elif text == "refreshui":
+            self.game_manager.input_manager.reset_ui()
+            return
         
-        # Slider commands (check before general s commands)
+        if not self.mouse_handler.active:
+            print("No active element selected.")
+            return
+        
+        # Use command mapping for cleaner parsing
+        self._execute_command(text)
+
+    def _execute_command(self, text: str) -> None:
+        """Execute command using pattern matching and dynamic attribute setting."""
+        
+        # Direct attribute setting: attr_name+value
+        # Examples: x100, y50, w200, h150
+        simple_attrs = {
+            'x': ('rect.x', int),
+            'y': ('rect.y', int),
+            'w': ('rect.width', int),
+            'h': ('rect.height', int),
+        }
+        
+        for prefix, (attr_path, value_type) in simple_attrs.items():
+            if text.startswith(prefix) and text[len(prefix):].lstrip('-').isdigit():
+                self._set_nested_attr(attr_path, value_type(text[len(prefix):]))
+                return
+        
+        # Color commands: c+r,g,b
+        if text.startswith("tc") and ',' in text:
+            self._set_color_attr('text_color', text[2:])
+        elif text.startswith("hc") and ',' in text:
+            self._set_color_attr('handle_color', text[2:])
+        elif text.startswith("c") and ',' in text:
+            self._set_color_attr('color', text[1:])
+        
+        # Slider commands
         elif text.startswith("smin"):
-            self._set_slider_min(text)
+            self._set_attr('min_value', int(text[4:]))
         elif text.startswith("smax"):
-            self._set_slider_max(text)
+            self._set_attr('max_value', int(text[4:]))
         elif text.startswith("sv"):
             self._set_slider_value(text)
         
-        # Toggle commands (check before general t commands)
+        # Toggle commands
         elif text == "ton":
-            self._toggle_on()
+            self._set_attr('on', True)
         elif text == "toff":
-            self._toggle_off()
+            self._set_attr('on', False)
         elif text == "tflip":
-            self._toggle_flip()
+            if isinstance(self.mouse_handler.active, Toggle):
+                self.mouse_handler.active.on = not self.mouse_handler.active.on
         
-        # Text commands
+        # Text command
         elif text.startswith("t") and not text.startswith("tc"):
             self._set_text(text)
         
-        # Font size
-        elif text.startswith("fs"):
-            self._set_font_size(text)
-        
-        # Alignment
-        elif text.startswith("align"):
-            self._set_alignment(text)
-        
-        # Name
-        elif text.startswith("n"):
-            self._set_name(text)
-        
-        # Alpha
-        elif text.startswith("a"):
-            self._set_alpha(text)
-        
-        # Add elements
-        elif text.startswith("add"):
-            # Example: addbutton, addtoggle, addslider, addtextdisplay
-            element_type = text[3:]
-            if element_type == "button":
-                layoout_props = {
-                    "name": "new_button",
-                    "rect": [
-                        0, 0, 150, 50
-                    ],
-                    "color": [0, 100, 0],
-                    "text": "new button",
-                }
-                new_button = Button(layoout_props, self.game_manager.game_font, self.game_manager, callback=None, shown=True)
-                if self.input_manager.menu.open:
-                    self.game_manager.input_manager.buttons["menu"][self.input_manager.menu.active_tab]["new_button"] = new_button
-                else:
-                    self.game_manager.input_manager.buttons[self.game_manager.game_state]["new_button"] = new_button
+        # Other commands...
+        elif text == "del":
+            self._delete_active()
+        """
+            elif text == "centertext":
+            self._center_text()
+        """
 
-                self.update_ui()
-            
-            elif element_type == "slider":
-                layout_props = {
-                    "name": "new_slider",
-                    "rect": [
-                        0, 0, 200, 40
-                    ],
-                    "color": [100, 0, 0],
-                    "min_value": 0,
-                    "max_value": 100,
-                    "initial_value": 50,
-                }
-                new_slider = Slider(layout_props, 50, self.game_manager)
-                if self.input_manager.menu.open:
-                    self.game_manager.input_manager.sliders["menu"][self.input_manager.menu.active_tab].append(new_slider)
-                else:
-                    self.game_manager.input_manager.sliders[self.game_manager.game_state]["new_slider"].append(new_slider)
-                self.update_ui()
-            
-            elif element_type == "text_display":
-                layout_props = {
-                    "name": "new_text_display",
-                    "rect": [
-                        0, 0, 200, 50
-                    ],
-                    "color": [200, 200, 200],
-                    "text": "new text display",
-                }
-                new_text_display = TextDisplay(layout_props,self.game_manager, self.game_manager.game_font, shown=True)
-                if self.input_manager.menu.open:
-                    self.game_manager.input_manager.text_displays["menu"][self.input_manager.menu.active_tab].append(new_text_display)
-                else:
-                    self.game_manager.input_manager.text_displays[self.game_manager.game_state]["new_text_display"].append(new_text_display)
-                
-            elif element_type == "image":
-                layout_props = {
-                    "name": "new_image",
-                    "rect": [
-                        0, 0, 100, 100
-                    ],
-                    "image_path": "path/to/image.png",
-                }
-                # Assuming Image class exists
-                new_image = Image(layout_props, self.game_manager)
-                if self.input_manager.menu.open:
-                    self.game_manager.input_manager.images["menu"][self.input_manager.menu.active_tab].append(new_image)
-                else:
-                    self.game_manager.input_manager.images[self.game_manager.game_state]["new_image"].append(new_image)
-                self.update_ui()
-            
-            elif element_type == "toggle":
-                layout_props = {
-                    "name": "new_toggle",
-                    "rect": [100, 300, 150, 50], 
-                    "guiding_lines": self.game_manager.default_guiding_lines,
-                    "height": self.game_manager.default_height, 
-                    "center_width": self.game_manager.default_center_width, 
-                    "fill_color": list(self.game_manager.default_fill_color),
-                    "handle_color": list(self.game_manager.default_handle_color), 
-                    "toggle_gap": self.game_manager.default_toggle_gap, 
-                    "time_to_flip": self.game_manager.default_time_to_flip
-                }
-                new_toggle = Toggle(layout_props, self.game_manager.graphics_manager.time, self.game_manager, on=False, callback=None, shown=True)
-                if self.input_manager.menu.open:
-                    self.game_manager.input_manager.toggles["menu"][self.input_manager.menu.active_tab].append(new_toggle)
-                else:
-                    self.game_manager.input_manager.toggles[self.game_manager.game_state]["new_toggle"].append(new_toggle)
-                self.update_ui()
-    
-        # Position and size
-        elif text.startswith("x"):
-            self._set_x_position(text)
-        elif text.startswith("y"):
-            self._set_y_position(text)
-        elif text.startswith("w"):
-            self._set_width(text)
-        elif text.startswith("h"):
-            self._set_height(text)
+    def _set_attr(self, attr_name: str, value) -> None:
+        """Dynamically set an attribute if it exists."""
+        if hasattr(self.mouse_handler.active, attr_name):
+            setattr(self.mouse_handler.active, attr_name, value)
+            print(f"Set {attr_name} to {value}")
+        else:
+            print(f"Active element does not have attribute: {attr_name}")
+
+    def _set_nested_attr(self, attr_path: str, value) -> None:
+        """Set nested attributes like 'rect.x'."""
+        parts = attr_path.split('.')
+        obj = self.mouse_handler.active
         
-        # System commands
-        elif text == "overridel":
-            self.game_manager.save_config("layout", True)
-        elif text == "overrides":
-            self.game_manager.save_config("settings", True)
-        elif text == "refreshui":
-            self.game_manager.input_manager.reset_ui()
-        elif text == "centertext":
-            if hasattr(self.mouse_handler.active, 'text_rect') and hasattr(self.mouse_handler.active, 'surface'):
-                assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
-                self.mouse_handler.active.text_rect.center = self.mouse_handler.active.surface.get_rect().center
+        # Navigate to the parent object
+        for part in parts[:-1]:
+            if not hasattr(obj, part):
+                print(f"Attribute path not found: {attr_path}")
+                return
+            obj = getattr(obj, part)
+        
+        # Set the final attribute
+        final_attr = parts[-1]
+        if hasattr(obj, final_attr):
+            setattr(obj, final_attr, value)
+            print(f"Set {attr_path} to {value}")
+        else:
+            print(f"Attribute not found: {attr_path}")
+
+    def _set_color_attr(self, attr_name: str, color_str: str) -> None:
+        """Set a color attribute from comma-separated RGB string."""
+        try:
+            r, g, b = map(int, color_str.split(','))
+            self._set_attr(attr_name, (r, g, b))
+            
+            # Special handling for text color to regenerate surface
+            if attr_name == 'text_color' and isinstance(self.mouse_handler.active, (TextDisplay, Button)):
+                if isinstance(self.mouse_handler.active, TextDisplay):
+                    self.mouse_handler.active.text_surface = self.mouse_handler.active.font.render(
+                        self.mouse_handler.active.text, True, self.mouse_handler.active.text_color
+                    )
+                    self.mouse_handler.active.text_rect = self.mouse_handler.active.text_surface.get_rect()
+        except (ValueError, IndexError):
+            print(f"Invalid color format. Use: {attr_name[0]}r,g,b")
 
     def _set_x_position(self, text: str) -> None:
         assert self.mouse_handler.active is not None
@@ -323,8 +298,7 @@ class DevModeHandler:
     def _set_text(self, text: str) -> None:
         """Set text of active element."""
         new_text = text[1:]
-        if hasattr(self.mouse_handler.active, 'update_text'):
-            assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
+        if isinstance(self.mouse_handler.active, (TextDisplay, Button)):
             self.mouse_handler.active.update_text(new_text)
 
     def _set_text_color(self, text: str) -> None:
@@ -334,8 +308,7 @@ class DevModeHandler:
             r = int(color_values[0])
             g = int(color_values[1])
             b = int(color_values[2])
-            if hasattr(self.mouse_handler.active, 'text_color'):
-                assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
+            if isinstance(self.mouse_handler.active, (TextDisplay, Button)):
                 self.mouse_handler.active.text_color = (r, g, b)
                 # Regenerate text surface for TextDisplay
                 if isinstance(self.mouse_handler.active, TextDisplay):
@@ -354,31 +327,23 @@ class DevModeHandler:
             g = int(color_values[1])
             b = int(color_values[2])
             
-            # For buttons and text displays
-            if hasattr(self.mouse_handler.active, 'color'):
-                assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
+            # For buttons, text displays, toggles, sliders, and menu
+            if isinstance(self.mouse_handler.active, (TextDisplay, Button, Toggle, Slider)):
                 self.mouse_handler.active.color = (r, g, b)
-            
-            # For toggles (use color now)
-            if isinstance(self.mouse_handler.active, Toggle):
-                self.mouse_handler.active.color = (r, g, b)
-            
-            # For sliders (use color now)
-            if isinstance(self.mouse_handler.active, Slider):
-                self.mouse_handler.active.color = (r, g, b)
+            elif isinstance(self.mouse_handler.active, Menu):
+                self.mouse_handler.active.bckg_color = (r, g, b)
         except (ValueError, IndexError):
             pass
 
     def _set_handle_color(self, text: str) -> None:
-        """Set handle color for toggles."""
+        """Set handle color for toggles and sliders."""
         try:
             color_values = text[2:].split(",")
             r = int(color_values[0])
             g = int(color_values[1])
             b = int(color_values[2])
             
-            if hasattr(self.mouse_handler.active, 'handle_color'):
-                assert isinstance(self.mouse_handler.active, Toggle)
+            if isinstance(self.mouse_handler.active, (Toggle, Slider)):
                 self.mouse_handler.active.handle_color = (r, g, b)
         except (ValueError, IndexError):
             pass
@@ -387,9 +352,8 @@ class DevModeHandler:
         """Set font size for text elements."""
         try:
             size = int(text[2:])
-            if hasattr(self.mouse_handler.active, 'font'):
+            if isinstance(self.mouse_handler.active, (TextDisplay, Button)):
                 new_font = pygame.font.Font(None, size)
-                assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
                 self.mouse_handler.active.font = new_font
                 
                 # Regenerate text surface
@@ -407,13 +371,10 @@ class DevModeHandler:
         """Set text alignment for text elements."""
         alignment = text[5:].lower()
         if alignment in ["left", "center", "right"]:
-            if hasattr(self.mouse_handler.active, 'alignment'):
-                assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
+            if isinstance(self.mouse_handler.active, (TextDisplay, Button)):
                 self.mouse_handler.active.text_align = alignment
-            
-            # Reposition text based on alignment
-            if hasattr(self.mouse_handler.active, 'text_rect') and hasattr(self.mouse_handler.active, 'surface'):
-                assert isinstance(self.mouse_handler.active, TextDisplay) or isinstance(self.mouse_handler.active, Button)
+                
+                # Reposition text based on alignment
                 if alignment == "left":
                     self.mouse_handler.active.text_rect.left = self.mouse_handler.active.surface.get_rect().left
                 elif alignment == "center":
@@ -424,8 +385,7 @@ class DevModeHandler:
     def _set_name(self, text: str) -> None:
         """Set name of active element."""
         new_name = text[1:]
-        if hasattr(self.mouse_handler.active, 'name'):
-            assert isinstance(self.mouse_handler.active, (Button, TextDisplay, Slider, Toggle, Image))
+        if isinstance(self.mouse_handler.active, (Button, TextDisplay, Slider, Toggle, Image, Menu)):
             self.mouse_handler.active.name = new_name
 
     def _set_alpha(self, text: str) -> None:
@@ -434,8 +394,7 @@ class DevModeHandler:
             alpha = int(text[1:])
             alpha = max(0, min(255, alpha))  # Clamp between 0-255
             
-            if hasattr(self.mouse_handler.active, 'surface'):
-                assert isinstance(self.mouse_handler.active, (Button, TextDisplay, Image))
+            if isinstance(self.mouse_handler.active, (Button, TextDisplay, Image)):
                 self.mouse_handler.active.surface.set_alpha(alpha)
         except ValueError:
             pass
@@ -491,9 +450,59 @@ class DevModeHandler:
         if isinstance(self.mouse_handler.active, Toggle):
             self.mouse_handler.active.on = not self.mouse_handler.active.on
 
+    def _set_border_radius(self, text: str) -> None:
+        """Set border radius of active element."""
+        try:
+            radius = int(text[1:])
+            if isinstance(self.mouse_handler.active, (Button, TextDisplay)):
+                self.mouse_handler.active.border_radius = radius
+        except ValueError:
+            pass
+
+    def _set_border_top_left_radius(self, text: str) -> None:
+        """Set top left border radius of active element."""
+        try:
+            radius = int(text[4:])
+            if isinstance(self.mouse_handler.active, (Button, TextDisplay)):
+                self.mouse_handler.active.border_top_left_radius = radius
+        except ValueError:
+            pass
+
+    def _set_border_top_right_radius(self, text: str) -> None:
+        """Set top right border radius of active element."""
+        try:
+            radius = int(text[5:])
+            if isinstance(self.mouse_handler.active, (Button, TextDisplay)):
+                self.mouse_handler.active.border_top_right_radius = radius
+        except ValueError:
+            pass
+
+    def _set_border_bottom_left_radius(self, text: str) -> None:
+        """Set bottom left border radius of active element."""
+        try:
+            radius = int(text[5:])
+            if isinstance(self.mouse_handler.active, (Button, TextDisplay)):
+                self.mouse_handler.active.border_bottom_left_radius = radius
+        except ValueError:
+            pass
+
+    def _set_border_bottom_right_radius(self, text: str) -> None:
+        """Set bottom right border radius of active element."""
+        try:
+            radius = int(text[6:])
+            if isinstance(self.mouse_handler.active, (Button, TextDisplay)):
+                self.mouse_handler.active.border_bottom_right_radius = radius
+        except ValueError:
+            pass
+
     def _delete_active(self) -> None:
         """Delete the currently active UI element."""
         if not self.mouse_handler.active:
+            return
+        
+        # Don't allow deleting the menu itself
+        if isinstance(self.mouse_handler.active, Menu):
+            print("Cannot delete menu")
             return
         
         # Determine which collection the active element belongs to
@@ -502,12 +511,12 @@ class DevModeHandler:
             self.input_manager.toggles,
             self.input_manager.sliders,
             self.input_manager.images,
-            self.input_manager.text_displays
+            self.input_manager.text_displays,
         ]
         
         for collection in collections:
             for state, elements in collection.items():
-                if isinstance(elements, dict):
+                if state == "menu":
                     # For buttons in menu tabs
                     for tab, tab_elements in elements.items():
                         if self.mouse_handler.active.name in tab_elements:
@@ -516,18 +525,94 @@ class DevModeHandler:
                             return
                 else:
                     # For lists of elements
-                    for i, element in enumerate(elements):
-                        if element == self.mouse_handler.active:
-                            del elements[i]
-                            self.mouse_handler.active = None
-                            return
+                    if self.mouse_handler.active.name in elements:
+                        del elements[self.mouse_handler.active.name]
+                        self.mouse_handler.active = None
+                        return
+        
+    def _handle_add_element(self, text: str) -> None:
+        """Handle adding new UI elements."""
+        import time
+        element_type = text[3:]
+        
+        # Generate unique name with timestamp
+        timestamp = int(time.time() * 1000) % 100000
 
-    def update_ui(self):
-        self.input_manager.mouse_handler.set_ui_elements(
-            self.input_manager.buttons,
-            self.input_manager.toggles,
-            self.input_manager.sliders,
-            self.input_manager.images,
-            self.input_manager.text_displays,
-            self.input_manager.menu
-        )
+        elements_by_type = {
+            "button": self.input_manager.buttons,
+            "slider": self.input_manager.sliders,
+            "image": self.input_manager.images,
+            "text_display": self.input_manager.text_displays,
+            "toggle": self.input_manager.toggles
+        }
+        
+        if element_type == "button":
+            layout_props = {
+                "name": f"new_button_{timestamp}",
+                "rect": [100, 100, 150, 50],
+                "color": [0, 100, 0],
+                "text": "new button",
+            }
+            new_element = Button(layout_props, self.game_manager.game_font, self.game_manager, callback=None, shown=True)
+        
+        elif element_type == "slider":
+            layout_props = {
+                "name": f"new_slider_{timestamp}",
+                "rect": [100, 100, 200, 40],
+                "color": [100, 0, 0],
+                "min_value": 0,
+                "max_value": 100,
+                "initial_value": 50,
+                "handle_color": [200, 200, 200],
+                "color": [100, 0, 0],
+            }
+            new_element = Slider(layout_props, 50, self.game_manager)
+        
+        elif element_type == "text_display":
+            layout_props = {
+                "name": f"new_text_display_{timestamp}",
+                "rect": [100, 100, 200, 50],
+                "color": [200, 200, 200],
+                "text": "new text display",
+            }
+            new_element = TextDisplay(layout_props, self.game_manager, self.game_manager.game_font, shown=True)
+        
+        elif element_type == "image":
+            layout_props = {
+                "name": f"new_image_{timestamp}",
+                "rect": [100, 100, 100, 100],
+                "image_path": "path/to/image.png",
+            }
+            new_element = Image(layout_props, self.game_manager)
+        
+        elif element_type == "toggle":
+            layout_props = {
+                "name": f"new_toggle_{timestamp}",
+                "rect": [100, 100, 150, 50],
+                "guiding_lines": self.game_manager.default_guiding_lines,
+                "height": self.game_manager.default_height,
+                "center_width": self.game_manager.default_center_width,
+                "color": list(self.game_manager.default_fill_color),
+                "handle_color": list(self.game_manager.default_handle_color),
+                "toggle_gap": self.game_manager.default_toggle_gap,
+                "time_to_flip": self.game_manager.default_time_to_flip
+            }
+            new_element = Toggle(layout_props, self.game_manager.graphics_manager.time, self.game_manager, on=False, callback=None, shown=True)
+            
+        else:
+            print(f"Unknown element type: {element_type}")
+            return
+
+        if self.input_manager.menu.open:
+            tab = self.input_manager.menu.active_tab
+            if tab not in elements_by_type[element_type]["menu"]:
+                elements_by_type[element_type]["menu"][tab] = {}
+            elements_by_type[element_type]["menu"][tab][new_element.name] = new_element
+        else:
+            state = self.game_manager.game_state
+            if state not in self.input_manager.buttons:
+                elements_by_type[element_type][state] = {}
+            elements_by_type[element_type][state][new_element.name] = new_element
+
+        self.update_ui()
+        print(f"Added {new_element.__class__.__name__}: {new_element.name}")

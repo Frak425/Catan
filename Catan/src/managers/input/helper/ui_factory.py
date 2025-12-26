@@ -61,17 +61,21 @@ class UIFactory:
                     if element:
                         result[state][name] = element
         
-        # Load menu state (with tabs)
+        # Load menu elements from the menus array
         menu_tabs = ["tabs", "input", "accessibility", "graphics", "audio", "gameplay"]
         result["menu"] = {tab: {} for tab in menu_tabs}
-        if "menu" in layout:
-            for tab in menu_tabs:
-                if tab in layout["menu"] and element_type in layout["menu"][tab]:
-                    for element_props in layout["menu"][tab][element_type]:
-                        name = element_props.get('name')
-                        element = factory_func(element_props, callbacks, "menu", tab)
-                        if element:
-                            result["menu"][tab][name] = element
+        if "menus" in layout and isinstance(layout["menus"], list):
+            for menu_config in layout["menus"]:
+                # Each menu has element_type as key, then tabs inside
+                # Structure: menu_config[element_type][tab] = {name: element_config}
+                if element_type in menu_config:
+                    for tab in menu_tabs:
+                        if tab in menu_config[element_type]:
+                            # The config is a dict of name->properties, not a list
+                            for name, element_props in menu_config[element_type][tab].items():
+                                element = factory_func(element_props, callbacks, "menu", tab)
+                                if element:
+                                    result["menu"][tab][name] = element
         
         return result
 
@@ -81,26 +85,37 @@ class UIFactory:
         """Create all buttons dynamically from config files."""
         self.register_callbacks(callbacks)
         
+        # Map button names to their callbacks for when JSON doesn't have callback info
+        button_name_to_callback = {
+            # Tab buttons
+            'input': 'change_tab_input',
+            'accessibility': 'change_tab_accessibility',
+            'gameplay': 'change_tab_gameplay',
+            'audio': 'change_tab_audio',
+            'graphics': 'change_tab_graphics',
+            'close_menu': 'close_menu'
+        }
+        
         def button_factory(props, cbs, state, tab):
             callback_name = props.get('callback')
+            
+            # If no callback in JSON, try to infer from button name
+            if not callback_name:
+                button_name = props.get('name')
+                callback_name = button_name_to_callback.get(button_name)
+            
             callback = self._get_callback(callback_name) if callback_name else None
+            
             return Button(props, self.game_manager.game_font, self.game_manager, callback=callback)
         
         result = self._create_elements_from_layout('buttons', button_factory, callbacks)
         
-        # Load menu tab buttons from config (or create defaults if not present)
-        layout = getattr(self.game_manager, 'layout', None)
-        if layout and "menu" in layout and "tabs" in layout["menu"] and 'buttons' in layout["menu"]["tabs"]:
-            # Load from config
-            result["menu"]["tabs"] = {}
-            for button_props in layout["menu"]["tabs"]['buttons']:
-                name = button_props.get('name')
-                callback_name = button_props.get('callback')
-                callback = self._get_callback(callback_name) if callback_name else None
-                button = Button(button_props, self.game_manager.game_font, self.game_manager, callback=callback)
-                result["menu"]["tabs"][name] = button
-        else:
-            # Create default tab buttons if not in config
+        # Note: Tab buttons are already loaded by _create_elements_from_layout
+        # The structure in JSON is: menu_config["buttons"]["tabs"] = {name: button_config}
+        # So we don't need special handling here anymore, but keep the defaults fallback
+        
+        # If no tabs found in config, create defaults
+        if not result["menu"]["tabs"]:
             result["menu"]["tabs"] = {
                 "input": Button(
                     {"name": "input", "rect": [300, self.game_manager.menu_tab_margin_top, self.game_manager.menu_input_tab_size[0], self.game_manager.menu_input_tab_size[1]], "color": [100, 0, 0], "text": "Input"},
@@ -186,17 +201,28 @@ class UIFactory:
 
     # --- MENU CREATION --- #
 
-    def create_menu(self, buttons, toggles, sliders) -> Menu:
-        """Create the main menu."""
+    def create_menu(self, buttons, toggles, sliders, images, text_displays) -> Menu:
+        """Create the main menu from menus array in layout."""
+        layout = getattr(self.game_manager, 'layout', None)
+        menu_props = {}
+        
+        if layout and "menus" in layout and isinstance(layout["menus"], list):
+            # Find the settings_menu or use the first menu
+            for menu_config in layout["menus"]:
+                if menu_config.get("name") == "settings_menu":
+                    menu_props = menu_config
+                    break
+            if not menu_props and layout["menus"]:
+                menu_props = layout["menus"][0]
+        
         menu = Menu(
-            self.game_manager.menu_rect,
-            self.game_manager.game_font,
-            buttons["menu"],
-            toggles["menu"],
-            sliders["menu"],
-            self.game_manager.init_location,
-            self.game_manager.final_location,
-            bckg_color=self.game_manager.menu_background_color
+            layout_props=menu_props,
+            game_manager=self.game_manager,
+            buttons=buttons,
+            toggles=toggles,
+            sliders=sliders,
+            images=images,
+            text_displays=text_displays
         )
         return menu
 

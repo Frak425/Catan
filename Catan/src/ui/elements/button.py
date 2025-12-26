@@ -21,12 +21,19 @@ class Button(UIElement):
         self.text_align = "center"
         self.font = font
         self.disabled = False
+
+        self.border_radius = 0
+        self.border_top_right_radius = 0
+        self.border_top_left_radius = 0
+        self.border_bottom_right_radius = 0
+        self.border_bottom_left_radius = 0
         
         # Call parent constructor
         super().__init__(layout_props, game_manager, callback, shown)
         
         self.game_font = font
         self.hovering = False
+        self.selected = False
         self.background_image = background_image
 
         self.text_surface = self.game_font.render(self.text, False, self.text_color)
@@ -118,8 +125,44 @@ class Button(UIElement):
             "text": self.text,
             "shown": self.shown,
             "padding": self.padding,
-            "text_color": [self.text_color[0], self.text_color[1], self.text_color[2]]
+            "text_color": [self.text_color[0], self.text_color[1], self.text_color[2]],
+            "border_radius": self.border_radius,
+            "border_top_right_radius": self.border_top_right_radius,
+            "border_top_left_radius": self.border_top_left_radius,
+            "border_bottom_right_radius": self.border_bottom_right_radius,
+            "border_bottom_left_radius": self.border_bottom_left_radius
         })
+        
+        # Save callback name if it exists - do reverse lookup in callback registry
+        if hasattr(self, 'callback') and self.callback:
+            callback_name = None
+            if hasattr(self.game_manager, 'input_manager'):
+                if hasattr(self.game_manager.input_manager, 'ui_factory'):
+                    if hasattr(self.game_manager.input_manager.ui_factory, 'callback_registry'):
+                        for name, func in self.game_manager.input_manager.ui_factory.callback_registry.items():
+                            if func == self.callback:
+                                callback_name = name
+                                break
+            
+            if callback_name:
+                layout["callback"] = callback_name
+        
         return layout
     
-    
+    #print all layout info
+    def print_info(self) -> None:
+        self.print_common_info()
+        print(f"Button: {self.name}")
+        print(f"Text: {self.text}")
+        print(f"Color: {self.color}")
+        print(f"Text Color: {self.text_color}")
+        print(f"Padding: {self.padding}")
+        print(f"Text Align: {self.text_align}")
+        print(f"Rect: {self.rect}")
+        print(f"border_radius: {self.border_radius}")
+        print(f"border_top_right_radius: {self.border_top_right_radius}")
+        print(f"border_top_left_radius: {self.border_top_left_radius}")
+        print(f"border_bottom_right_radius: {self.border_bottom_right_radius}")
+        print(f"border_bottom_left_radius: {self.border_bottom_left_radius}")
+        print(f"Shown: {self.shown}")
+        print(f"")

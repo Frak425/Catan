@@ -18,6 +18,12 @@ class TextDisplay(UIElement):
         self.text_color = (0, 0, 0)
         self.padding = 5
         self.text_align = "center"
+
+        self.border_radius = 0
+        self.border_top_right_radius = 0
+        self.border_top_left_radius = 0
+        self.border_bottom_right_radius = 0
+        self.border_bottom_left_radius = 0
         
         # Call parent constructor
         super().__init__(layout_props, game_manager, callback, shown)
@@ -91,7 +97,26 @@ class TextDisplay(UIElement):
             "text_color": [self.text_color[0], self.text_color[1], self.text_color[2]],
             "padding": self.padding,
             "text_align": "center",
-            "shown": self.shown
+            "shown": self.shown,
+            "border_radius": self.border_radius,
+            "border_top_right_radius": self.border_top_right_radius,
+            "border_top_left_radius": self.border_top_left_radius,
+            "border_bottom_right_radius": self.border_bottom_right_radius,
+            "border_bottom_left_radius": self.border_bottom_left_radius
         })
         return layout
     
+    def print_info(self) -> None:
+        self.print_common_info()
+        print(f"TextDisplay: {self.name}")
+        print(f"Text: {self.text}")
+        print(f"Color: {self.color}")
+        print(f"Text Color: {self.text_color}")
+        print(f"Padding: {self.padding}")
+        print(f"Text Align: {self.text_align}")
+        print(f"Rect: {self.rect}")
+        print(f"border_radius: {self.border_radius}")
+        print(f"border_top_right_radius: {self.border_top_right_radius}")
+        print(f"border_top_left_radius: {self.border_top_left_radius}")
+        print(f"border_bottom_right_radius: {self.border_bottom_right_radius}")
+        print(f"border_bottom_left_radius: {self.border_bottom_left_radius}")

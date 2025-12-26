@@ -9,7 +9,6 @@ if TYPE_CHECKING:
 class Slider(UIElement):
     def __init__(self, layout_props: dict, initial_value: int | float, game_manager: "GameManager",  bar_image: pygame.Surface | None = None, handle_image: pygame.Surface | None = None, callback: Optional[Callable] = None, shown: bool = True) -> None:
         # Initialize element-specific defaults
-        self.wrapper_rect = pygame.Rect(0, 0, 0, 0)
         self.min_value = 0
         self.max_value = 100
         self.color = (0, 100, 0)
@@ -35,7 +34,7 @@ class Slider(UIElement):
         self.click_y = 0
 
         #create the drawing surface, cleared every frame
-        self.draw_surface = pygame.Surface((self.wrapper_rect.width, self.wrapper_rect.height), pygame.SRCALPHA)
+        self.draw_surface = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
         self.draw_surface.fill((0, 0, 0, 0))  # Transparent background
 
         self.create_surfaces(self.direction, self.handle_shape)
@@ -138,13 +137,11 @@ class Slider(UIElement):
     def draw(self, surface: pygame.Surface):
         # Redraw the bar and slider surfaces
         self.draw_surface.fill((0, 0, 0, 0))  # Clear the drawing surface
-        centered_x = (self.wrapper_rect.width - self.rect.width) / 2
-        centered_y = (self.wrapper_rect.height - self.rect.height) / 2
-        self.draw_surface.blit(self.bar_surface, (centered_x, centered_y))  # Draw the bar surface centered in the wrapper
-        self.draw_surface.blit(self.handle_surface, (centered_x + self.slider_position, centered_y))  # Draw the slider surface at the correct position
+        self.draw_surface.blit(self.bar_surface, (0, 0))  # Draw the bar surface
+        self.draw_surface.blit(self.handle_surface, (self.slider_position, 0))  # Draw the handle at the correct position
 
         # Draw the bar and slider on the main surface
-        surface.blit(self.draw_surface, self.wrapper_rect.topleft)
+        surface.blit(self.draw_surface, self.rect.topleft)
 
         if self.is_active:
             self.draw_guiding_lines(surface)
@@ -153,8 +150,6 @@ class Slider(UIElement):
         # Schema ref: See [layout.json](./config/layout.json#L188-215)
         self._read_common_layout(layout_props)
         
-        wrapper_rect_data = layout_props.get("wrapper_rect", [self.wrapper_rect.x, self.wrapper_rect.y, self.wrapper_rect.width, self.wrapper_rect.height])
-        self.wrapper_rect = pygame.Rect(wrapper_rect_data[0], wrapper_rect_data[1], wrapper_rect_data[2], wrapper_rect_data[3])
         self.min_value: int = layout_props.get("min_value", self.min_value)
         self.max_value: int = layout_props.get("max_value", self.max_value)
         color_data = layout_props.get("color", [self.color[0], self.color[1], self.color[2]])
@@ -169,7 +164,6 @@ class Slider(UIElement):
     def get_layout(self) -> dict:
         layout = self._get_common_layout()
         layout.update({
-            "wrapper_rect": [self.wrapper_rect.x, self.wrapper_rect.y, self.wrapper_rect.width, self.wrapper_rect.height],
             "min_value": self.min_value,
             "max_value": self.max_value,
             "color": [self.color[0], self.color[1], self.color[2]],
@@ -181,3 +175,13 @@ class Slider(UIElement):
         })
         return layout
     
+    def print_info(self) -> None:
+        self.print_common_info()
+        print(f"Min Value: {self.min_value}")
+        print(f"Max Value: {self.max_value}")
+        print(f"Color: {self.color}")
+        print(f"Handle Color: {self.handle_color}")
+        print(f"Handle Radius: {self.handle_radius}")
+        print(f"Direction: {self.direction}")
+        print(f"Handle Shape: {self.handle_shape}")
+        print(f"Handle Length: {self.handle_length}")

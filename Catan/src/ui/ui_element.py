@@ -42,6 +42,18 @@ class UIElement(ABC):
         """Get layout properties as dict. Must be implemented by subclasses."""
         pass
     
+    @abstractmethod
+    def print_info(self) -> None:
+        """Print all variable info about the UI element. Must be implemented by subclasses."""
+        pass
+
+    def print_common_info(self) -> None:
+        """Print common variable info about the UI element."""
+        print(f"Name: {self.name}")
+        print(f"Rect: {self.rect}")
+        print(f"Shown: {self.shown}")
+        print(f"Guiding Line Color: {self.guiding_line_color}")
+
     def read_settings(self, settings: dict) -> None:
         """Read settings from config. Can be overridden by subclasses."""
         pass

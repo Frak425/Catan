@@ -46,7 +46,7 @@ class InputManager:
         self.sliders = self.ui_factory.create_all_sliders(callbacks)
         self.images = self.ui_factory.create_all_images(callbacks)
         self.text_displays = self.ui_factory.create_all_text_displays(callbacks)
-        self.menu = self.ui_factory.create_menu(self.buttons, self.toggles, self.sliders)
+        self.menu = self.ui_factory.create_menu(self.buttons["menu"], self.toggles["menu"], self.sliders["menu"], self.images["menu"], self.text_displays["menu"])
         self.graphics_manager.set_ui_by_type()
         
         # Update mouse handler with new UI elements (if mouse_handler exists)

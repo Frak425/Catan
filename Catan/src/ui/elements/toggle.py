@@ -122,4 +122,15 @@ class Toggle(UIElement):
         })
         return layout
     
-    
+    def print_info(self) -> None:
+        self.print_common_info()
+        print(f"Toggle: {self.name}")
+        print(f"On: {self.on}")
+        print(f"Guiding Lines: {self.guiding_lines}")
+        print(f"Height: {self.height}")
+        print(f"Center Width: {self.center_width}")
+        print(f"Color: {self.color}")
+        print(f"Handle Color: {self.handle_color}")
+        print(f"Toggle Gap: {self.toggle_gap}")
+        print(f"Time to Flip: {self.time_to_flip}")
+        print(f"Rect: {self.rect}")

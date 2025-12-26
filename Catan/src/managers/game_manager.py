@@ -74,6 +74,7 @@ class GameManager:
         self.dev_mode = False
         self.dev_mode_typing = False
         self.dev_mode_text = ""
+        self.debugging = False
 
         self.default_time_to_flip = 0.25
         self.default_height = 50
@@ -122,7 +123,8 @@ class GameManager:
                 "toggles": [],
                 "text_displays": [],
                 "text_inputs": [],
-                "multi_selects": []
+                "multi_selects": [],
+                "menus": []
             },
             "setup": {
                 "buttons": [],
@@ -131,7 +133,8 @@ class GameManager:
                 "toggles": [],
                 "text_displays": [],
                 "text_inputs": [],
-                "multi_selects": []
+                "multi_selects": [],
+                "menus": []
             },
             "game": {
                 "buttons": [],
@@ -140,23 +143,18 @@ class GameManager:
                 "toggles": [],
                 "text_displays": [],
                 "text_inputs": [],
-                "multi_selects": []
+                "multi_selects": [],
+                "menus": []
             },
-            "menu": {
-                "buttons": [],
-                "images": [],
-                "sliders": [],
-                "toggles": [],
-                "text_displays": [],
-                "text_inputs": [],
-                "multi_selects": []
-            }
+            "menus": []
         }
 
         layout["home"] = self.save_layout_by_section("home")
         layout["setup"] = self.save_layout_by_section("setup")
         layout["game"] = self.save_layout_by_section("game")
-        layout["menu"] = self.save_layout_by_section("menu")
+        
+        # Save menus at the top level
+        layout["menus"] = [self.input_manager.menu.get_layout()]
 
         return layout
 
@@ -181,69 +179,36 @@ class GameManager:
                 "toggles": [],
                 "text_displays": [],
                 "text_inputs": [],
-                "multi_selects": []
+                "multi_selects": [],
+                "menus": []
             }
 
-        #create defaults for each section here
-        if section == "menu":
-            menu = {
-                "tabs": create_section_defaults(),
-                "input": create_section_defaults(),
-                "accessibility": create_section_defaults(),
-                "gameplay": create_section_defaults(),
-                "audio": create_section_defaults(),
-                "graphics": create_section_defaults()
-            }
+        section_data = create_section_defaults()
+        
+        buttons = self.input_manager.buttons[section]
+        section_data["buttons"] = self.convert_buttons_to_list(buttons)
 
-            # Save tab buttons
-            tab_buttons = self.input_manager.buttons["menu"]["tabs"]
-            menu["tabs"]["buttons"] = self.convert_buttons_to_list(tab_buttons)
+        sliders = self.input_manager.sliders[section]
+        section_data["sliders"] = self.convert_sliders_to_list(sliders)
 
-            # Save content for each tab
-            for tab_name in self.input_manager.menu.tabs:
-                buttons = self.input_manager.buttons["menu"][tab_name]
-                menu[tab_name]["buttons"] = self.convert_buttons_to_list(buttons)
+        toggles = self.input_manager.toggles[section]
+        section_data["toggles"] = self.convert_toggles_to_list(toggles)
 
-                sliders = self.input_manager.sliders["menu"][tab_name]
-                menu[tab_name]["sliders"] = self.convert_sliders_to_list(sliders)
+        text_displays = self.input_manager.text_displays[section]
+        section_data["text_displays"] = self.convert_text_displays_to_list(text_displays)
+        
+        # Add menu reference for sections that have the menu
+        if section in ["home", "setup", "game"]:
+            section_data["menus"] = [self.input_manager.menu.name]
 
-                toggles = self.input_manager.toggles["menu"][tab_name]
-                menu[tab_name]["toggles"] = self.convert_toggles_to_list(toggles)
+        #TODO: implement these
+        #text_inputs = self.input_manager.text_inputs[section]
+        #section_data["text_inputs"] = self.convert_text_inputs_to_list(text_inputs)
 
-                text_displays = self.input_manager.text_displays["menu"][tab_name]
-                menu[tab_name]["text_displays"] = self.convert_text_displays_to_list(text_displays)
-                
-                #TODO: implement these
-                #text_inputs = self.input_manager.text_inputs["menu"][tab_name]
-                #menu[tab_name]["text_inputs"] = self.convert_text_inputs_to_list(text_inputs)
+        #multi_selects = self.input_manager.multi_selects[section]
+        #section_data["multi_selects"] = self.convert_multi_selects_to_list(multi_selects)
 
-                #multi_selects = self.input_manager.multi_selects["menu"][tab_name]
-                #menu[tab_name]["multi_selects"] = self.convert_multi_selects_to_list(multi_selects)
-            return menu
-            
-        else:
-            section_data = create_section_defaults()
-            
-            buttons = self.input_manager.buttons[section]
-            section_data["buttons"] = self.convert_buttons_to_list(buttons)
-
-            sliders = self.input_manager.sliders[section]
-            section_data["sliders"] = self.convert_sliders_to_list(sliders)
-
-            toggles = self.input_manager.toggles[section]
-            section_data["toggles"] = self.convert_toggles_to_list(toggles)
-
-            text_displays = self.input_manager.text_displays[section]
-            section_data["text_displays"] = self.convert_text_displays_to_list(text_displays)
-
-            #TODO: implement these
-            #text_inputs = self.input_manager.text_inputs[section]
-            #section_data["text_inputs"] = self.convert_text_inputs_to_list(text_inputs)
-
-            #multi_selects = self.input_manager.multi_selects[section]
-            #section_data["multi_selects"] = self.convert_multi_selects_to_list(multi_selects)
-
-            return section_data
+        return section_data
 
     ## --- CONVERT OBJECTS TO --- ##
 
@@ -296,7 +261,6 @@ class GameManager:
             layout_object = {
                 "name": slider.name,
                 "rect": [slider.rect[0], slider.rect[1], slider.rect[2], slider.rect[3]],
-                "wrapper_rect": [slider.wrapper_rect[0], slider.wrapper_rect[1], slider.wrapper_rect[2], slider.wrapper_rect[3]],
                 "min_value": slider.min_value,
                 "max_value": slider.max_value,
                 "color": [slider.color[0], slider.color[1], slider.color[2]],

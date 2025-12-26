@@ -46,3 +46,7 @@ class Image(UIElement):
         })
         return layout
     
+    def print_info(self) -> None:
+        self.print_common_info()
+        print(f"Image Path: {self.image_path}")
+        
