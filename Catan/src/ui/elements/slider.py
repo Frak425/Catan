@@ -68,9 +68,15 @@ class Slider(UIElement):
 
 
         if handle_shape == "circle":
-                self.handle_surface = pygame.Surface((self.rect.height, self.rect.height), pygame.SRCALPHA)
-                self.handle_surface.fill((0, 0, 0, 0))
-                pygame.draw.circle(self.handle_surface, self.handle_color, (self.rect.height / 2, self.rect.height / 2), self.handle_radius)
+                # For vertical slider, use width as the dimension
+                if direction == "vertical":
+                    self.handle_surface = pygame.Surface((self.rect.width, self.rect.width), pygame.SRCALPHA)
+                    self.handle_surface.fill((0, 0, 0, 0))
+                    pygame.draw.circle(self.handle_surface, self.handle_color, (self.rect.width / 2, self.rect.width / 2), self.handle_radius)
+                else:
+                    self.handle_surface = pygame.Surface((self.rect.height, self.rect.height), pygame.SRCALPHA)
+                    self.handle_surface.fill((0, 0, 0, 0))
+                    pygame.draw.circle(self.handle_surface, self.handle_color, (self.rect.height / 2, self.rect.height / 2), self.handle_radius)
         elif handle_shape == "rectangle":
             self.handle_surface = pygame.Surface((self.handle_length, self.rect.height), pygame.SRCALPHA)
             self.handle_surface.fill((0, 0, 0, 0))
@@ -95,13 +101,13 @@ class Slider(UIElement):
             slider_position = relative_position * (self.rect.height - self.rect.width)
             return int(slider_position)
 
-    def calculate_value(self) -> int:
+    def calculate_value(self) -> float:
         # Calculate the value based on the slider position
         denom_pixels = (self.rect.width - self.rect.height) if self.direction == "horizontal" else (self.rect.height - self.rect.width)
         if denom_pixels == 0:
-            return int(self.min_value)
+            return float(self.min_value)
         relative_position = self.slider_position / denom_pixels
-        value = int(self.min_value + relative_position * (self.max_value - self.min_value))
+        value = self.min_value + relative_position * (self.max_value - self.min_value)
         # Ensure the value is within the defined range
         if value < self.min_value:
             value = self.min_value
@@ -133,12 +139,20 @@ class Slider(UIElement):
                 self.slider_position = self.rect.height - self.rect.width
 
         self.value = self.calculate_value()
+        if self.callback:
+            self.callback()  # Call the callback function if provided
 
     def draw(self, surface: pygame.Surface):
         # Redraw the bar and slider surfaces
         self.draw_surface.fill((0, 0, 0, 0))  # Clear the drawing surface
         self.draw_surface.blit(self.bar_surface, (0, 0))  # Draw the bar surface
-        self.draw_surface.blit(self.handle_surface, (self.slider_position, 0))  # Draw the handle at the correct position
+        # Position handle based on direction
+        if self.direction == "horizontal":
+            handle_pos = (self.slider_position, 0)
+            self.draw_surface.blit(self.handle_surface, handle_pos)
+        else:
+            handle_pos = (0, self.slider_position)
+            self.draw_surface.blit(self.handle_surface, handle_pos)
 
         # Draw the bar and slider on the main surface
         surface.blit(self.draw_surface, self.rect.topleft)

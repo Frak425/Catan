@@ -122,6 +122,7 @@ class GameManager:
                 "sliders": [],
                 "toggles": [],
                 "text_displays": [],
+                "scrollable_areas": [],
                 "text_inputs": [],
                 "multi_selects": [],
                 "menus": []
@@ -132,6 +133,7 @@ class GameManager:
                 "sliders": [],
                 "toggles": [],
                 "text_displays": [],
+                "scrollable_areas": [],
                 "text_inputs": [],
                 "multi_selects": [],
                 "menus": []
@@ -142,6 +144,7 @@ class GameManager:
                 "sliders": [],
                 "toggles": [],
                 "text_displays": [],
+                "scrollable_areas": [],
                 "text_inputs": [],
                 "multi_selects": [],
                 "menus": []
@@ -178,6 +181,7 @@ class GameManager:
                 "sliders": [],
                 "toggles": [],
                 "text_displays": [],
+                "scrollable_areas": [],
                 "text_inputs": [],
                 "multi_selects": [],
                 "menus": []
@@ -196,6 +200,9 @@ class GameManager:
 
         text_displays = self.input_manager.text_displays[section]
         section_data["text_displays"] = self.convert_text_displays_to_list(text_displays)
+        
+        scrollable_areas = self.input_manager.scrollable_areas[section]
+        section_data["scrollable_areas"] = self.convert_scrollable_areas_to_list(scrollable_areas)
         
         # Add menu reference for sections that have the menu
         if section in ["home", "setup", "game"]:
@@ -327,6 +334,16 @@ class GameManager:
                 "padding": text_display.padding
             }
             layout_object_list.append(layout_object)
+        return layout_object_list
+
+    def convert_scrollable_areas_to_list(self, scrollable_areas: dict) -> list:
+        """Convert scrollable area dictionary to list format for JSON serialization."""
+        from src.ui.elements.scrollable_area import ScrollableArea
+        layout_object_list = []
+        for area_name, area in scrollable_areas.items():
+            if isinstance(area, ScrollableArea):
+                layout_object = area.get_layout()
+                layout_object_list.append(layout_object)
         return layout_object_list
 
     def convert_text_inputs_to_list(self, text_inputs: list) -> list:

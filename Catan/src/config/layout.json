@@ -434,19 +434,33 @@
         {
             "name": "settings_menu",
             "rect": [
-                400,
-                200,
-                400,
-                300
+                -195,
+                -161,
+                1346,
+                780
             ],
-            "bckg_color": [
-                200,
-                200,
+            "guiding_line_color": [
+                100,
+                100,
                 200
             ],
-            "tabs": {
-                "buttons": [
-                    {
+            "bckg_color": [
+                100,
+                100,
+                100
+            ],
+            "init_location": [
+                15,
+                8
+            ],
+            "final_location": [
+                15,
+                8
+            ],
+            "anim_length": 0.5,
+            "buttons": {
+                "tabs": {
+                    "input": {
                         "name": "input",
                         "rect": [
                             300,
@@ -454,65 +468,101 @@
                             60,
                             35
                         ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
                         "color": [
                             0,
                             100,
                             0
                         ],
+                        "text_align": "center",
                         "text": "Input",
+                        "shown": true,
+                        "padding": 5,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "padding": 5,
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0,
                         "callback": "change_tab_input"
                     },
-                    {
+                    "accessibility": {
                         "name": "accessibility",
                         "rect": [
-                            400,
-                            20,
+                            396,
+                            37,
                             130,
                             35
                         ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
                         "color": [
                             100,
                             0,
                             0
                         ],
+                        "text_align": "center",
                         "text": "Accessibility",
+                        "shown": true,
+                        "padding": 5,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "padding": 5,
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0,
                         "callback": "change_tab_accessibility"
                     },
-                    {
+                    "gameplay": {
                         "name": "gameplay",
                         "rect": [
-                            585,
-                            20,
+                            566,
+                            19,
                             95,
                             35
                         ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
                         "color": [
                             100,
                             0,
                             0
                         ],
+                        "text_align": "center",
                         "text": "Gameplay",
+                        "shown": true,
+                        "padding": 5,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "padding": 5,
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0,
                         "callback": "change_tab_gameplay"
                     },
-                    {
+                    "audio": {
                         "name": "audio",
                         "rect": [
                             700,
@@ -520,21 +570,33 @@
                             65,
                             35
                         ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
                         "color": [
                             100,
                             0,
                             0
                         ],
+                        "text_align": "center",
                         "text": "Audio",
+                        "shown": true,
+                        "padding": 5,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "padding": 5,
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0,
                         "callback": "change_tab_audio"
                     },
-                    {
+                    "graphics": {
                         "name": "graphics",
                         "rect": [
                             800,
@@ -542,21 +604,33 @@
                             90,
                             35
                         ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
                         "color": [
                             100,
                             0,
                             0
                         ],
+                        "text_align": "center",
                         "text": "Graphics",
+                        "shown": true,
+                        "padding": 5,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "padding": 5,
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0,
                         "callback": "change_tab_graphics"
                     },
-                    {
+                    "close_menu": {
                         "name": "close_menu",
                         "rect": [
                             1116,
@@ -564,31 +638,35 @@
                             100,
                             50
                         ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
                         "color": [
                             100,
                             0,
                             0
                         ],
+                        "text_align": "center",
                         "text": "Close",
+                        "shown": true,
+                        "padding": 5,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "padding": 5,
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0,
                         "callback": "close_menu"
                     }
-                ],
-                "images": [],
-                "sliders": [],
-                "toggles": [],
-                "text_displays": [],
-                "text_inputs": [],
-                "multi_selects": []
-            },
-            "input": {
-                "buttons": [
-                    {
+                },
+                "input": {
+                    "test3": {
                         "name": "test3",
                         "rect": [
                             275,
@@ -596,126 +674,34 @@
                             100,
                             50
                         ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
                         "color": [
                             200,
                             50,
                             100
                         ],
+                        "text_align": "center",
                         "text": "1",
+                        "shown": true,
+                        "padding": 5,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "padding": 5
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
                     }
-                ],
-                "images": [],
-                "sliders": [
-                    {
-                        "name": "brightness",
-                        "rect": [
-                            100,
-                            200,
-                            300,
-                            20
-                        ],
-                        "min_value": 0,
-                        "max_value": 1,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "handle_radius": 10
-                    }
-                ],
-                "toggles": [
-                    {
-                        "name": "aa",
-                        "rect": [
-                            200,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    },
-                    {
-                        "name": "fullscreen",
-                        "rect": [
-                            300,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    },
-                    {
-                        "name": "shadows",
-                        "rect": [
-                            400,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    }
-                ],
-                "text_displays": [],
-                "text_inputs": [],
-                "multi_selects": []
-            },
-            "accessibility": {
-                "buttons": [
-                    {
+                },
+                "accessibility": {
+                    "test3": {
                         "name": "test3",
                         "rect": [
                             275,
@@ -723,126 +709,34 @@
                             100,
                             50
                         ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
                         "color": [
                             200,
                             50,
                             100
                         ],
+                        "text_align": "center",
                         "text": "4",
+                        "shown": true,
+                        "padding": 5,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "padding": 5
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
                     }
-                ],
-                "images": [],
-                "sliders": [
-                    {
-                        "name": "brightness",
-                        "rect": [
-                            100,
-                            200,
-                            300,
-                            20
-                        ],
-                        "min_value": 0,
-                        "max_value": 1,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "handle_radius": 10
-                    }
-                ],
-                "toggles": [
-                    {
-                        "name": "aa",
-                        "rect": [
-                            200,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    },
-                    {
-                        "name": "fullscreen",
-                        "rect": [
-                            300,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    },
-                    {
-                        "name": "shadows",
-                        "rect": [
-                            400,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    }
-                ],
-                "text_displays": [],
-                "text_inputs": [],
-                "multi_selects": []
-            },
-            "gameplay": {
-                "buttons": [
-                    {
+                },
+                "graphics": {
+                    "test3": {
                         "name": "test3",
                         "rect": [
                             275,
@@ -850,126 +744,34 @@
                             100,
                             50
                         ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
                         "color": [
                             200,
                             50,
                             100
                         ],
+                        "text_align": "center",
                         "text": "4",
+                        "shown": true,
+                        "padding": 5,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "padding": 5
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
                     }
-                ],
-                "images": [],
-                "sliders": [
-                    {
-                        "name": "brightness",
-                        "rect": [
-                            100,
-                            200,
-                            300,
-                            20
-                        ],
-                        "min_value": 0,
-                        "max_value": 1,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "handle_radius": 10
-                    }
-                ],
-                "toggles": [
-                    {
-                        "name": "aa",
-                        "rect": [
-                            200,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    },
-                    {
-                        "name": "fullscreen",
-                        "rect": [
-                            300,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    },
-                    {
-                        "name": "shadows",
-                        "rect": [
-                            400,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    }
-                ],
-                "text_displays": [],
-                "text_inputs": [],
-                "multi_selects": []
-            },
-            "audio": {
-                "buttons": [
-                    {
+                },
+                "audio": {
+                    "test3": {
                         "name": "test3",
                         "rect": [
                             275,
@@ -977,126 +779,34 @@
                             100,
                             50
                         ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
                         "color": [
                             200,
                             50,
                             100
                         ],
+                        "text_align": "center",
                         "text": "4",
+                        "shown": true,
+                        "padding": 5,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "padding": 5
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
                     }
-                ],
-                "images": [],
-                "sliders": [
-                    {
-                        "name": "brightness",
-                        "rect": [
-                            100,
-                            200,
-                            300,
-                            20
-                        ],
-                        "min_value": 0,
-                        "max_value": 1,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "handle_radius": 10
-                    }
-                ],
-                "toggles": [
-                    {
-                        "name": "aa",
-                        "rect": [
-                            200,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    },
-                    {
-                        "name": "fullscreen",
-                        "rect": [
-                            300,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    },
-                    {
-                        "name": "shadows",
-                        "rect": [
-                            400,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    }
-                ],
-                "text_displays": [],
-                "text_inputs": [],
-                "multi_selects": []
-            },
-            "graphics": {
-                "buttons": [
-                    {
+                },
+                "gameplay": {
+                    "test3": {
                         "name": "test3",
                         "rect": [
                             275,
@@ -1104,29 +814,496 @@
                             100,
                             50
                         ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
                         "color": [
                             200,
                             50,
                             100
                         ],
+                        "text_align": "center",
                         "text": "4",
+                        "shown": true,
+                        "padding": 5,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "padding": 5
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
                     }
-                ],
-                "images": [],
-                "sliders": [
-                    {
+                }
+            },
+            "toggles": {
+                "tabs": {},
+                "input": {
+                    "aa": {
+                        "name": "aa",
+                        "rect": [
+                            200,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    },
+                    "fullscreen": {
+                        "name": "fullscreen",
+                        "rect": [
+                            300,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    },
+                    "shadows": {
+                        "name": "shadows",
+                        "rect": [
+                            400,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    }
+                },
+                "accessibility": {
+                    "aa": {
+                        "name": "aa",
+                        "rect": [
+                            200,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    },
+                    "fullscreen": {
+                        "name": "fullscreen",
+                        "rect": [
+                            300,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    },
+                    "shadows": {
+                        "name": "shadows",
+                        "rect": [
+                            400,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    }
+                },
+                "graphics": {
+                    "aa": {
+                        "name": "aa",
+                        "rect": [
+                            200,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    },
+                    "fullscreen": {
+                        "name": "fullscreen",
+                        "rect": [
+                            300,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    },
+                    "shadows": {
+                        "name": "shadows",
+                        "rect": [
+                            400,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    }
+                },
+                "audio": {
+                    "aa": {
+                        "name": "aa",
+                        "rect": [
+                            200,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    },
+                    "fullscreen": {
+                        "name": "fullscreen",
+                        "rect": [
+                            300,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    },
+                    "shadows": {
+                        "name": "shadows",
+                        "rect": [
+                            400,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    }
+                },
+                "gameplay": {
+                    "aa": {
+                        "name": "aa",
+                        "rect": [
+                            200,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    },
+                    "fullscreen": {
+                        "name": "fullscreen",
+                        "rect": [
+                            300,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    },
+                    "shadows": {
+                        "name": "shadows",
+                        "rect": [
+                            400,
+                            300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    }
+                }
+            },
+            "sliders": {
+                "tabs": {},
+                "input": {
+                    "brightness": {
                         "name": "brightness",
                         "rect": [
                             100,
                             200,
                             300,
                             20
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
                         ],
                         "min_value": 0,
                         "max_value": 1,
@@ -1140,21 +1317,28 @@
                             0,
                             0
                         ],
-                        "handle_radius": 10
+                        "handle_radius": 10,
+                        "direction": "horizontal",
+                        "handle_shape": "circle",
+                        "handle_length": 0
                     }
-                ],
-                "toggles": [
-                    {
-                        "name": "aa",
+                },
+                "accessibility": {
+                    "brightness": {
+                        "name": "brightness",
                         "rect": [
+                            100,
                             200,
                             300,
-                            150,
-                            50
+                            20
                         ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "min_value": 0,
+                        "max_value": 1,
                         "color": [
                             0,
                             100,
@@ -1165,61 +1349,124 @@
                             0,
                             0
                         ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    },
-                    {
-                        "name": "fullscreen",
-                        "rect": [
-                            300,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
-                    },
-                    {
-                        "name": "shadows",
-                        "rect": [
-                            400,
-                            300,
-                            150,
-                            50
-                        ],
-                        "guiding_lines": true,
-                        "height": 50,
-                        "center_width": 100,
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "handle_color": [
-                            100,
-                            0,
-                            0
-                        ],
-                        "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "handle_radius": 10,
+                        "direction": "horizontal",
+                        "handle_shape": "circle",
+                        "handle_length": 0
                     }
-                ],
-                "text_displays": [],
-                "text_inputs": [],
-                "multi_selects": []
+                },
+                "graphics": {
+                    "brightness": {
+                        "name": "brightness",
+                        "rect": [
+                            100,
+                            200,
+                            300,
+                            20
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "min_value": 0,
+                        "max_value": 1,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "handle_radius": 10,
+                        "direction": "horizontal",
+                        "handle_shape": "circle",
+                        "handle_length": 0
+                    }
+                },
+                "audio": {
+                    "brightness": {
+                        "name": "brightness",
+                        "rect": [
+                            100,
+                            200,
+                            300,
+                            20
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "min_value": 0,
+                        "max_value": 1,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "handle_radius": 10,
+                        "direction": "horizontal",
+                        "handle_shape": "circle",
+                        "handle_length": 0
+                    }
+                },
+                "gameplay": {
+                    "brightness": {
+                        "name": "brightness",
+                        "rect": [
+                            100,
+                            200,
+                            300,
+                            20
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "min_value": 0,
+                        "max_value": 1,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "handle_radius": 10,
+                        "direction": "horizontal",
+                        "handle_shape": "circle",
+                        "handle_length": 0
+                    }
+                }
+            },
+            "images": {
+                "tabs": {},
+                "input": {},
+                "accessibility": {},
+                "graphics": {},
+                "audio": {},
+                "gameplay": {}
+            },
+            "text_displays": {
+                "tabs": {},
+                "input": {},
+                "accessibility": {},
+                "graphics": {},
+                "audio": {},
+                "gameplay": {}
             }
         }
     ]

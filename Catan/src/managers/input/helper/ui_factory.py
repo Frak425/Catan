@@ -1,4 +1,5 @@
 import pygame
+import pygame
 from typing import Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -11,6 +12,7 @@ from src.ui.elements.toggle import Toggle
 from src.ui.elements.image import Image
 from src.ui.elements.text_display import TextDisplay
 from src.ui.elements.menu import Menu
+from src.ui.elements.scrollable_area import ScrollableArea
 
 
 class UIFactory:
@@ -198,6 +200,30 @@ class UIFactory:
             return TextDisplay(props, self.game_manager, self.game_manager.game_font, callback=callback)
         
         return self._create_elements_from_layout('text_displays', text_display_factory, callbacks)
+
+    # --- SCROLLABLE AREA CREATION --- #
+
+    def create_all_scrollable_areas(self, callbacks) -> Dict[str, Dict]:
+        """Create all scrollable areas dynamically from config files."""
+        def scrollable_area_factory(props, cbs, state, tab):
+            # Create a dummy content surface for now - users can replace it
+            content_height = props.get('content_height', 600)
+            content_width = props.get('viewable_content_width', 200)
+            content_surface = pygame.Surface((content_width, content_height))
+            
+            # Create a vertical gradient to test scroll logic
+            start_color = (255, 0, 0)  # Red at top
+            end_color = (0, 0, 255)    # Blue at bottom
+            for y in range(content_height):
+                ratio = y / content_height
+                r = int(start_color[0] + (end_color[0] - start_color[0]) * ratio)
+                g = int(start_color[1] + (end_color[1] - start_color[1]) * ratio)
+                b = int(start_color[2] + (end_color[2] - start_color[2]) * ratio)
+                pygame.draw.line(content_surface, (r, g, b), (0, y), (content_width, y))
+            
+            return ScrollableArea(props, self.game_manager, content_surface)
+        
+        return self._create_elements_from_layout('scrollable_areas', scrollable_area_factory, callbacks)
 
     # --- MENU CREATION --- #
 

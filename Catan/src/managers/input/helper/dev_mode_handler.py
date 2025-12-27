@@ -6,6 +6,7 @@ if TYPE_CHECKING:
     from src.managers.input.helper.mouse_input_handler import MouseInputHandler
     from input_manager import InputManager
 
+from src.ui.elements.scrollable_area import ScrollableArea
 from src.ui.elements.image import Image
 from src.ui.elements.toggle import Toggle
 from src.ui.elements.slider import Slider
@@ -89,6 +90,7 @@ class DevModeHandler:
             self.input_manager.sliders,
             self.input_manager.images,
             self.input_manager.text_displays,
+            self.input_manager.scrollable_areas,
             self.input_manager.menu
         )
     """
@@ -153,6 +155,9 @@ class DevModeHandler:
         elif text == "refreshui":
             self.game_manager.input_manager.reset_ui()
             return
+        elif text == "toggle_debug":
+            self.game_manager.debugging = not self.game_manager.debugging
+            return
         
         if not self.mouse_handler.active:
             print("No active element selected.")
@@ -163,7 +168,7 @@ class DevModeHandler:
 
     def _execute_command(self, text: str) -> None:
         """Execute command using pattern matching and dynamic attribute setting."""
-        
+        assert self.mouse_handler.active is not None, "No active element selected."
         # Direct attribute setting: attr_name+value
         # Examples: x100, y50, w200, h150
         simple_attrs = {
@@ -210,10 +215,14 @@ class DevModeHandler:
         # Other commands...
         elif text == "del":
             self._delete_active()
+        elif text == "print_info":
+            self.mouse_handler.active.print_info()
         """
             elif text == "centertext":
             self._center_text()
         """
+        if isinstance(self.mouse_handler.active, ScrollableArea):
+            self.mouse_handler.active.calculate_dependent_properties()
 
     def _set_attr(self, attr_name: str, value) -> None:
         """Dynamically set an attribute if it exists."""
@@ -222,6 +231,9 @@ class DevModeHandler:
             print(f"Set {attr_name} to {value}")
         else:
             print(f"Active element does not have attribute: {attr_name}")
+
+        if isinstance(self.mouse_handler.active, ScrollableArea):
+            self.mouse_handler.active.calculate_dependent_properties()
 
     def _set_nested_attr(self, attr_path: str, value) -> None:
         """Set nested attributes like 'rect.x'."""
@@ -242,6 +254,9 @@ class DevModeHandler:
             print(f"Set {attr_path} to {value}")
         else:
             print(f"Attribute not found: {attr_path}")
+
+        if isinstance(self.mouse_handler.active, ScrollableArea):
+            self.mouse_handler.active.calculate_dependent_properties()
 
     def _set_color_attr(self, attr_name: str, color_str: str) -> None:
         """Set a color attribute from comma-separated RGB string."""

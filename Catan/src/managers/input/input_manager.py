@@ -13,6 +13,7 @@ from src.managers.input.helper.mouse_input_handler import MouseInputHandler
 from src.managers.input.helper.keyboard_input_handler import KeyboardInputHandler
 from src.managers.input.helper.dev_mode_handler import DevModeHandler
 from src.managers.input.helper.ui_factory import UIFactory
+from src.ui.elements.scrollable_area import ScrollableArea
 
 
 class InputManager:
@@ -46,12 +47,13 @@ class InputManager:
         self.sliders = self.ui_factory.create_all_sliders(callbacks)
         self.images = self.ui_factory.create_all_images(callbacks)
         self.text_displays = self.ui_factory.create_all_text_displays(callbacks)
+        self.scrollable_areas = self.ui_factory.create_all_scrollable_areas(callbacks)
         self.menu = self.ui_factory.create_menu(self.buttons["menu"], self.toggles["menu"], self.sliders["menu"], self.images["menu"], self.text_displays["menu"])
         self.graphics_manager.set_ui_by_type()
         
         # Update mouse handler with new UI elements (if mouse_handler exists)
         if hasattr(self, 'mouse_handler'):
-            self.mouse_handler.set_ui_elements(self.buttons, self.toggles, self.sliders, self.images, self.text_displays, self.menu)
+            self.mouse_handler.set_ui_elements(self.buttons, self.toggles, self.sliders, self.images, self.text_displays, self.scrollable_areas, self.menu)
         
         # Update graphics manager's UI references (if graphics_manager exists)
         if hasattr(self, 'graphics_manager') and hasattr(self.graphics_manager, 'ui_by_type'):
@@ -60,7 +62,8 @@ class InputManager:
                 "images": self.images,
                 "text_displays": self.text_displays,
                 "sliders": self.sliders,
-                "toggles": self.toggles
+                "toggles": self.toggles,
+                "scrollable_areas": self.scrollable_areas
             }
         
         # Initialize UI elements

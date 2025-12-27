@@ -13,6 +13,7 @@ from src.ui.elements.slider import Slider
 from src.ui.elements.toggle import Toggle
 from src.ui.elements.image import Image
 from src.ui.elements.menu import Menu
+from src.ui.elements.scrollable_area import ScrollableArea
 
 
 class MouseInputHandler:
@@ -38,6 +39,7 @@ class MouseInputHandler:
         self.buttons: Dict = {}
         self.toggles: Dict = {}
         self.sliders: Dict = {}
+        self.scrollable_areas: Dict = {}
         
     def set_managers(self, game_manager, graphics_manager, helper_manager):
         """Set manager references."""
@@ -45,13 +47,14 @@ class MouseInputHandler:
         self.graphics_manager = graphics_manager
         self.helper_manager = helper_manager
 
-    def set_ui_elements(self, buttons, toggles, sliders, images, text_display, menu):
+    def set_ui_elements(self, buttons, toggles, sliders, images, text_display, scrollable_areas, menu):
         """Set UI element references."""
         self.buttons = buttons
         self.toggles = toggles
         self.sliders = sliders
         self.images = images
         self.text_display = text_display
+        self.scrollable_areas = scrollable_areas
         self.menu = menu
 
     def handle_mouse_input(self, x: int, y: int, event_type: int) -> None:
@@ -98,6 +101,25 @@ class MouseInputHandler:
                 menu_offset_x, 
                 menu_offset_y
             )
+            
+            # If slider was clicked, check if it was specifically on the handle
+            if slider_clicked:
+                if slider_clicked.direction == "horizontal":
+                    handle_rect = pygame.Rect(
+                        slider_clicked.rect.x + slider_clicked.slider_position + menu_offset_x,
+                        slider_clicked.rect.y + menu_offset_y,
+                        slider_clicked.handle_surface.get_width(),
+                        slider_clicked.handle_surface.get_height()
+                    )
+                else:  # vertical
+                    handle_rect = pygame.Rect(
+                        slider_clicked.rect.x + menu_offset_x,
+                        slider_clicked.rect.y + slider_clicked.slider_position + menu_offset_y,
+                        slider_clicked.handle_surface.get_width(),
+                        slider_clicked.handle_surface.get_height()
+                    )
+                if not handle_rect.collidepoint(x, y):
+                    slider_clicked = None
             # TextDisplay is display-only, but selectable in dev mode
             text_display_clicked: TextDisplay | None = None
             if self.game_manager.dev_mode:
@@ -114,6 +136,32 @@ class MouseInputHandler:
                 menu_offset_x,
                 menu_offset_y
             )
+            scrollable_area_clicked: ScrollableArea | None = self.helper_manager.check_clickable_from_dict(
+                self.scrollable_areas["menu"][self.menu.active_tab],
+                (x, y),
+                menu_offset_x,
+                menu_offset_y
+            )
+            
+            # If scrollable area was clicked, check if it was specifically on the slider handle
+            if scrollable_area_clicked:
+                slider = scrollable_area_clicked.slider
+                if slider.direction == "horizontal":
+                    handle_rect = pygame.Rect(
+                        scrollable_area_clicked.rect.x + slider.rect.x + slider.slider_position + menu_offset_x,
+                        scrollable_area_clicked.rect.y + slider.rect.y + menu_offset_y,
+                        slider.handle_surface.get_width(),
+                        slider.handle_surface.get_height()
+                    )
+                else:  # vertical
+                    handle_rect = pygame.Rect(
+                        scrollable_area_clicked.rect.x + slider.rect.x + menu_offset_x,
+                        scrollable_area_clicked.rect.y + slider.rect.y + slider.slider_position + menu_offset_y,
+                        slider.handle_surface.get_width(),
+                        slider.handle_surface.get_height()
+                    )
+                if not handle_rect.collidepoint(x, y):
+                    scrollable_area_clicked = None
             
             # If not, check the tabs of the menu
             if not button_clicked:
@@ -147,6 +195,25 @@ class MouseInputHandler:
             slider_clicked: Slider | None = self.helper_manager.check_clickable_from_dict(
                 self.sliders[state], (x, y)
             )
+            
+            # If slider was clicked, check if it was specifically on the handle
+            if slider_clicked:
+                if slider_clicked.direction == "horizontal":
+                    handle_rect = pygame.Rect(
+                        slider_clicked.rect.x + slider_clicked.slider_position,
+                        slider_clicked.rect.y,
+                        slider_clicked.handle_surface.get_width(),
+                        slider_clicked.handle_surface.get_height()
+                    )
+                else:  # vertical
+                    handle_rect = pygame.Rect(
+                        slider_clicked.rect.x,
+                        slider_clicked.rect.y + slider_clicked.slider_position,
+                        slider_clicked.handle_surface.get_width(),
+                        slider_clicked.handle_surface.get_height()
+                    )
+                if not handle_rect.collidepoint(x, y):
+                    slider_clicked = None
             # TextDisplay is display-only, but selectable in dev mode
             text_display_clicked: TextDisplay | None = None
             if self.game_manager.dev_mode:
@@ -156,6 +223,29 @@ class MouseInputHandler:
             image_clicked: Image | None = self.helper_manager.check_clickable_from_dict(
                 self.images[state], (x, y)
             )
+            scrollable_area_clicked: ScrollableArea | None = self.helper_manager.check_clickable_from_dict(
+                self.scrollable_areas[state], (x, y)
+            )
+            
+            # If scrollable area was clicked, check if it was specifically on the slider handle
+            if scrollable_area_clicked:
+                slider = scrollable_area_clicked.slider
+                if slider.direction == "horizontal":
+                    handle_rect = pygame.Rect(
+                        scrollable_area_clicked.rect.x + slider.rect.x + slider.slider_position,
+                        scrollable_area_clicked.rect.y + slider.rect.y,
+                        slider.handle_surface.get_width(),
+                        slider.handle_surface.get_height()
+                    )
+                else:  # vertical
+                    handle_rect = pygame.Rect(
+                        scrollable_area_clicked.rect.x + slider.rect.x,
+                        scrollable_area_clicked.rect.y + slider.rect.y + slider.slider_position,
+                        slider.handle_surface.get_width(),
+                        slider.handle_surface.get_height()
+                    )
+                if not handle_rect.collidepoint(x, y):
+                    scrollable_area_clicked = None
 
             menu_clicked: Menu | None = None
 
@@ -178,6 +268,9 @@ class MouseInputHandler:
         if image_clicked:
             self.active = image_clicked
 
+        if scrollable_area_clicked:
+            self.active = scrollable_area_clicked
+
         if self.prev_active and self.prev_active != self.active:
             self.prev_active.is_active = False
         if self.active:
@@ -196,13 +289,11 @@ class MouseInputHandler:
         if not self.game_manager.dev_mode:
             # Handle drag updates
             if self.dragging and isinstance(self.active, Slider):
-                if self.graphics_manager.menu_open:
-                    self.handle_drag(
-                        x - self.menu.location[0], 
-                        y - self.menu.location[1]
-                    )
-                else:
-                    self.handle_drag(x, y)
+                self.active.update_location(x, y)
+            elif self.dragging and isinstance(self.active, ScrollableArea):
+                # Handle scrollable area's internal slider dragging
+                # Pass absolute coordinates - ScrollableArea will adjust them
+                self.active.update_scroll(x, y)
         else:
             # In dev mode, we can move any ui element around
             if self.active:
@@ -224,14 +315,18 @@ class MouseInputHandler:
         if self.active and not self.game_manager.dev_mode:
             self.handle_click()
 
-        # In normal mode, sliders become inactive after release
+        # In normal mode, sliders and scrollable areas become inactive after release
         # In dev mode, keep them active for command execution
-        if isinstance(self.active, Slider) and not self.game_manager.dev_mode:
-            self.active.is_active = False
-            # Trigger slider callback after drag completes, regardless of mouse position
-            if self.active.callback:
-                self.active.callback()
-            self.active = None
+        if not self.game_manager.dev_mode:
+            if isinstance(self.active, Slider):
+                self.active.is_active = False
+                # Trigger slider callback after drag completes, regardless of mouse position
+                if self.active.callback:
+                    self.active.callback()
+                self.active = None
+            elif isinstance(self.active, ScrollableArea):
+                self.active.is_active = False
+                self.active = None
 
     def handle_click(self) -> None:
         """Process a click event on the active UI element."""
@@ -269,3 +364,6 @@ class MouseInputHandler:
         """Handle dragging of slider elements."""
         if self.active and isinstance(self.active, Slider):
             self.active.update_location(x, y)
+
+        if self.active and isinstance(self.active, ScrollableArea):
+            self.active.update_scroll(x, y)
