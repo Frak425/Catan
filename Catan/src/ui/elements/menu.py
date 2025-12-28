@@ -34,7 +34,11 @@ class Menu(UIElement):
         self.images = images
         self.text_displays = text_displays
         
-        self.open = False
+        # Multi-menu system properties
+        self.z_index = 0  # Lower number = on top (0 is highest priority)
+        self.exclusive_with = []  # List of menu names that can't be open simultaneously
+        self.modal = False  # If True, blocks input to other menus
+        self.close_on_state_change = True  # If True, closes when game state changes
         
         self.anim_length = 0.5  # in seconds
         self.start_time = None
@@ -42,7 +46,8 @@ class Menu(UIElement):
         self.anim_reversed = False
         
         # Initialize parent class (this calls read_layout internally)
-        super().__init__(layout_props, game_manager, callback=None, shown=True)
+        # Start with shown=False since menu should be closed by default
+        super().__init__(layout_props, game_manager, callback=None, shown=False)
         
         # Read layout properties to update locations from config
         self.read_layout(layout_props)
@@ -58,72 +63,143 @@ class Menu(UIElement):
         else:
             self.menu_surface.fill(self.bckg_color)
         
+        # Add all UI elements to the hierarchy
+        self._add_children_to_hierarchy()
+        
         self.update_menu(time)
+    
+    def _add_children_to_hierarchy(self):
+        """Add all buttons, toggles, sliders, images, and text displays to the hierarchy."""
+        # Add tab buttons
+        if "tabs" in self.buttons:
+            for button in self.buttons["tabs"].values():
+                self.add_child(button)
+        
+        # Add elements for each tab
+        for tab in self.tabs:
+            if tab in self.buttons:
+                for button in self.buttons[tab].values():
+                    self.add_child(button)
+            if tab in self.toggles:
+                for toggle in self.toggles[tab].values():
+                    self.add_child(toggle)
+            if tab in self.sliders:
+                for slider in self.sliders[tab].values():
+                    self.add_child(slider)
+            if tab in self.images:
+                for image in self.images[tab].values():
+                    self.add_child(image)
+            if tab in self.text_displays:
+                for text_display in self.text_displays[tab].values():
+                    self.add_child(text_display)
     
     def open_menu(self):
         self.location = self.final_location
-        self.open = True
+        self.shown = True  # Make menu visible
+        self._invalidate_absolute_rect()  # Recalculate positions
 
     def close_menu(self):
         self.location = self.init_location
-        self.open = False
+        self.shown = False  # Hide menu
+        self._invalidate_absolute_rect()  # Recalculate positions
 
     def update_menu(self, time: int):
-        # When refreshing the menu...
-        # Refresh the background and cover everything previously
-        assert self.bckg_color is not None
-        self.menu_surface.fill((self.bckg_color))
-
-        # Blit tabs on the menu surface
-        for button_name, button in self.buttons["tabs"].items():
-            button.draw(self.menu_surface)
-
-        # Blit the active tab's buttons on the menu surface
-        for button_name, button in self.buttons[self.active_tab].items():
-            button.draw(self.menu_surface)
-
-        # Blit toggles on the menu surface
-        for toggle_name, toggle in self.toggles[self.active_tab].items():
-            toggle.draw(self.menu_surface, time)
-
-        for slider_name, slider in self.sliders[self.active_tab].items():
-            slider.draw(self.menu_surface)
+        """Update menu state and control which children are visible based on active tab."""
+        # Control visibility of children based on active tab
+        # Tab buttons are always visible
+        if "tabs" in self.buttons:
+            for button in self.buttons["tabs"].values():
+                button.shown = True
         
-        # Blit images on the menu surface
-        for image_name, image in self.images[self.active_tab].items():
-            image.draw(self.menu_surface)
-        
-        # Blit text displays on the menu surface
-        for text_display_name, text_display in self.text_displays[self.active_tab].items():
-            text_display.draw(self.menu_surface)
+        # Show only elements for the active tab
+        for tab in self.tabs:
+            is_active = (tab == self.active_tab)
+            
+            if tab in self.buttons:
+                for button in self.buttons[tab].values():
+                    button.shown = is_active
+            if tab in self.toggles:
+                for toggle in self.toggles[tab].values():
+                    toggle.shown = is_active
+            if tab in self.sliders:
+                for slider in self.sliders[tab].values():
+                    slider.shown = is_active
+            if tab in self.images:
+                for image in self.images[tab].values():
+                    image.shown = is_active
+            if tab in self.text_displays:
+                for text_display in self.text_displays[tab].values():
+                    text_display.shown = is_active
 
-    def draw(self, surface: pygame.Surface, time):
-        self.update_menu(time)
-        assert self.location is not None
-        surface.blit(self.menu_surface, self.location)
+    def draw(self, surface: pygame.Surface, time: int | None= None):
+        if not self.shown:
+            return
+        
+        # Update menu state
+        if time is not None:
+            self.update_menu(time)
+        
+        # Use absolute rect for drawing (combines rect with location)
+        abs_rect = self.get_absolute_rect()
+        
+        # Redraw background
+        if self.backdrop:
+            self.menu_surface.fill((0, 0, 0, 0))  # Clear
+            self.menu_surface.blit(pygame.transform.scale(self.backdrop, self.rect.size), (0, 0))
+        else:
+            self.menu_surface.fill(self.bckg_color)
+        
+        # Draw menu surface at absolute position
+        surface.blit(self.menu_surface, abs_rect.topleft)
+        
+        # Draw children (they handle their own absolute positioning)
+        for child in self.children:
+            if child.shown:
+                # Pass time to toggles if needed
+                if isinstance(child, Toggle) and time is not None:
+                    child.draw(surface, time)
+                else:
+                    child.draw(surface)
         
         # Draw guiding lines in dev mode
         if self.game_manager.dev_mode and self.is_active:
-            # Draw guiding lines at the menu's current position
-            pygame.draw.rect(
-                surface,
-                self.guiding_line_color,
-                pygame.Rect(
-                    self.location[0],
-                    self.location[1],
+            pygame.draw.rect(surface, self.guiding_line_color, abs_rect, 2)
+    
+    def get_absolute_rect(self) -> pygame.Rect:
+        """Override to use location instead of rect position."""
+        if self._absolute_rect is None:
+            # Menu uses location for positioning, not rect.x/rect.y
+            if self.location:
+                x, y = self.location
+            else:
+                x, y = self.rect.x, self.rect.y
+            
+            if self.parent:
+                parent_rect = self.parent.get_absolute_rect()
+                self._absolute_rect = pygame.Rect(
+                    parent_rect.x + x,
+                    parent_rect.y + y,
                     self.rect.width,
                     self.rect.height
-                ),
-                2  # Line thickness
-            )
+                )
+            else:
+                self._absolute_rect = pygame.Rect(x, y, self.rect.width, self.rect.height)
+        return self._absolute_rect
 
     def get_layout(self) -> dict:
         layout = self._get_common_layout()
         layout.update({
+            "_type": "Menu",
             "bckg_color": [self.bckg_color[0], self.bckg_color[1], self.bckg_color[2]] if self.bckg_color else None,
             "init_location": [self.init_location[0], self.init_location[1]] if self.init_location else None,
             "final_location": [self.final_location[0], self.final_location[1]] if self.final_location else None,
             "anim_length": self.anim_length,
+            "active_tab": self.active_tab,
+            "tabs": self.tabs,
+            "z_index": self.z_index,
+            "exclusive_with": self.exclusive_with,
+            "modal": self.modal,
+            "close_on_state_change": self.close_on_state_change,
             "buttons": {tab: {name: button.get_layout() for name, button in buttons.items()} for tab, buttons in self.buttons.items()},
             "toggles": {tab: {name: toggle.get_layout() for name, toggle in toggles.items()} for tab, toggles in self.toggles.items()},
             "sliders": {tab: {name: slider.get_layout() for name, slider in sliders.items()} for tab, sliders in self.sliders.items()},
@@ -149,6 +225,12 @@ class Menu(UIElement):
             self.final_location = (final_location_data[0], final_location_data[1])
 
         self.anim_length = layout_props.get("anim_length", self.anim_length)
+        
+        # Read multi-menu properties
+        self.z_index = layout_props.get("z_index", self.z_index)
+        self.exclusive_with = layout_props.get("exclusive_with", self.exclusive_with)
+        self.modal = layout_props.get("modal", self.modal)
+        self.close_on_state_change = layout_props.get("close_on_state_change", self.close_on_state_change)
 
         # Read buttons
         buttons_layout = layout_props.get("buttons", {})
@@ -204,7 +286,7 @@ class Menu(UIElement):
         print(f"Final Location: {self.final_location}")
         print(f"Animation Length: {self.anim_length}")
         print(f"Active Tab: {self.active_tab}")
-        print(f"Open: {self.open}")
+        print(f"Shown (Open): {self.shown}")
         print(f"Buttons:")
         for tab, buttons in self.buttons.items():
             print(f"  Tab: {tab}")

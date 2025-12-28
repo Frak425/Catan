@@ -68,12 +68,22 @@ class GraphicsManager:
             print("wrong game state")
             self.game_manager.running = False
 
-        self.draw_menu()
+        self.draw_menus()
             
-    def draw_menu(self):
-        if self.menu_open:
-            assert self.input_manager is not None, "GraphicsManager: menu not set in InputManager"
-            self.input_manager.menu.draw(self.game_manager.screen, self.time)
+    def draw_menus(self):
+        """Draw all open menus sorted by z-index (higher z_index = drawn first = behind)."""
+        if not self.input_manager or not hasattr(self.input_manager, 'menus'):
+            return
+        
+        # Get all menus sorted by z-index (higher first, so they draw in back)
+        sorted_menus = sorted(
+            self.input_manager.menus.values(),
+            key=lambda m: m.z_index,
+            reverse=True
+        )
+        for menu in sorted_menus:
+            # Menu.draw() checks menu.shown internally, so closed menus won't draw
+            menu.draw(self.game_manager.screen, self.time)
 
     def draw_ui(self, type: str, layer: str):
         for element_name, element in self.ui_by_type[type][layer].items():

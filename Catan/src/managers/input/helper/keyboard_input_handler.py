@@ -86,7 +86,8 @@ class KeyboardInputHandler:
 
     def _handle_escape(self) -> None:
         """Handle escape key press."""
-        if self.graphics_manager.menu_open:
+        # Check if any menus are open by asking InputManager
+        if hasattr(self.game_manager, 'input_manager') and self.game_manager.input_manager.get_open_menus():
             self._close_menu()
         elif self.game_manager.dev_mode_typing:
             self.game_manager.dev_mode_typing = False

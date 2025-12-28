@@ -33,7 +33,6 @@ class GameManager:
         self.game_font = pygame.font.SysFont('Comic Sans', self.font_size)
         self.game_state = "home" # main menu -> game setup -> init -> game ongoing -> game over -> main menu
         self.player_state = "roll" # roll -> trade -> buy -> place
-        self.settings_open = False
         self.players_num = 2
         self.players_list = []
         self.players_list_index = 0
@@ -44,28 +43,6 @@ class GameManager:
         self.framerate_index = 1
         self.num_tiles = 19
         self.points_to_win = 10
-        self.game_difficulty = "easy"
-        self.menu_margins = (50, 50) #top, bottom
-        self.menu_rect = pygame.Rect(self.menu_margins[0], self.menu_margins[1], self.screen_w - 2 * self.menu_margins[0], self.screen_h - 2 * self.menu_margins[1])
-        self.menu_size = (self.screen_w - 2 * self.menu_margins[0], self.screen_h - 2 * self.menu_margins[1])
-        self.init_location = (self.screen_w + self.menu_margins[0], self.menu_margins[1]) #of top left corner
-        self.final_location = self.menu_margins #of top left corner
-        self.menu_background_color = (100, 100, 100)
-        self.play_button_width = 200
-        self.play_button_height = 75
-        self.game_start_button_width = 150
-        self.game_start_button_height = 50
-        self.player_number_incease_decrease_button_size = self.screen_h / 20
-        self.settings_open_button_size = self.screen_w / 12 / 1.5
-        self.settings_open_button_offset = self.screen_h / 24 / 1.5
-        self.menu_tab_margin_top = 20
-        self.close_menu_margins = (50, 50)
-        self.close_menu_size = (100, 50)
-        self.menu_input_tab_size = (60, 35)
-        self.menu_accessibility_tab_size = (130, 35)
-        self.menu_gameplay_tab_size = (95, 35)
-        self.menu_audio_tab_size = (65, 35)
-        self.menu_graphics_tab_size = (90, 35)
         
         self.buy_selection_backdrop_offset = (self.screen_w / 8 * 5, self.screen_h / 8 * 7)
         self.buy_selection_offset = (50, 50)
@@ -156,8 +133,8 @@ class GameManager:
         layout["setup"] = self.save_layout_by_section("setup")
         layout["game"] = self.save_layout_by_section("game")
         
-        # Save menus at the top level
-        layout["menus"] = [self.input_manager.menu.get_layout()]
+        # Save all menus at the top level
+        layout["menus"] = [menu.get_layout() for menu in self.input_manager.menus.values()]
 
         return layout
 
@@ -206,7 +183,7 @@ class GameManager:
         
         # Add menu reference for sections that have the menu
         if section in ["home", "setup", "game"]:
-            section_data["menus"] = [self.input_manager.menu.name]
+            section_data["menus"] = list(self.input_manager.menus.keys())
 
         #TODO: implement these
         #text_inputs = self.input_manager.text_inputs[section]

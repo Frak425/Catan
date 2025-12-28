@@ -69,10 +69,16 @@ class TextDisplay(UIElement):
         self.set_text_align(self.text_align)
 
     def draw(self, surface: pygame.Surface) -> None:
+        if not self.shown:
+            return
+        
+        # Get absolute position for drawing
+        abs_rect = self.get_absolute_rect()
+        
         # Blit the background and text to the surface
         self.surface.fill(self.color)
         self.surface.blit(self.text_surface, self.text_rect)
-        surface.blit(self.surface, self.rect)
+        surface.blit(self.surface, abs_rect.topleft)
 
         if self.is_active:
             self.draw_guiding_lines(surface)
@@ -92,6 +98,7 @@ class TextDisplay(UIElement):
     def get_layout(self) -> dict:
         layout = self._get_common_layout()
         layout.update({
+            "_type": "TextDisplay",
             "color": [self.color[0], self.color[1], self.color[2]],
             "text": self.text,
             "text_color": [self.text_color[0], self.text_color[1], self.text_color[2]],

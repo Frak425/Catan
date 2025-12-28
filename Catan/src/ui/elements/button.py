@@ -70,10 +70,33 @@ class Button(UIElement):
         elif text_align == "right":
             self.text_rect.midright = (self.surface.get_rect().width - self.padding, self.surface.get_rect().centery)
 
+    def _handle_own_event(self, event: pygame.event.Event) -> bool:
+        """Handle button-specific events (clicks, hover)."""
+        if self.disabled or not self.shown:
+            return False
+        
+        abs_rect = self.get_absolute_rect()
+        mouse_pos = pygame.mouse.get_pos()
+        
+        # Update hover state
+        is_hovering = abs_rect.collidepoint(mouse_pos)
+        if is_hovering != self.hovering:
+            self.hovering = is_hovering
+        
+        # Handle click
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if abs_rect.collidepoint(event.pos):
+                self.trigger()
+                return True
+        
+        return False
 
     def draw(self, surface: pygame.Surface) -> None:
         if not self.shown:
             return
+        
+        # Get absolute position for drawing
+        abs_rect = self.get_absolute_rect()
         
         # Apply visual state modifications
         draw_color = self.color
@@ -87,10 +110,20 @@ class Button(UIElement):
             # Lighten on hover
             draw_color = tuple(min(255, int(c * 1.2)) for c in self.color)
         
-        # Draw using the provided surface explicitly
-        pygame.draw.rect(surface, draw_color, self.rect)
+        # Draw using absolute rect
+        pygame.draw.rect(surface, draw_color, abs_rect)
         text = self.game_font.render(self.text, False, draw_text_color)
-        surface.blit(text, self.get_text_rect(text))
+        
+        # Calculate text position based on absolute rect
+        text_rect = text.get_rect()
+        if self.text_align == "center":
+            text_rect.center = abs_rect.center
+        elif self.text_align == "left":
+            text_rect.midleft = (abs_rect.left + self.padding, abs_rect.centery)
+        elif self.text_align == "right":
+            text_rect.midright = (abs_rect.right - self.padding, abs_rect.centery)
+        
+        surface.blit(text, text_rect)
 
         if self.is_active:
             self.draw_guiding_lines(surface)
@@ -120,6 +153,7 @@ class Button(UIElement):
     def get_layout(self) -> dict:
         layout = self._get_common_layout()
         layout.update({
+            "_type": "Button",
             "color": [self.color[0], self.color[1], self.color[2]],
             "text_align": "center",
             "text": self.text,
@@ -136,13 +170,16 @@ class Button(UIElement):
         # Save callback name if it exists - do reverse lookup in callback registry
         if hasattr(self, 'callback') and self.callback:
             callback_name = None
-            if hasattr(self.game_manager, 'input_manager'):
-                if hasattr(self.game_manager.input_manager, 'ui_factory'):
-                    if hasattr(self.game_manager.input_manager.ui_factory, 'callback_registry'):
-                        for name, func in self.game_manager.input_manager.ui_factory.callback_registry.items():
-                            if func == self.callback:
-                                callback_name = name
-                                break
+            for name, func in self.game_manager.input_manager.ui_factory.callback_registry.items():
+                if func == self.callback:
+                    callback_name = name
+                    break
+            
+                if callback_name:
+                    layout["callback"] = callback_name
+                    if func == self.callback:
+                        callback_name = name
+                        break
             
             if callback_name:
                 layout["callback"] = callback_name

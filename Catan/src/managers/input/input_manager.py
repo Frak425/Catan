@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from src.managers.player_manager import PlayerManager
 
 # Import the new handler classes
+from src.ui.elements.menu import Menu
 from src.managers.input.helper.mouse_input_handler import MouseInputHandler
 from src.managers.input.helper.keyboard_input_handler import KeyboardInputHandler
 from src.managers.input.helper.dev_mode_handler import DevModeHandler
@@ -48,12 +49,12 @@ class InputManager:
         self.images = self.ui_factory.create_all_images(callbacks)
         self.text_displays = self.ui_factory.create_all_text_displays(callbacks)
         self.scrollable_areas = self.ui_factory.create_all_scrollable_areas(callbacks)
-        self.menu = self.ui_factory.create_menu(self.buttons["menu"], self.toggles["menu"], self.sliders["menu"], self.images["menu"], self.text_displays["menu"])
+        self.menus = self.ui_factory.create_all_menus(self.buttons["menu"], self.toggles["menu"], self.sliders["menu"], self.images["menu"], self.text_displays["menu"])
         self.graphics_manager.set_ui_by_type()
         
         # Update mouse handler with new UI elements (if mouse_handler exists)
         if hasattr(self, 'mouse_handler'):
-            self.mouse_handler.set_ui_elements(self.buttons, self.toggles, self.sliders, self.images, self.text_displays, self.scrollable_areas, self.menu)
+            self.mouse_handler.set_ui_elements(self.buttons, self.toggles, self.sliders, self.images, self.text_displays, self.scrollable_areas, self.menus)
         
         # Update graphics manager's UI references (if graphics_manager exists)
         if hasattr(self, 'graphics_manager') and hasattr(self.graphics_manager, 'ui_by_type'):
@@ -75,10 +76,15 @@ class InputManager:
 
     def handle_keyboard(self, key: int) -> None:
         """Delegate keyboard input handling to KeyboardInputHandler."""
-        # Special handling for escape to close menu
-        if key == pygame.K_ESCAPE and self.graphics_manager.menu_open:
-            self.close_menu()
-            return
+        # Special handling for escape to close topmost menu
+        if key == pygame.K_ESCAPE:
+            open_menus = self.get_open_menus()
+            if open_menus:
+                #TODO: This will need to change because esc should only close certain menus. This could be implemented as a list of specific menus that can be closed with esc
+                # Close the topmost menu (lowest z_index)
+                topmost_menu = min(open_menus, key=lambda m: m.z_index)
+                self.close_menu_by_name(topmost_menu.name)
+                return
         
         self.keyboard_handler.handle_keyboard(key)
 
@@ -133,26 +139,90 @@ class InputManager:
     def start_game(self):
         self.game_manager.game_state = "init"
 
-    def open_menu(self):
-        self.menu.open_menu()
-        self.graphics_manager.menu_open = True
-        self.buttons["setup"]["open_menu"].hide()
+    #TODO: update calls to include menu name
+    def open_menu(self, name: str = "settings"):
+        self.open_menu_by_name(name)
 
-    def close_menu(self):
-        self.menu.close_menu()
-        self.graphics_manager.menu_open = False
-        self.buttons["setup"]["open_menu"].show()
+    def close_menu(self, name: str = "settings"):
+        self.close_menu_by_name(name)
+    
+    # --- Menu Management Methods --- #
+    
+    def get_menu(self, name: str):
+        """Get a menu by name. Returns None if not found."""
+        return self.menus.get(name)
+    
+    def open_menu_by_name(self, name: str) -> bool:
+        """
+        Open a menu by name. Handles exclusivity by closing conflicting menus.
+        Returns True if menu was opened, False if menu doesn't exist.
+        """
+        menu = self.get_menu(name)
+        if not menu:
+            print(f"Warning: Menu '{name}' not found")
+            return False
+        
+        # Check for exclusivity - close any menus that can't be open simultaneously
+        for other_menu in self.get_open_menus():
+            if other_menu.name == name:
+                continue
+            # Check bidirectional exclusivity
+            if name in other_menu.exclusive_with or other_menu.name in menu.exclusive_with:
+                other_menu.close_menu()
+        
+        menu.open_menu()
+        
+        return True
+    
+    def close_menu_by_name(self, name: str) -> bool:
+        """
+        Close a menu by name.
+        Returns True if menu was closed, False if menu doesn't exist.
+        """
+        menu = self.get_menu(name)
+        if not menu:
+            print(f"Warning: Menu '{name}' not found")
+            return False
+        
+        menu.close_menu()
+        
+        return True
+    
+    def get_open_menus(self):
+        """Get a list of all currently open menus."""
+        return [menu for menu in self.menus.values() if menu.shown]
+    
+    def get_menus_by_z_index(self, reverse=False) -> list[Menu]:
+        """
+        Get all menus sorted by z_index.
+        Lower z_index = on top (drawn last).
+        Set reverse=True to get bottom-to-top order (for drawing).
+        """
+        return sorted(self.menus.values(), key=lambda m: m.z_index, reverse=reverse)
+    
+    def close_menus_on_state_change(self):
+        """Close all menus that have close_on_state_change=True."""
+        for menu in self.menus.values():
+            if menu.close_on_state_change and menu.shown:
+                menu.close_menu()
 
     def set_game_state(self, state: str):
         self.game_manager.game_state = state
 
+    #TODO: update to allow multiple tabs on any number of menus
     def change_tab(self, new_tab):
-        self.menu.active_tab = new_tab
+        """Change the active tab in the settings menu (backwards compat)"""
+        settings_menu = self.get_menu("settings")
+        if not settings_menu:
+            print("Warning: 'settings' menu not found")
+            return
+        
+        settings_menu.active_tab = new_tab
         self.buttons["menu"]["tabs"][new_tab].color = (0, 100, 0)  # Highlight the active tab
         for tab_name, button in self.buttons["menu"]["tabs"].items():
             if tab_name != new_tab:
                 button.color = (100, 0, 0)
-        self.menu.update_menu(0)
+        settings_menu.update_menu(0)
 
     def quit(self):
         self.game_manager.running = False

@@ -112,38 +112,10 @@ class UIFactory:
         
         result = self._create_elements_from_layout('buttons', button_factory, callbacks)
         
-        # Note: Tab buttons are already loaded by _create_elements_from_layout
-        # The structure in JSON is: menu_config["buttons"]["tabs"] = {name: button_config}
-        # So we don't need special handling here anymore, but keep the defaults fallback
-        
-        # If no tabs found in config, create defaults
+        # Note: Tab buttons should always be loaded from layout.json
+        # If no tabs found in config, the layout.json is incomplete
         if not result["menu"]["tabs"]:
-            result["menu"]["tabs"] = {
-                "input": Button(
-                    {"name": "input", "rect": [300, self.game_manager.menu_tab_margin_top, self.game_manager.menu_input_tab_size[0], self.game_manager.menu_input_tab_size[1]], "color": [100, 0, 0], "text": "Input"},
-                    self.game_manager.game_font, self.game_manager, callback=callbacks['change_tab_input']
-                ),
-                "accessibility": Button(
-                    {"name": "accessibility", "rect": [400, self.game_manager.menu_tab_margin_top, self.game_manager.menu_accessibility_tab_size[0], self.game_manager.menu_accessibility_tab_size[1]], "color": [100, 0, 0], "text": "Accessibility"},
-                    self.game_manager.game_font, self.game_manager, callback=callbacks['change_tab_accessibility']
-                ),
-                "gameplay": Button(
-                    {"name": "gameplay", "rect": [self.game_manager.menu_size[0] / 2 - self.game_manager.menu_gameplay_tab_size[0] / 2, self.game_manager.menu_tab_margin_top, self.game_manager.menu_gameplay_tab_size[0], self.game_manager.menu_gameplay_tab_size[1]], "color": [100, 0, 0], "text": "Gameplay"},
-                    self.game_manager.game_font, self.game_manager, callback=callbacks['change_tab_gameplay']
-                ),
-                "audio": Button(
-                    {"name": "audio", "rect": [700, self.game_manager.menu_tab_margin_top, self.game_manager.menu_audio_tab_size[0], self.game_manager.menu_audio_tab_size[1]], "color": [100, 0, 0], "text": "Audio"},
-                    self.game_manager.game_font, self.game_manager, callback=callbacks['change_tab_audio']
-                ),
-                "graphics": Button(
-                    {"name": "graphics", "rect": [800, self.game_manager.menu_tab_margin_top, self.game_manager.menu_graphics_tab_size[0], self.game_manager.menu_graphics_tab_size[1]], "color": [100, 0, 0], "text": "Graphics"},
-                    self.game_manager.game_font, self.game_manager, callback=callbacks['change_tab_graphics']
-                ),
-                "close_menu": Button(
-                    {"name": "close_menu", "rect": [self.game_manager.menu_size[0] - self.game_manager.close_menu_size[0] - self.game_manager.close_menu_margins[0], self.game_manager.close_menu_margins[1], self.game_manager.close_menu_size[0], self.game_manager.close_menu_size[1]], "color": [100, 0, 0], "text": "Close"},
-                    self.game_manager.game_font, self.game_manager, callback=callbacks['close_menu']
-                )
-            }
+            print("Warning: No tab buttons found in layout.json. Menu tabs will not work.")
         
         return result
 
@@ -227,28 +199,37 @@ class UIFactory:
 
     # --- MENU CREATION --- #
 
-    def create_menu(self, buttons, toggles, sliders, images, text_displays) -> Menu:
-        """Create the main menu from menus array in layout."""
+    def create_all_menus(self, buttons, toggles, sliders, images, text_displays) -> dict:
+        """Create all menus from menus array in layout. Returns a dict of {name: Menu}."""
         layout = getattr(self.game_manager, 'layout', None)
-        menu_props = {}
+        menus = {}
         
         if layout and "menus" in layout and isinstance(layout["menus"], list):
-            # Find the settings_menu or use the first menu
             for menu_config in layout["menus"]:
-                if menu_config.get("name") == "settings_menu":
-                    menu_props = menu_config
-                    break
-            if not menu_props and layout["menus"]:
-                menu_props = layout["menus"][0]
+                menu_name = menu_config.get("name", "menu")
+                menu = Menu(
+                    layout_props=menu_config,
+                    game_manager=self.game_manager,
+                    buttons=buttons,
+                    toggles=toggles,
+                    sliders=sliders,
+                    images=images,
+                    text_displays=text_displays
+                )
+                menus[menu_name] = menu
         
-        menu = Menu(
-            layout_props=menu_props,
-            game_manager=self.game_manager,
-            buttons=buttons,
-            toggles=toggles,
-            sliders=sliders,
-            images=images,
-            text_displays=text_displays
-        )
-        return menu
+        # If no menus found in layout, create default settings menu for backwards compatibility
+        if not menus:
+            menu = Menu(
+                layout_props={},
+                game_manager=self.game_manager,
+                buttons=buttons,
+                toggles=toggles,
+                sliders=sliders,
+                images=images,
+                text_displays=text_displays
+            )
+            menus["settings"] = menu
+        
+        return menus
 

@@ -53,6 +53,26 @@ class Toggle(UIElement):
         self.toggle_circle.fill((0, 0, 0, 0))  # Transparent background
         pygame.draw.circle(self.toggle_circle, self.handle_color, self.toggle_circle.get_rect().center, self.handle_radius)
     
+    def _handle_own_event(self, event: pygame.event.Event) -> bool:
+        """Handle toggle-specific events (clicks)."""
+        if not self.shown:
+            return False
+        
+        abs_rect = self.get_absolute_rect()
+        mouse_pos = pygame.mouse.get_pos()
+        
+        # Handle click to toggle
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if abs_rect.collidepoint(event.pos):
+                # Get current time from game_manager
+                current_time = pygame.time.get_ticks()
+                self.set_animating(current_time)
+                if self.callback:
+                    self.trigger()
+                return True
+        
+        return False
+    
     def set_animating(self, time: int):
         if not self.animating:
             self.animating = True
@@ -73,10 +93,17 @@ class Toggle(UIElement):
             else:
                 self.toggle_center_location = (self.center_width + self.height // 2 - int((self.center_width) * progress), self.height // 2)
 
-    def draw(self, surface: pygame.Surface, time: int):
+    def draw(self, surface: pygame.Surface, time: int | None = None):
+        if not self.shown:
+            return
+        
+        # Get absolute position for drawing
+        abs_rect = self.get_absolute_rect()
+        
         # Draw the toggle on the background and then the background to the surface 
         if self.animating:
-            self.update(time)
+            if time is not None:
+                self.update(time)
             # Redraw the toggle background
             self.surface.fill((0, 0, 0, 0))  # Transparent background
             pygame.draw.circle(self.surface, self.color, (self.radius, self.height // 2), self.radius)
@@ -86,7 +113,7 @@ class Toggle(UIElement):
             pygame.draw.line(self.surface, (100, 100, 200), (0, self.height / 2), (self.height + self. center_width, self.height / 2), 1)
             pygame.draw.line(self.surface, (100, 100, 200), ((self.height + self.center_width) / 2, 0), ((self.height + self.center_width) / 2, self.height), 1)
         self.surface.blit(self.toggle_circle, (self.toggle_center_location[0] - self.toggle_circle.get_size()[0] / 2, self.toggle_center_location[1] - self.toggle_circle.get_size()[1] / 2))
-        surface.blit(self.surface, self.rect.topleft)
+        surface.blit(self.surface, abs_rect.topleft)
 
         if self.is_active:
             self.draw_guiding_lines(surface)
@@ -112,6 +139,8 @@ class Toggle(UIElement):
     def get_layout(self) -> dict:
         layout = self._get_common_layout()
         layout.update({
+            "_type": "Toggle",
+            "on": self.on,
             "guiding_lines": self.guiding_lines,
             "height": self.height,
             "center_width": self.center_width,

@@ -100,6 +100,47 @@ class Slider(UIElement):
             relative_position = (value - self.min_value) / denom
             slider_position = relative_position * (self.rect.height - self.rect.width)
             return int(slider_position)
+    
+    def _handle_own_event(self, event: pygame.event.Event) -> bool:
+        """Handle slider-specific events (dragging)."""
+        if not self.shown:
+            return False
+        
+        abs_rect = self.get_absolute_rect()
+        mouse_pos = pygame.mouse.get_pos()
+        
+        # Handle mouse down to start dragging
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if abs_rect.collidepoint(event.pos):
+                # Store click offset relative to slider
+                self.click_x = event.pos[0] - abs_rect.x
+                self.click_y = event.pos[1] - abs_rect.y
+                self.is_dragging = True
+                return True
+        
+        # Handle mouse up to stop dragging
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            if hasattr(self, 'is_dragging') and self.is_dragging:
+                self.is_dragging = False
+                return True
+        
+        # Handle mouse motion for dragging
+        elif event.type == pygame.MOUSEMOTION:
+            if hasattr(self, 'is_dragging') and self.is_dragging:
+                # Update slider position based on mouse movement
+                if self.direction == "horizontal":
+                    new_pos = mouse_pos[0] - abs_rect.x - self.click_x + self.handle_surface.get_width() / 2
+                    self.slider_position = max(0, min(new_pos, self.rect.width - self.rect.height))
+                else:
+                    new_pos = mouse_pos[1] - abs_rect.y - self.click_y + self.handle_surface.get_height() / 2
+                    self.slider_position = max(0, min(new_pos, self.rect.height - self.rect.width))
+                
+                self.value = self.calculate_value()
+                if self.callback:
+                    self.callback()
+                return True
+        
+        return False
 
     def calculate_value(self) -> float:
         # Calculate the value based on the slider position
@@ -143,6 +184,12 @@ class Slider(UIElement):
             self.callback()  # Call the callback function if provided
 
     def draw(self, surface: pygame.Surface):
+        if not self.shown:
+            return
+        
+        # Get absolute position for drawing
+        abs_rect = self.get_absolute_rect()
+        
         # Redraw the bar and slider surfaces
         self.draw_surface.fill((0, 0, 0, 0))  # Clear the drawing surface
         self.draw_surface.blit(self.bar_surface, (0, 0))  # Draw the bar surface
@@ -154,8 +201,8 @@ class Slider(UIElement):
             handle_pos = (0, self.slider_position)
             self.draw_surface.blit(self.handle_surface, handle_pos)
 
-        # Draw the bar and slider on the main surface
-        surface.blit(self.draw_surface, self.rect.topleft)
+        # Draw the bar and slider on the main surface using absolute rect
+        surface.blit(self.draw_surface, abs_rect.topleft)
 
         if self.is_active:
             self.draw_guiding_lines(surface)
@@ -178,6 +225,8 @@ class Slider(UIElement):
     def get_layout(self) -> dict:
         layout = self._get_common_layout()
         layout.update({
+            "_type": "Slider",
+            "value": self.value,
             "min_value": self.min_value,
             "max_value": self.max_value,
             "color": [self.color[0], self.color[1], self.color[2]],

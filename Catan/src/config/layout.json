@@ -50,6 +50,7 @@
         "sliders": [],
         "toggles": [],
         "text_displays": [],
+        "scrollable_areas": [],
         "text_inputs": [],
         "multi_selects": [],
         "menus": [
@@ -262,6 +263,73 @@
                 "padding": 5
             }
         ],
+        "scrollable_areas": [
+            {
+                "name": "test_scrollable",
+                "rect": [
+                    816,
+                    67,
+                    300,
+                    400
+                ],
+                "guiding_line_color": [
+                    100,
+                    100,
+                    200
+                ],
+                "_type": "ScrollableArea",
+                "slider_layout_props": {
+                    "name": "slider",
+                    "rect": [
+                        266,
+                        5,
+                        29,
+                        390
+                    ],
+                    "guiding_line_color": [
+                        100,
+                        100,
+                        200
+                    ],
+                    "_type": "Slider",
+                    "value": 0,
+                    "min_value": 0,
+                    "max_value": 1,
+                    "color": [
+                        0,
+                        100,
+                        0
+                    ],
+                    "handle_color": [
+                        50,
+                        50,
+                        200
+                    ],
+                    "handle_radius": 12,
+                    "direction": "vertical",
+                    "handle_shape": "circle",
+                    "handle_length": 20
+                },
+                "exterior_padding": 5,
+                "interior_padding": 5,
+                "viewable_content_height": 390,
+                "viewable_content_width": 256,
+                "background_color": [
+                    200,
+                    200,
+                    200,
+                    255
+                ],
+                "content_background_color": [
+                    255,
+                    255,
+                    255,
+                    255
+                ],
+                "slider_side": "right",
+                "content_width_percentage": 0.9
+            }
+        ],
         "text_inputs": [],
         "multi_selects": [],
         "menus": [
@@ -424,6 +492,7 @@
         "sliders": [],
         "toggles": [],
         "text_displays": [],
+        "scrollable_areas": [],
         "text_inputs": [],
         "multi_selects": [],
         "menus": [
@@ -432,7 +501,7 @@
     },
     "menus": [
         {
-            "name": "settings_menu",
+            "name": "settings",
             "rect": [
                 -195,
                 -161,
@@ -444,6 +513,40 @@
                 100,
                 200
             ],
+            "children": [
+                "input",
+                "accessibility",
+                "gameplay",
+                "audio",
+                "graphics",
+                "close_menu",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness"
+            ],
+            "_type": "Menu",
             "bckg_color": [
                 100,
                 100,
@@ -458,6 +561,18 @@
                 8
             ],
             "anim_length": 0.5,
+            "active_tab": "input",
+            "tabs": [
+                "input",
+                "accessibility",
+                "gameplay",
+                "audio",
+                "graphics"
+            ],
+            "z_index": 0,
+            "exclusive_with": [],
+            "modal": false,
+            "close_on_state_change": true,
             "buttons": {
                 "tabs": {
                     "input": {
@@ -473,6 +588,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             0,
                             100,
@@ -507,6 +623,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             100,
                             0,
@@ -541,6 +658,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             100,
                             0,
@@ -575,6 +693,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             100,
                             0,
@@ -609,6 +728,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             100,
                             0,
@@ -643,6 +763,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             100,
                             0,
@@ -679,6 +800,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             200,
                             50,
@@ -714,6 +836,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             200,
                             50,
@@ -721,7 +844,7 @@
                         ],
                         "text_align": "center",
                         "text": "4",
-                        "shown": true,
+                        "shown": false,
                         "padding": 5,
                         "text_color": [
                             0,
@@ -749,6 +872,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             200,
                             50,
@@ -756,7 +880,7 @@
                         ],
                         "text_align": "center",
                         "text": "4",
-                        "shown": true,
+                        "shown": false,
                         "padding": 5,
                         "text_color": [
                             0,
@@ -784,6 +908,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             200,
                             50,
@@ -791,7 +916,7 @@
                         ],
                         "text_align": "center",
                         "text": "4",
-                        "shown": true,
+                        "shown": false,
                         "padding": 5,
                         "text_color": [
                             0,
@@ -819,6 +944,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             200,
                             50,
@@ -826,7 +952,7 @@
                         ],
                         "text_align": "center",
                         "text": "4",
-                        "shown": true,
+                        "shown": false,
                         "padding": 5,
                         "text_color": [
                             0,
@@ -857,6 +983,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -886,6 +1014,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -915,6 +1045,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -946,6 +1078,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -975,6 +1109,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1004,6 +1140,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1035,6 +1173,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1064,6 +1204,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1093,6 +1235,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1124,6 +1268,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1153,6 +1299,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1182,6 +1330,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1213,6 +1363,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1242,6 +1394,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1271,6 +1425,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1305,6 +1461,8 @@
                             100,
                             200
                         ],
+                        "_type": "Slider",
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [
@@ -1337,6 +1495,8 @@
                             100,
                             200
                         ],
+                        "_type": "Slider",
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [
@@ -1369,6 +1529,8 @@
                             100,
                             200
                         ],
+                        "_type": "Slider",
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [
@@ -1401,6 +1563,8 @@
                             100,
                             200
                         ],
+                        "_type": "Slider",
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [
@@ -1433,6 +1597,8 @@
                             100,
                             200
                         ],
+                        "_type": "Slider",
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [

@@ -26,8 +26,13 @@ class Image(UIElement):
             self.surface.fill(self.default_color)
 
     def draw(self, surface: pygame.surface.Surface):
-        if self.shown:
-            surface.blit(self.surface, (self.rect.x, self.rect.y))
+        if not self.shown:
+            return
+        
+        # Get absolute position for drawing
+        abs_rect = self.get_absolute_rect()
+        surface.blit(self.surface, abs_rect.topleft)
+        
         if self.is_active:
             self.draw_guiding_lines(surface)
     
@@ -41,6 +46,7 @@ class Image(UIElement):
     def get_layout(self) -> dict:
         layout = self._get_common_layout()
         layout.update({
+            "_type": "Image",
             "image_path": self.image_path,
             "shown": self.shown
         })
@@ -49,4 +55,3 @@ class Image(UIElement):
     def print_info(self) -> None:
         self.print_common_info()
         print(f"Image Path: {self.image_path}")
-        

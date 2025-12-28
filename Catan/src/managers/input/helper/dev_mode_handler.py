@@ -13,6 +13,7 @@ from src.ui.elements.slider import Slider
 from src.ui.elements.button import Button
 from src.ui.elements.text_display import TextDisplay
 from src.ui.elements.menu import Menu
+from src.ui.layout_utils import save_ui_hierarchy, restore_ui_hierarchy
 
 
 class DevModeHandler:
@@ -91,52 +92,9 @@ class DevModeHandler:
             self.input_manager.images,
             self.input_manager.text_displays,
             self.input_manager.scrollable_areas,
-            self.input_manager.menu
+            self.input_manager.menus
         )
-    """
-        Parse and execute dev mode commands.
-        
-        Available commands:
-        Position & Size:
-        - x+number -> set x position. Example: x150
-        - y+number -> set y position. Example: y300
-        - w+number -> set width. Example: w200
-        - h+number -> set height. Example: h100
-        
-        Colors:
-        - c+r,g,b -> set background/fill color. Example: c255,0,0 (red)
-        - tc+r,g,b -> set text color. Example: tc0,255,0 (green)
-        - hc+r,g,b -> set handle color (toggles). Example: hc100,100,100
-        
-        Text:
-        - t+text -> set text. Example: tHello World
-        - fs+number -> set font size. Example: fs24
-        - align+value -> set text alignment (left/center/right). Example: aligncenter
-        
-        Slider:
-        - sv+number -> set slider value. Example: sv75
-        - smin+number -> set slider min value. Example: smin0
-        - smax+number -> set slider max value. Example: smax200
-        
-        Toggle:
-        - ton -> turn toggle on
-        - toff -> turn toggle off
-        - tflip -> flip toggle state
-        
-        General:
-        - n+name -> set element name. Example: nmy_button
-        - a+number -> set alpha/opacity (0-255). Example: a200
-        - del -> delete active element
-        - radius+type(opt)+number -> set border radius. Example: radius10, radiustop_left5
-        
-        System:
-        - add+type -> add new element (button/slider/toggle/image/text_display)
-        - overridel -> save layout config
-        - overrides -> save settings config
-        - refreshui -> refresh UI elements
-        - centertext -> center text in element
-        """
-        
+   
     def parse_typing(self) -> None:
         """Parse and execute dev mode commands."""
         text = self.game_manager.dev_mode_text
@@ -151,6 +109,24 @@ class DevModeHandler:
             return
         elif text == "overrides":
             self.game_manager.save_config("settings", True)
+            return
+        elif text == "savehierarchy":
+            self._save_hierarchy()
+            return
+        elif text == "loadhierarchy":
+            self._load_hierarchy()
+            return
+        elif text == "listmenus":
+            self._list_menus()
+            return
+        elif text.startswith("deletemenu"):
+            self._delete_menu(text)
+            return
+        elif text.startswith("addexclusion"):
+            self._add_exclusion(text)
+            return
+        elif text.startswith("removeexclusion"):
+            self._remove_exclusion(text)
             return
         elif text == "refreshui":
             self.game_manager.input_manager.reset_ui()
@@ -178,6 +154,7 @@ class DevModeHandler:
             'h': ('rect.height', int),
         }
         
+        # Handle simple attribute commands
         for prefix, (attr_path, value_type) in simple_attrs.items():
             if text.startswith(prefix) and text[len(prefix):].lstrip('-').isdigit():
                 self._set_nested_attr(attr_path, value_type(text[len(prefix):]))
@@ -197,7 +174,7 @@ class DevModeHandler:
         elif text.startswith("smax"):
             self._set_attr('max_value', int(text[4:]))
         elif text.startswith("sv"):
-            self._set_slider_value(text)
+            self._set_attr('value', int(text[2:]))
         
         # Toggle commands
         elif text == "ton":
@@ -210,7 +187,7 @@ class DevModeHandler:
         
         # Text command
         elif text.startswith("t") and not text.startswith("tc"):
-            self._set_text(text)
+            self._set_attr('text', text[1:])
         
         # Other commands...
         elif text == "del":
@@ -274,242 +251,6 @@ class DevModeHandler:
         except (ValueError, IndexError):
             print(f"Invalid color format. Use: {attr_name[0]}r,g,b")
 
-    def _set_x_position(self, text: str) -> None:
-        assert self.mouse_handler.active is not None
-        """Set x position of active element."""
-        try:
-            value = int(text[1:])
-            self.mouse_handler.active.rect.x = value
-        except ValueError:
-            pass
-
-    def _set_y_position(self, text: str) -> None:
-        assert self.mouse_handler.active is not None
-        """Set y position of active element."""
-        try:
-            value = int(text[1:])
-            self.mouse_handler.active.rect.y = value
-        except ValueError:
-            pass
-
-    def _set_width(self, text: str) -> None:
-        assert self.mouse_handler.active is not None
-        """Set width of active element."""
-        try:
-            value = int(text[1:])
-            self.mouse_handler.active.rect.width = value
-        except ValueError:
-            pass
-
-    def _set_height(self, text: str) -> None:
-        assert self.mouse_handler.active is not None
-        """Set height of active element."""
-        try:
-            value = int(text[1:])
-            self.mouse_handler.active.rect.height = value
-        except ValueError:
-            pass
-
-    def _set_text(self, text: str) -> None:
-        """Set text of active element."""
-        new_text = text[1:]
-        if isinstance(self.mouse_handler.active, (TextDisplay, Button)):
-            self.mouse_handler.active.update_text(new_text)
-
-    def _set_text_color(self, text: str) -> None:
-        """Set text color of active element."""
-        try:
-            color_values = text[2:].split(",")
-            r = int(color_values[0])
-            g = int(color_values[1])
-            b = int(color_values[2])
-            if isinstance(self.mouse_handler.active, (TextDisplay, Button)):
-                self.mouse_handler.active.text_color = (r, g, b)
-                # Regenerate text surface for TextDisplay
-                if isinstance(self.mouse_handler.active, TextDisplay):
-                    self.mouse_handler.active.text_surface = self.mouse_handler.active.font.render(
-                        self.mouse_handler.active.text, True, self.mouse_handler.active.text_color
-                    )
-                    self.mouse_handler.active.text_rect = self.mouse_handler.active.text_surface.get_rect()
-        except (ValueError, IndexError):
-            pass
-
-    def _set_color(self, text: str) -> None:
-        """Set background/fill color of active element."""
-        try:
-            color_values = text[1:].split(",")
-            r = int(color_values[0])
-            g = int(color_values[1])
-            b = int(color_values[2])
-            
-            # For buttons, text displays, toggles, sliders, and menu
-            if isinstance(self.mouse_handler.active, (TextDisplay, Button, Toggle, Slider)):
-                self.mouse_handler.active.color = (r, g, b)
-            elif isinstance(self.mouse_handler.active, Menu):
-                self.mouse_handler.active.bckg_color = (r, g, b)
-        except (ValueError, IndexError):
-            pass
-
-    def _set_handle_color(self, text: str) -> None:
-        """Set handle color for toggles and sliders."""
-        try:
-            color_values = text[2:].split(",")
-            r = int(color_values[0])
-            g = int(color_values[1])
-            b = int(color_values[2])
-            
-            if isinstance(self.mouse_handler.active, (Toggle, Slider)):
-                self.mouse_handler.active.handle_color = (r, g, b)
-        except (ValueError, IndexError):
-            pass
-
-    def _set_font_size(self, text: str) -> None:
-        """Set font size for text elements."""
-        try:
-            size = int(text[2:])
-            if isinstance(self.mouse_handler.active, (TextDisplay, Button)):
-                new_font = pygame.font.Font(None, size)
-                self.mouse_handler.active.font = new_font
-                
-                # Regenerate text surface
-                if isinstance(self.mouse_handler.active, TextDisplay):
-                    self.mouse_handler.active.text_surface = new_font.render(
-                        self.mouse_handler.active.text, True, self.mouse_handler.active.text_color
-                    )
-                    self.mouse_handler.active.text_rect = self.mouse_handler.active.text_surface.get_rect()
-                elif isinstance(self.mouse_handler.active, Button):
-                    self.mouse_handler.active.update_text(self.mouse_handler.active.text)
-        except ValueError:
-            pass
-
-    def _set_alignment(self, text: str) -> None:
-        """Set text alignment for text elements."""
-        alignment = text[5:].lower()
-        if alignment in ["left", "center", "right"]:
-            if isinstance(self.mouse_handler.active, (TextDisplay, Button)):
-                self.mouse_handler.active.text_align = alignment
-                
-                # Reposition text based on alignment
-                if alignment == "left":
-                    self.mouse_handler.active.text_rect.left = self.mouse_handler.active.surface.get_rect().left
-                elif alignment == "center":
-                    self.mouse_handler.active.text_rect.center = self.mouse_handler.active.surface.get_rect().center
-                elif alignment == "right":
-                    self.mouse_handler.active.text_rect.right = self.mouse_handler.active.surface.get_rect().right
-
-    def _set_name(self, text: str) -> None:
-        """Set name of active element."""
-        new_name = text[1:]
-        if isinstance(self.mouse_handler.active, (Button, TextDisplay, Slider, Toggle, Image, Menu)):
-            self.mouse_handler.active.name = new_name
-
-    def _set_alpha(self, text: str) -> None:
-        """Set alpha/opacity of active element."""
-        try:
-            alpha = int(text[1:])
-            alpha = max(0, min(255, alpha))  # Clamp between 0-255
-            
-            if isinstance(self.mouse_handler.active, (Button, TextDisplay, Image)):
-                self.mouse_handler.active.surface.set_alpha(alpha)
-        except ValueError:
-            pass
-
-    def _set_slider_value(self, text: str) -> None:
-        """Set current value of slider."""
-        try:
-            value = float(text[2:])
-            if isinstance(self.mouse_handler.active, Slider):
-                self.mouse_handler.active.value = max(
-                    self.mouse_handler.active.min_value,
-                    min(self.mouse_handler.active.max_value, value)
-                )
-        except ValueError:
-            pass
-
-    def _set_slider_min(self, text: str) -> None:
-        """Set minimum value of slider."""
-        try:
-            min_val = int(text[4:])
-            if isinstance(self.mouse_handler.active, Slider):
-                self.mouse_handler.active.min_value = min_val
-                # Ensure current value is still valid
-                if self.mouse_handler.active.value < min_val:
-                    self.mouse_handler.active.value = min_val
-        except ValueError:
-            pass
-
-    def _set_slider_max(self, text: str) -> None:
-        """Set maximum value of slider."""
-        try:
-            max_val = int(text[4:])
-            if isinstance(self.mouse_handler.active, Slider):
-                self.mouse_handler.active.max_value = max_val
-                # Ensure current value is still valid
-                if self.mouse_handler.active.value > max_val:
-                    self.mouse_handler.active.value = max_val
-        except ValueError:
-            pass
-
-    def _toggle_on(self) -> None:
-        """Turn toggle on."""
-        if isinstance(self.mouse_handler.active, Toggle):
-            self.mouse_handler.active.on = True
-
-    def _toggle_off(self) -> None:
-        """Turn toggle off."""
-        if isinstance(self.mouse_handler.active, Toggle):
-            self.mouse_handler.active.on = False
-
-    def _toggle_flip(self) -> None:
-        """Flip toggle state."""
-        if isinstance(self.mouse_handler.active, Toggle):
-            self.mouse_handler.active.on = not self.mouse_handler.active.on
-
-    def _set_border_radius(self, text: str) -> None:
-        """Set border radius of active element."""
-        try:
-            radius = int(text[1:])
-            if isinstance(self.mouse_handler.active, (Button, TextDisplay)):
-                self.mouse_handler.active.border_radius = radius
-        except ValueError:
-            pass
-
-    def _set_border_top_left_radius(self, text: str) -> None:
-        """Set top left border radius of active element."""
-        try:
-            radius = int(text[4:])
-            if isinstance(self.mouse_handler.active, (Button, TextDisplay)):
-                self.mouse_handler.active.border_top_left_radius = radius
-        except ValueError:
-            pass
-
-    def _set_border_top_right_radius(self, text: str) -> None:
-        """Set top right border radius of active element."""
-        try:
-            radius = int(text[5:])
-            if isinstance(self.mouse_handler.active, (Button, TextDisplay)):
-                self.mouse_handler.active.border_top_right_radius = radius
-        except ValueError:
-            pass
-
-    def _set_border_bottom_left_radius(self, text: str) -> None:
-        """Set bottom left border radius of active element."""
-        try:
-            radius = int(text[5:])
-            if isinstance(self.mouse_handler.active, (Button, TextDisplay)):
-                self.mouse_handler.active.border_bottom_left_radius = radius
-        except ValueError:
-            pass
-
-    def _set_border_bottom_right_radius(self, text: str) -> None:
-        """Set bottom right border radius of active element."""
-        try:
-            radius = int(text[6:])
-            if isinstance(self.mouse_handler.active, (Button, TextDisplay)):
-                self.mouse_handler.active.border_bottom_right_radius = radius
-        except ValueError:
-            pass
-
     def _delete_active(self) -> None:
         """Delete the currently active UI element."""
         if not self.mouse_handler.active:
@@ -520,7 +261,14 @@ class DevModeHandler:
             print("Cannot delete menu")
             return
         
-        # Determine which collection the active element belongs to
+        element_to_delete = self.mouse_handler.active
+        
+        # Remove from parent in hierarchy
+        if element_to_delete.parent:
+            element_to_delete.parent.remove_child(element_to_delete)
+            print(f"Removed {element_to_delete.name} from parent hierarchy")
+        
+        # Remove from legacy collection dictionaries
         collections = [
             self.input_manager.buttons,
             self.input_manager.toggles,
@@ -534,19 +282,20 @@ class DevModeHandler:
                 if state == "menu":
                     # For buttons in menu tabs
                     for tab, tab_elements in elements.items():
-                        if self.mouse_handler.active.name in tab_elements:
-                            del tab_elements[self.mouse_handler.active.name]
-                            self.mouse_handler.active = None
-                            return
+                        if element_to_delete.name in tab_elements:
+                            del tab_elements[element_to_delete.name]
+                            print(f"Removed from menu tab: {tab}")
                 else:
                     # For lists of elements
-                    if self.mouse_handler.active.name in elements:
-                        del elements[self.mouse_handler.active.name]
-                        self.mouse_handler.active = None
-                        return
+                    if element_to_delete.name in elements:
+                        del elements[element_to_delete.name]
+                        print(f"Removed from state: {state}")
+        
+        self.mouse_handler.active = None
+        self.update_ui()
         
     def _handle_add_element(self, text: str) -> None:
-        """Handle adding new UI elements."""
+        """Handle adding new UI elements and integrate with hierarchy."""
         import time
         element_type = text[3:]
         
@@ -558,7 +307,8 @@ class DevModeHandler:
             "slider": self.input_manager.sliders,
             "image": self.input_manager.images,
             "text_display": self.input_manager.text_displays,
-            "toggle": self.input_manager.toggles
+            "toggle": self.input_manager.toggles,
+            "scrollable_area": self.input_manager.scrollable_areas
         }
         
         if element_type == "button":
@@ -613,21 +363,197 @@ class DevModeHandler:
                 "time_to_flip": self.game_manager.default_time_to_flip
             }
             new_element = Toggle(layout_props, self.game_manager.graphics_manager.time, self.game_manager, on=False, callback=None, shown=True)
+        
+        elif element_type == "scrollable_area":
+            layout_props = {
+                "name": f"new_scrollable_area_{timestamp}",
+                "rect": [100, 100, 400, 300],
+                "exterior_padding": 10,
+                "slider_side": "right"
+            }
+            content_surface = pygame.Surface((400, 600))
+            new_element = ScrollableArea(layout_props, self.game_manager, content_surface)
             
         else:
             print(f"Unknown element type: {element_type}")
             return
 
-        if self.input_manager.menu.open:
-            tab = self.input_manager.menu.active_tab
+        # Add to legacy dictionary structure
+        # Check if we're adding to a specific menu
+        target_menu = None
+        for menu in self.input_manager.get_open_menus():
+            tab = menu.active_tab
             if tab not in elements_by_type[element_type]["menu"]:
                 elements_by_type[element_type]["menu"][tab] = {}
+            # Use first open menu for now (could be enhanced to detect which menu was clicked)
+            target_menu = menu
+            break
+        
+        if target_menu:
+            tab = target_menu.active_tab
             elements_by_type[element_type]["menu"][tab][new_element.name] = new_element
+            
+            # Add to menu hierarchy
+            target_menu.add_child(new_element)
+            print(f"Added {new_element.name} to menu '{target_menu.name}' tab: {tab} and hierarchy")
         else:
             state = self.game_manager.game_state
-            if state not in self.input_manager.buttons:
+            if state not in elements_by_type[element_type]:
                 elements_by_type[element_type][state] = {}
             elements_by_type[element_type][state][new_element.name] = new_element
+            print(f"Added {new_element.name} to state: {state}")
+            
+            # If there's an active parent element, add as child
+            if self.mouse_handler.active and isinstance(self.mouse_handler.active, (Menu, ScrollableArea)):
+                if isinstance(self.mouse_handler.active, ScrollableArea):
+                    self.mouse_handler.active.add_element(new_element)
+                    print(f"Added {new_element.name} to scrollable area: {self.mouse_handler.active.name}")
+                else:
+                    self.mouse_handler.active.add_child(new_element)
+                    print(f"Added {new_element.name} as child of: {self.mouse_handler.active.name}")
 
         self.update_ui()
         print(f"Added {new_element.__class__.__name__}: {new_element.name}")
+    
+    def _save_hierarchy(self) -> None:
+        """Save the current UI hierarchy to a JSON file."""
+        import json
+        
+        # Collect root elements (elements without parents)
+        root_elements = []
+        
+        # All menus are root elements
+        if hasattr(self.input_manager, 'menus') and self.input_manager.menus:
+            root_elements.extend(self.input_manager.menus.values())
+        
+        # Collect other potential root elements from each state
+        for collection in [self.input_manager.buttons, self.input_manager.toggles, 
+                          self.input_manager.sliders, self.input_manager.images, 
+                          self.input_manager.text_displays, self.input_manager.scrollable_areas]:
+            for state, elements in collection.items():
+                if state != "menu":  # Skip menu as we already added it
+                    if isinstance(elements, dict):
+                        for element in elements.values():
+                            if element.parent is None and element not in root_elements:
+                                root_elements.append(element)
+        
+        # Save the hierarchy
+        hierarchy_data = save_ui_hierarchy(root_elements)
+        
+        # Save to file
+        with open("src/config/ui_hierarchy.json", "w") as f:
+            json.dump(hierarchy_data, f, indent=2)
+        
+        print(f"Saved UI hierarchy with {len(root_elements)} root elements to ui_hierarchy.json")
+        print(f"Total elements saved: {len(hierarchy_data)}")
+    
+    def _load_hierarchy(self) -> None:
+        """Load UI hierarchy from a JSON file."""
+        import json
+        
+        try:
+            with open("src/config/ui_hierarchy.json", "r") as f:
+                hierarchy_data = json.load(f)
+            
+            # Restore the hierarchy
+            element_registry = restore_ui_hierarchy(hierarchy_data, self.game_manager)
+            
+            print(f"Loaded {len(element_registry)} elements from hierarchy")
+            
+            # Update input manager references
+            # Note: This is a simplified approach - you may need to rebuild
+            # the state-based dictionaries from the loaded elements
+            self.game_manager.input_manager.reset_ui()
+            
+            print("UI hierarchy loaded successfully. Use 'refreshui' to fully update.")
+        except FileNotFoundError:
+            print("No saved hierarchy found at src/config/ui_hierarchy.json")
+        except Exception as e:
+            print(f"Error loading hierarchy: {e}")
+    
+    def _list_menus(self) -> None:
+        """List all available menus with their properties."""
+        if not hasattr(self.input_manager, 'menus'):
+            print("No menus found")
+            return
+        
+        print(f"\n=== Available Menus ({len(self.input_manager.menus)}) ===")
+        for name, menu in self.input_manager.menus.items():
+            status = "OPEN" if menu.shown else "closed"
+            print(f"  {name}: z_index={menu.z_index}, {status}, exclusive_with={menu.exclusive_with}")
+    
+    def _delete_menu(self, command: str) -> None:
+        """Delete a menu. Usage: deletemenu <menu_name>"""
+        parts = command.split()
+        if len(parts) < 2:
+            print("Usage: deletemenu <menu_name>")
+            return
+        
+        menu_name = parts[1]
+        if menu_name not in self.input_manager.menus:
+            print(f"Menu '{menu_name}' not found")
+            return
+        
+        # Close the menu if it's open
+        if self.input_manager.menus[menu_name].shown:
+            self.input_manager.close_menu_by_name(menu_name)
+        
+        # Remove from menus dict
+        del self.input_manager.menus[menu_name]
+        print(f"Deleted menu: {menu_name}")
+    
+    def _add_exclusion(self, command: str) -> None:
+        """Add exclusivity between two menus. Usage: addexclusion <menu1> <menu2>"""
+        parts = command.split()
+        if len(parts) < 3:
+            print("Usage: addexclusion <menu1> <menu2>")
+            return
+        
+        menu1_name = parts[1]
+        menu2_name = parts[2]
+        
+        menu1 = self.input_manager.get_menu(menu1_name)
+        menu2 = self.input_manager.get_menu(menu2_name)
+        
+        if not menu1:
+            print(f"Menu '{menu1_name}' not found")
+            return
+        if not menu2:
+            print(f"Menu '{menu2_name}' not found")
+            return
+        
+        # Add bidirectional exclusivity
+        if menu2_name not in menu1.exclusive_with:
+            menu1.exclusive_with.append(menu2_name)
+        if menu1_name not in menu2.exclusive_with:
+            menu2.exclusive_with.append(menu1_name)
+        
+        print(f"Added exclusivity between '{menu1_name}' and '{menu2_name}'")
+    
+    def _remove_exclusion(self, command: str) -> None:
+        """Remove exclusivity between two menus. Usage: removeexclusion <menu1> <menu2>"""
+        parts = command.split()
+        if len(parts) < 3:
+            print("Usage: removeexclusion <menu1> <menu2>")
+            return
+        
+        menu1_name = parts[1]
+        menu2_name = parts[2]
+        
+        menu1 = self.input_manager.get_menu(menu1_name)
+        menu2 = self.input_manager.get_menu(menu2_name)
+        
+        if not menu1:
+            print(f"Menu '{menu1_name}' not found")
+            return
+        if not menu2:
+            print(f"Menu '{menu2_name}' not found")
+            return
+        
+        # Remove bidirectional exclusivity
+        if menu2_name in menu1.exclusive_with:
+            menu1.exclusive_with.remove(menu2_name)
+        if menu1_name in menu2.exclusive_with:
+            menu2.exclusive_with.remove(menu1_name)
+        
+        print(f"Removed exclusivity between '{menu1_name}' and '{menu2_name}'")

@@ -277,6 +277,7 @@
                     100,
                     200
                 ],
+                "_type": "ScrollableArea",
                 "slider_layout_props": {
                     "name": "slider",
                     "rect": [
@@ -290,6 +291,8 @@
                         100,
                         200
                     ],
+                    "_type": "Slider",
+                    "value": 0,
                     "min_value": 0,
                     "max_value": 1,
                     "color": [
@@ -498,7 +501,7 @@
     },
     "menus": [
         {
-            "name": "settings_menu",
+            "name": "settings",
             "rect": [
                 -195,
                 -161,
@@ -510,6 +513,40 @@
                 100,
                 200
             ],
+            "children": [
+                "input",
+                "accessibility",
+                "gameplay",
+                "audio",
+                "graphics",
+                "close_menu",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness"
+            ],
+            "_type": "Menu",
             "bckg_color": [
                 100,
                 100,
@@ -524,6 +561,18 @@
                 8
             ],
             "anim_length": 0.5,
+            "active_tab": "input",
+            "tabs": [
+                "input",
+                "accessibility",
+                "gameplay",
+                "audio",
+                "graphics"
+            ],
+            "z_index": 0,
+            "exclusive_with": [],
+            "modal": false,
+            "close_on_state_change": true,
             "buttons": {
                 "tabs": {
                     "input": {
@@ -539,6 +588,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             0,
                             100,
@@ -573,6 +623,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             100,
                             0,
@@ -607,6 +658,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             100,
                             0,
@@ -641,6 +693,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             100,
                             0,
@@ -675,6 +728,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             100,
                             0,
@@ -709,6 +763,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             100,
                             0,
@@ -745,6 +800,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             200,
                             50,
@@ -780,6 +836,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             200,
                             50,
@@ -787,7 +844,7 @@
                         ],
                         "text_align": "center",
                         "text": "4",
-                        "shown": true,
+                        "shown": false,
                         "padding": 5,
                         "text_color": [
                             0,
@@ -815,6 +872,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             200,
                             50,
@@ -822,7 +880,7 @@
                         ],
                         "text_align": "center",
                         "text": "4",
-                        "shown": true,
+                        "shown": false,
                         "padding": 5,
                         "text_color": [
                             0,
@@ -850,6 +908,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             200,
                             50,
@@ -857,7 +916,7 @@
                         ],
                         "text_align": "center",
                         "text": "4",
-                        "shown": true,
+                        "shown": false,
                         "padding": 5,
                         "text_color": [
                             0,
@@ -885,6 +944,7 @@
                             100,
                             200
                         ],
+                        "_type": "Button",
                         "color": [
                             200,
                             50,
@@ -892,7 +952,7 @@
                         ],
                         "text_align": "center",
                         "text": "4",
-                        "shown": true,
+                        "shown": false,
                         "padding": 5,
                         "text_color": [
                             0,
@@ -923,6 +983,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -952,6 +1014,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -981,6 +1045,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1012,6 +1078,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1041,6 +1109,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1070,6 +1140,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1101,6 +1173,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1130,6 +1204,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1159,6 +1235,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1190,6 +1268,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1219,6 +1299,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1248,6 +1330,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1279,6 +1363,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1308,6 +1394,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1337,6 +1425,8 @@
                             100,
                             200
                         ],
+                        "_type": "Toggle",
+                        "on": false,
                         "guiding_lines": true,
                         "height": 50,
                         "center_width": 100,
@@ -1371,6 +1461,8 @@
                             100,
                             200
                         ],
+                        "_type": "Slider",
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [
@@ -1403,6 +1495,8 @@
                             100,
                             200
                         ],
+                        "_type": "Slider",
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [
@@ -1435,6 +1529,8 @@
                             100,
                             200
                         ],
+                        "_type": "Slider",
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [
@@ -1467,6 +1563,8 @@
                             100,
                             200
                         ],
+                        "_type": "Slider",
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [
@@ -1499,6 +1597,8 @@
                             100,
                             200
                         ],
+                        "_type": "Slider",
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [
