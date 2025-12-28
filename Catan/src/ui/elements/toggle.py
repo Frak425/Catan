@@ -8,7 +8,57 @@ if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
 class Toggle(UIElement):
+    """
+    Animated on/off toggle switch with smooth easing transition.
+    
+    Features:
+    - Stadium-shaped track (circles + rectangle)
+    - Circular handle that slides between positions
+    - Smooth animation with easeInOutCubic easing (pytweening)
+    - Click anywhere on toggle to flip state
+    - Configurable colors, size, and animation duration
+    
+    Visual Structure:
+    - Track: Two circles (radius = height/2) connected by rectangle (width = center_width)
+    - Handle: Circle (radius = height/2 - toggle_gap) that slides on track
+    - Total width: center_width + height
+    
+    Animation:
+    - Click triggers animation with start/end time tracking
+    - Each frame updates handle position via pytweening.easeInOutCubic
+    - State (on/off) only flips when animation completes
+    - Progress calculated as (current_time - start_time) / duration
+    
+    Positions:
+    - Off: Handle at (height/2, height/2) - left side
+    - On: Handle at (center_width + height/2, height/2) - right side
+    - Animating: Interpolated between positions
+    """
     def __init__(self, layout_props: dict, time: int, game_manager: GameManager, on: bool = False, callback=None, shown: bool = True) -> None:
+        """
+        Initialize toggle with initial state and create surfaces.
+        
+        Args:
+            layout_props: Configuration from layout.json
+            time: Initial time in milliseconds (for animation tracking)
+            game_manager: Central game state manager
+            on: Initial state (False = off/left, True = on/right)
+            callback: Function called when toggle is clicked
+            shown: Initial visibility
+        
+        Properties:
+        - height: Track height (determines radius)
+        - center_width: Length of rectangle connecting circles
+        - color: Track color (r, g, b)
+        - handle_color: Handle circle color (r, g, b)
+        - toggle_gap: Gap between track edge and handle (pixels)
+        - time_to_flip: Animation duration in seconds (default: 0.25s)
+        - guiding_lines: Debug lines showing center axes
+        
+        Surfaces:
+        - surface: Track background (stadium shape)
+        - toggle_circle: Handle circle (slides on track)
+        """
         # Initialize element-specific defaults
         self.guiding_lines = False
         self.height = 50
@@ -53,8 +103,15 @@ class Toggle(UIElement):
         self.toggle_circle.fill((0, 0, 0, 0))  # Transparent background
         pygame.draw.circle(self.toggle_circle, self.handle_color, self.toggle_circle.get_rect().center, self.handle_radius)
     
+    ## --- EVENT HANDLING --- ##
+    
     def _handle_own_event(self, event: pygame.event.Event) -> bool:
-        """Handle toggle-specific events (clicks)."""
+        """
+        Handle toggle click to start animation and trigger callback.
+        
+        Click anywhere on toggle starts animation. Callback fires immediately,
+        but state (on/off) only changes when animation completes.
+        """
         if not self.shown:
             return False
         
@@ -73,7 +130,10 @@ class Toggle(UIElement):
         
         return False
     
+    ## --- ANIMATION --- ##
+    
     def set_animating(self, time: int):
+        """Start animation with timestamp (only if not already animating)."""
         if not self.animating:
             self.animating = True
             self.time = time
@@ -81,6 +141,24 @@ class Toggle(UIElement):
             self.end_time = time + int(self.time_to_flip * 1000)
     
     def update(self, new_time: int):
+        """
+        Update handle position during animation using easing function.
+        
+        Algorithm:
+        1. Check if animation complete (flip state and stop)
+        2. Calculate progress: (current - start) / (end - start)
+        3. Apply easeInOutCubic easing for smooth acceleration/deceleration
+        4. Interpolate handle position based on eased progress
+        
+        Easing: pytweening.easeInOutCubic
+        - Slow start (ease in)
+        - Slow end (ease out)
+        - Fast in middle
+        
+        Direction:
+        - Off->On: Move right (height/2 to center_width + height/2)
+        - On->Off: Move left (center_width + height/2 to height/2)
+        """
         if self.animating:
             if new_time >= self.end_time:
                     self.animating = False
@@ -93,7 +171,24 @@ class Toggle(UIElement):
             else:
                 self.toggle_center_location = (self.center_width + self.height // 2 - int((self.center_width) * progress), self.height // 2)
 
+    ## --- RENDERING --- ##
+
     def draw(self, surface: pygame.Surface, time: int | None = None):
+        """
+        Draw toggle track and handle, updating animation if active.
+        
+        Process:
+        1. If animating: Update handle position and redraw track
+        2. Blit handle circle at current toggle_center_location
+        3. Blit composite to screen at absolute position
+        
+        Note: Track is redrawn each frame during animation (could be optimized
+              to only redraw handle, but current approach is simpler).
+        
+        Args:
+            surface: Target surface for drawing
+            time: Current time in milliseconds (optional, for animation update)
+        """
         if not self.shown:
             return
         
@@ -118,7 +213,16 @@ class Toggle(UIElement):
         if self.is_active:
             self.draw_guiding_lines(surface)
 
+    ## --- SERIALIZATION --- ##
+
     def read_layout(self, layout_props: dict):
+        """
+        Load toggle properties from config dict and recalculate dependent values.
+        
+        Dependent properties (calculated from height and toggle_gap):
+        - radius: height / 2
+        - handle_radius: height / 2 - toggle_gap
+        """
         # Schema reference: See [layout.json](./config/layout.json#L442-L465)
         self._read_common_layout(layout_props)
         
@@ -137,6 +241,7 @@ class Toggle(UIElement):
         self.handle_radius = self.height / 2 - self.toggle_gap
         
     def get_layout(self) -> dict:
+        """Serialize toggle properties including current state (on/off)."""
         layout = self._get_common_layout()
         layout.update({
             "_type": "Toggle",
@@ -152,8 +257,8 @@ class Toggle(UIElement):
         return layout
     
     def print_info(self) -> None:
+        """Print all toggle properties and current state for debugging."""
         self.print_common_info()
-        print(f"Toggle: {self.name}")
         print(f"On: {self.on}")
         print(f"Guiding Lines: {self.guiding_lines}")
         print(f"Height: {self.height}")

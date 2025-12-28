@@ -7,7 +7,49 @@ if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
 class Slider(UIElement):
+    """
+    Interactive slider for numeric value selection with draggable handle.
+    
+    Features:
+    - Horizontal or vertical orientation
+    - Multiple handle shapes: circle, rectangle, stadium (pill)
+    - Configurable value range (min/max)
+    - Visual bar with rounded ends
+    - Drag interaction with callback on value change
+    
+    Architecture:
+    - Uses three surfaces: draw_surface (composite), bar_surface, handle_surface
+    - Position <-> Value conversion via calculate_slider_position/calculate_value
+    - Handle position clamped to bar bounds
+    
+    Handle Shapes:
+    - circle: Circular handle (default)
+    - stadium: Pill-shaped handle (rounded rectangle)
+    - rectangle: Rectangular handle (uses handle_length)
+    """
     def __init__(self, layout_props: dict, initial_value: int | float, game_manager: "GameManager",  bar_image: pygame.Surface | None = None, handle_image: pygame.Surface | None = None, callback: Optional[Callable] = None, shown: bool = True) -> None:
+        """
+        Initialize slider with range, colors, and handle configuration.
+        
+        Args:
+            layout_props: Configuration from layout.json
+            initial_value: Starting value (will be clamped to min/max)
+            game_manager: Central game state manager
+            bar_image: Optional background image (not currently used)
+            handle_image: Optional handle image (not currently used)
+            callback: Function called when value changes
+            shown: Initial visibility
+        
+        Properties:
+        - min_value/max_value: Value range (default: 0-100)
+        - color: Bar color (r, g, b)
+        - handle_color: Handle color (r, g, b)
+        - handle_radius: Handle size in pixels
+        - direction: "horizontal" or "vertical"
+        - handle_shape: "circle", "stadium", or "rectangle"
+        - handle_length: Used only for rectangle shape
+        - slider_position: Handle position in pixels (calculated from value)
+        """
         # Initialize element-specific defaults
         self.min_value = 0
         self.max_value = 100
@@ -39,7 +81,27 @@ class Slider(UIElement):
 
         self.create_surfaces(self.direction, self.handle_shape)
 
+    ## --- SURFACE GENERATION --- ##
+
     def create_surfaces(self, direction: str, handle_shape: str):
+        """
+        Generate bar and handle surfaces based on direction and shape.
+        
+        Creates two separate surfaces:
+        1. bar_surface: Track with rounded ends (stadium shape)
+        2. handle_surface: Draggable handle in specified shape
+        
+        Bar Construction:
+        - Horizontal: Rectangle + circles on ends (width = rect.height)
+        - Vertical: Rectangle + circles on ends (height = rect.width)
+        
+        Handle Construction:
+        - circle: Circular handle (radius = handle_radius)
+        - stadium: Pill shape (rectangle + circles on ends)
+        - rectangle: Simple rectangle (width = handle_length)
+        
+        Note: All surfaces use SRCALPHA for transparency.
+        """
         self.bar_surface = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
         self.bar_surface.fill((0, 0, 0, 0))
         if direction == "horizontal":
@@ -82,7 +144,27 @@ class Slider(UIElement):
             self.handle_surface.fill((0, 0, 0, 0))
             pygame.draw.rect(self.handle_surface, self.handle_color, (0, 0, self.handle_length, self.rect.height))
 
+    ## --- POSITION/VALUE CALCULATIONS --- ##
+
     def calculate_slider_position(self, value: float | int) -> int:
+        """
+        Convert value to pixel position on slider track.
+        
+        Args:
+            value: Numeric value (clamped to min/max)
+        
+        Returns:
+            Pixel offset from start of track (0 = min_value position)
+        
+        Algorithm:
+        1. Clamp value to [min_value, max_value]
+        2. Calculate relative position: (value - min) / (max - min)
+        3. Scale to pixel range: relative * (track_length - handle_size)
+        
+        Track length accounts for handle size:
+        - Horizontal: rect.width - rect.height
+        - Vertical: rect.height - rect.width
+        """
         # Ensure the value is within the defined range
         if value < self.min_value:
             value = self.min_value
@@ -101,8 +183,19 @@ class Slider(UIElement):
             slider_position = relative_position * (self.rect.height - self.rect.width)
             return int(slider_position)
     
+    ## --- EVENT HANDLING --- ##
+    
     def _handle_own_event(self, event: pygame.event.Event) -> bool:
-        """Handle slider-specific events (dragging)."""
+        """
+        Handle slider-specific events (click and drag).
+        
+        Interaction:
+        1. MOUSEBUTTONDOWN: Start drag, store click offset
+        2. MOUSEMOTION: Update position while dragging, call callback
+        3. MOUSEBUTTONUP: End drag
+        
+        Position updates clamped to track bounds. Returns True if event consumed.
+        """
         if not self.shown:
             return False
         
@@ -143,6 +236,17 @@ class Slider(UIElement):
         return False
 
     def calculate_value(self) -> float:
+        """
+        Convert pixel position to numeric value (inverse of calculate_slider_position).
+        
+        Returns:
+            Value corresponding to current slider_position (clamped to min/max)
+        
+        Algorithm:
+        1. Calculate relative position: slider_position / track_length
+        2. Scale to value range: min + relative * (max - min)
+        3. Clamp result to [min_value, max_value]
+        """
         # Calculate the value based on the slider position
         denom_pixels = (self.rect.width - self.rect.height) if self.direction == "horizontal" else (self.rect.height - self.rect.width)
         if denom_pixels == 0:
@@ -157,11 +261,18 @@ class Slider(UIElement):
         return value
 
     def set_value(self, value: int):
+        """Set value programmatically and update handle position."""
         # Update the value and recalculate the slider position
         self.value = value
         self.slider_position = self.calculate_slider_position(value)
 
     def update_location(self, mouse_x: int, mouse_y):
+        """
+        Update slider position from mouse coordinates (legacy drag handler).
+        
+        Note: This appears to be legacy code - _handle_own_event now handles dragging.
+              Kept for compatibility with MouseInputHandler._handle_mouse_motion.
+        """
         # Calculate the new slider position based on mouse x-coordinate
         if self.direction == "horizontal":
             self.slider_position = mouse_x - self.click_x - self.rect.x - self.handle_surface.get_width() / 2
@@ -183,7 +294,20 @@ class Slider(UIElement):
         if self.callback:
             self.callback()  # Call the callback function if provided
 
+    ## --- RENDERING --- ##
+
     def draw(self, surface: pygame.Surface):
+        """
+        Draw slider by compositing bar and handle surfaces.
+        
+        Process:
+        1. Clear draw_surface (transparent)
+        2. Blit bar_surface at (0, 0)
+        3. Blit handle_surface at slider_position offset
+        4. Draw composite to screen at absolute position
+        
+        Uses absolute coordinates for final blit.
+        """
         if not self.shown:
             return
         
@@ -207,7 +331,15 @@ class Slider(UIElement):
         if self.is_active:
             self.draw_guiding_lines(surface)
 
+    ## --- SERIALIZATION --- ##
+
     def read_layout(self, layout_props: dict):
+        """
+        Load slider properties from config dict.
+        
+        Properties: min/max values, colors, handle config, direction
+        See layout.json for schema reference.
+        """
         # Schema ref: See [layout.json](./config/layout.json#L188-215)
         self._read_common_layout(layout_props)
         
@@ -223,6 +355,7 @@ class Slider(UIElement):
         self.handle_length: int = layout_props.get("handle_length", self.handle_length)
 
     def get_layout(self) -> dict:
+        """Serialize slider properties to config dict."""
         layout = self._get_common_layout()
         layout.update({
             "_type": "Slider",
@@ -239,6 +372,7 @@ class Slider(UIElement):
         return layout
     
     def print_info(self) -> None:
+        """Print all slider properties for debugging."""
         self.print_common_info()
         print(f"Min Value: {self.min_value}")
         print(f"Max Value: {self.max_value}")

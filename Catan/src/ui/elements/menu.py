@@ -14,7 +14,71 @@ if TYPE_CHECKING:
 #import pytweening as tween
 
 class Menu(UIElement):
+    """
+    Container for tabbed UI elements with multi-menu system support.
+    
+    Features:
+    - Tab-based organization (input, accessibility, gameplay, audio, graphics)
+    - Element collections per tab: buttons, toggles, sliders, images, text_displays
+    - Tab switching: only active tab's elements are shown
+    - Multi-menu system: z_index priority, modal blocking, exclusivity
+    - Open/close with init_location and final_location
+    - Animation system (partially implemented)
+    
+    Architecture:
+    - Uses location (init/final) instead of rect.x/rect.y for positioning
+    - All child elements organized by tab in dictionaries
+    - Tab buttons always visible, other elements shown/hidden per active_tab
+    - Children added to hierarchy for parent-child coordinate transforms
+    
+    Multi-Menu System:
+    - z_index: Lower = higher priority (0 = top)
+    - modal: If True, blocks input to other menus
+    - exclusive_with: List of menu names that can't be open simultaneously
+    - close_on_state_change: Auto-close when game state changes
+    
+    Positioning:
+    - Menu uses location tuple (x, y) instead of rect.x/rect.y
+    - init_location: Closed position (often off-screen)
+    - final_location: Open position (on-screen)
+    - get_absolute_rect() overridden to use location
+    
+    Tab Organization:
+    - Element dicts: {tab_name: {element_name: element}}
+    - Special "tabs" key for tab buttons (always visible)
+    - Active tab controls which elements are shown
+    """
     def __init__(self, layout_props: dict, game_manager: 'GameManager', buttons: Dict[str, Dict[str, Button]], toggles: Dict[str, Dict[str, Toggle]], sliders: Dict[str, Dict[str, Slider]], images: Dict[str, Dict[str, Image]], text_displays: Dict[str, Dict[str, TextDisplay]], time: int = 0) -> None:
+        """
+        Initialize menu with element collections and tab system.
+        
+        Args:
+            layout_props: Configuration from layout.json
+            game_manager: Central game state manager
+            buttons: {tab_name: {button_name: Button}} - organized by tab
+            toggles: {tab_name: {toggle_name: Toggle}}
+            sliders: {tab_name: {slider_name: Slider}}
+            images: {tab_name: {image_name: Image}}
+            text_displays: {tab_name: {text_display_name: TextDisplay}}
+            time: Initial time for animation (milliseconds)
+        
+        Properties:
+        - tabs: List of tab names (order matters for display)
+        - active_tab: Currently visible tab
+        - location: Current position (init_location when closed, final_location when open)
+        - init_location: Position when menu is closed
+        - final_location: Position when menu is open
+        - z_index: Menu priority (lower = on top, 0 = highest)
+        - exclusive_with: Menu names that can't be open simultaneously
+        - modal: If True, blocks input to lower priority menus
+        - close_on_state_change: Auto-close on game state change
+        - anim_length: Animation duration in seconds (not fully implemented)
+        
+        Element Organization:
+        - Special "tabs" key in buttons dict for tab switcher buttons
+        - Each tab has its own element collections
+        - Only active tab's elements are visible
+        """
         # Set defaults before reading layout
         self.name = "menu"
         self.rect = pygame.Rect(0, 0, 800, 600)
@@ -68,8 +132,15 @@ class Menu(UIElement):
         
         self.update_menu(time)
     
+    ## --- HIERARCHY SETUP --- ##
+    
     def _add_children_to_hierarchy(self):
-        """Add all buttons, toggles, sliders, images, and text displays to the hierarchy."""
+        """
+        Add all UI elements to parent-child hierarchy for coordinate transforms.
+        
+        Adds tab buttons (always visible) and all elements from each tab.
+        Children use parent's get_absolute_rect() for positioning.
+        """
         # Add tab buttons
         if "tabs" in self.buttons:
             for button in self.buttons["tabs"].values():
@@ -93,18 +164,30 @@ class Menu(UIElement):
                 for text_display in self.text_displays[tab].values():
                     self.add_child(text_display)
     
+    ## --- MENU CONTROL --- ##
+    
     def open_menu(self):
+        """Open menu by moving to final_location and showing."""
         self.location = self.final_location
         self.shown = True  # Make menu visible
         self._invalidate_absolute_rect()  # Recalculate positions
 
     def close_menu(self):
+        """Close menu by moving to init_location and hiding."""
         self.location = self.init_location
         self.shown = False  # Hide menu
         self._invalidate_absolute_rect()  # Recalculate positions
 
     def update_menu(self, time: int):
-        """Update menu state and control which children are visible based on active tab."""
+        """
+        Update menu state and control element visibility based on active tab.
+        
+        Visibility Rules:
+        - Tab buttons ("tabs" key): Always shown
+        - Other elements: Only shown if their tab == active_tab
+        
+        This is called each frame during draw to update element visibility.
+        """
         # Control visibility of children based on active tab
         # Tab buttons are always visible
         if "tabs" in self.buttons:
@@ -131,7 +214,23 @@ class Menu(UIElement):
                 for text_display in self.text_displays[tab].values():
                     text_display.shown = is_active
 
+    ## --- RENDERING --- ##
+
     def draw(self, surface: pygame.Surface, time: int | None= None):
+        """
+        Draw menu background and all visible children.
+        
+        Process:
+        1. Update menu state (tab visibility)
+        2. Redraw background (backdrop image or solid color)
+        3. Draw menu surface at absolute position
+        4. Draw all visible children (they handle their own positioning)
+        5. Draw guiding lines if in dev mode
+        
+        Special Handling:
+        - Toggle elements receive time parameter for animation
+        - Children use their own get_absolute_rect() for positioning
+        """
         if not self.shown:
             return
         
@@ -165,8 +264,19 @@ class Menu(UIElement):
         if self.game_manager.dev_mode and self.is_active:
             pygame.draw.rect(surface, self.guiding_line_color, abs_rect, 2)
     
+    ## --- COORDINATE TRANSFORM --- ##
+    
     def get_absolute_rect(self) -> pygame.Rect:
-        """Override to use location instead of rect position."""
+        """
+        Override to use location tuple instead of rect.x/rect.y for positioning.
+        
+        Critical Difference:
+        - Normal UIElement: Uses rect.x and rect.y
+        - Menu: Uses self.location (init_location or final_location)
+        
+        This allows menu to have separate open/closed positions without
+        modifying rect, which is used for size only.
+        """
         if self._absolute_rect is None:
             # Menu uses location for positioning, not rect.x/rect.y
             if self.location:
@@ -186,7 +296,15 @@ class Menu(UIElement):
                 self._absolute_rect = pygame.Rect(x, y, self.rect.width, self.rect.height)
         return self._absolute_rect
 
+    ## --- SERIALIZATION --- ##
+
     def get_layout(self) -> dict:
+        """
+        Serialize menu and all child elements to config dict.
+        
+        Includes complete nested serialization of all buttons, toggles, sliders,
+        images, and text_displays organized by tab.
+        """
         layout = self._get_common_layout()
         layout.update({
             "_type": "Menu",
@@ -209,6 +327,14 @@ class Menu(UIElement):
         return layout
     
     def read_layout(self, layout_props: dict) -> None:
+        """
+        Load menu properties and propagate to all child elements.
+        
+        Reads menu-specific properties (locations, colors, z_index, etc.) and
+        then recursively reads layout for all child elements in all tabs.
+        
+        Note: Only updates existing elements - doesn't create new ones.
+        """
         # Read common properties first
         self._read_common_layout(layout_props)
         
@@ -267,8 +393,18 @@ class Menu(UIElement):
                 if tab in self.text_displays and name in self.text_displays[tab]:
                     self.text_displays[tab][name].read_layout(text_display_layout)
 
+    ## --- DEV MODE --- ##
+
     def dev_mode_drag(self, x: int, y: int) -> None:
-        """Override to move both rect and location when dragging in dev mode."""
+        """
+        Override to update both rect and location properties when dragging.
+        
+        Since Menu uses location for positioning (not rect.x/rect.y), we need to
+        update all three location properties to maintain proper positioning:
+        - location: Current position
+        - init_location: Closed position
+        - final_location: Open position
+        """
         super().dev_mode_drag(x, y)
         # Update the current location as well
         if self.location:
@@ -280,6 +416,7 @@ class Menu(UIElement):
             self.final_location = (self.final_location[0] + x, self.final_location[1] + y)
 
     def print_info(self) -> None:
+        """Print menu properties and all child element info for debugging."""
         self.print_common_info()
         print(f"Background Color: {self.bckg_color}")
         print(f"Initial Location: {self.init_location}")

@@ -69,9 +69,12 @@ player_manager.set_helper_manager(helper_manager)
 player_manager.set_audio_manager(audio_manager)
 player_manager.set_graphics_manager(graphics_manager)
 
+# Load layout config before initializing input_manager (which creates UI)
+game_manager.load_config("layout", False)
+
 #init all managers
 graphics_manager.init(pygame.time.get_ticks())
-input_manager.init()
+input_manager.init()  # Creates UI from game_manager.layout
 
 audio_manager.init()
 player_manager.init([])

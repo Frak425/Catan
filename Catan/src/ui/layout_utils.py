@@ -144,7 +144,6 @@ def create_element_from_layout(layout_props: dict, game_manager: 'GameManager') 
     else:
         raise ValueError(f"Unknown element type: {element_type}")
 
-
 def restore_ui_hierarchy(elements: list, game_manager: 'GameManager') -> Dict[str, UIElement]:
     """Restore a complete UI hierarchy from a list of element layouts.
     
@@ -184,7 +183,6 @@ def restore_ui_hierarchy(elements: list, game_manager: 'GameManager') -> Dict[st
     
     return element_registry
 
-
 def reconnect_callbacks(element_registry: Dict[str, UIElement], callback_registry: Dict[str, Callable]) -> None:
     """Reconnect callbacks to UI elements after loading from layout.
     
@@ -222,7 +220,6 @@ def reconnect_callbacks(element_registry: Dict[str, UIElement], callback_registr
             if callback_name and callback_name in callback_registry:
                 element.callback = callback_registry[callback_name]
                 print(f"Reconnected callback '{callback_name}' to element '{element_name}'")
-
 
 def reconnect_callbacks_by_name(element_registry: Dict[str, UIElement], 
                                  element_callback_map: Dict[str, str],
@@ -263,7 +260,6 @@ def reconnect_callbacks_by_name(element_registry: Dict[str, UIElement],
                 print(f"Warning: Element '{element_name}' not found in registry")
             if callback_name not in callback_registry:
                 print(f"Warning: Callback '{callback_name}' not found in registry")
-
 
 def save_ui_hierarchy(root_elements: list) -> list:
     """Save a UI hierarchy to a list of layout dictionaries.

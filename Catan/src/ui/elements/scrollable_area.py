@@ -8,7 +8,52 @@ if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
 class ScrollableArea(UIElement):
+    """
+    Scrollable container for content larger than viewport with vertical slider.
+    
+    Features:
+    - Vertical scrolling with mousewheel and slider
+    - Viewport clipping (only visible content drawn)
+    - Child element management with scroll offset
+    - Configurable slider position (left/right)
+    - Content area width percentage control
+    
+    Architecture:
+    - Composite structure: background + content area + slider
+    - Three coordinate spaces:
+      1. Container rect: Full scrollable area including padding
+      2. Content rect: Viewport where content is visible
+      3. Scroll offset: Virtual position of content (-content_scroll pixels)
+    - Slider controls content_scroll (0 to max_scroll)
+    
+    Layout:
+    - exterior_padding: Space around entire container
+    - content area: Left portion (content_width_percentage)
+    - interior_padding: Gap between content and slider
+    - slider: Right portion (remaining width)
+    
+    Coordinate Transform:
+    - Child elements positioned relative to content area
+    - get_absolute_rect() applies scroll offset for children
+    - Drawing uses clipped subsurface for viewport
+    """
     def __init__(self, layout_props: dict, game_manager: GameManager, content_surface: pygame.Surface) -> None:
+        """
+        Initialize scrollable area with content surface and slider.
+        
+        Args:
+            layout_props: Configuration from layout.json
+            game_manager: Central game state manager
+            content_surface: Surface to display (can be larger than viewport)
+        
+        Properties:
+        - exterior_padding: Space around entire area
+        - interior_padding: Gap between content and slider
+        - content_scroll: Current scroll position in pixels (0 to max_scroll)
+        - content_width_percentage: Content area as fraction of usable width
+        - slider_side: "right" or "left"
+        - content_elements: Child UI elements that scroll with content
+        """
         # Call parent constructor to initialize common UIElement attributes
         super().__init__(layout_props, game_manager, callback=None, shown=True)
         
@@ -57,21 +102,28 @@ class ScrollableArea(UIElement):
 
         self.read_layout(layout_props)
 
+    ## --- CHILD ELEMENT MANAGEMENT --- ##
+
     def add_element(self, element: UIElement) -> None:
-        """Add a UI element to the scrollable content."""
+        """Add UI element to scrollable content and recalculate height."""
         self.add_child(element)  # Use parent method for hierarchy
         self.content_elements.append(element)
         self._recalculate_content_height()
 
     def remove_element(self, element: UIElement) -> None:
-        """Remove a UI element from the scrollable content."""
+        """Remove UI element from scrollable content and recalculate height."""
         if element in self.content_elements:
             self.remove_child(element)  # Use parent method for hierarchy
             self.content_elements.remove(element)
             self._recalculate_content_height()
 
     def _recalculate_content_height(self) -> None:
-        """Calculate total content height based on child elements."""
+        """
+        Calculate total content height and update max scroll.
+        
+        Uses bottommost child element or content_surface height.
+        Updates max_scroll to ensure content can't scroll beyond bottom.
+        """
         if self.content_elements:
             max_bottom = max(elem.rect.y + elem.rect.height for elem in self.content_elements)
             self.content_height = max_bottom
@@ -82,8 +134,15 @@ class ScrollableArea(UIElement):
         
         self.max_scroll = max(0, self.content_height - self.viewable_content_height)
 
+    ## --- COORDINATE TRANSFORMS --- ##
+
     def _get_content_rect(self) -> pygame.Rect:
-        """Get the rect for the content area (where child elements live)."""
+        """
+        Get content area rect in container-relative coordinates.
+        
+        Returns rect accounting for exterior_padding but not scroll offset.
+        Used for layout calculations, not drawing.
+        """
         return pygame.Rect(
             self.rect.x + self.exterior_padding,
             self.rect.y + self.exterior_padding,
@@ -92,7 +151,16 @@ class ScrollableArea(UIElement):
         )
     
     def get_absolute_content_rect(self) -> pygame.Rect:
-        """Get the visible content area in screen coordinates."""
+        """
+        Get visible viewport area in screen coordinates (no scroll offset).
+        
+        Used for:
+        - Drawing subsurface (clipping region)
+        - Event collision detection
+        - Determining what's visible
+        
+        Returns fixed screen-space rect regardless of scroll position.
+        """
         abs_rect = super().get_absolute_rect()  # Get actual screen position
         return pygame.Rect(
             abs_rect.x + self.exterior_padding,
@@ -102,11 +170,23 @@ class ScrollableArea(UIElement):
         )
     
     def get_clip_rect(self) -> pygame.Rect:
-        """Content area should clip its children."""
+        """Return clipping rect for child elements (content viewport)."""
         return self.get_absolute_content_rect()
     
     def get_absolute_rect(self) -> pygame.Rect:
-        """Override to account for scroll offset for children positioning."""
+        """
+        Override to apply scroll offset for child element positioning.
+        
+        CRITICAL: This method returns the content rect WITH scroll offset applied.
+        Children use this to calculate their screen positions, making them scroll.
+        
+        Transform:
+        - base_y includes -content_scroll offset
+        - As content_scroll increases, children move up (negative Y)
+        - Viewport (get_absolute_content_rect) stays fixed
+        
+        Returns rect that moves with scroll, not the visible viewport.
+        """
         if self._absolute_rect is None:
             if self.parent:
                 parent_rect = self.parent.get_absolute_rect()
@@ -125,8 +205,23 @@ class ScrollableArea(UIElement):
             )
         return self._absolute_rect
 
+    ## --- EVENT HANDLING --- ##
+
     def _handle_own_event(self, event: pygame.event.Event) -> bool:
-        """Handle scrolling events (mousewheel, slider interaction)."""
+        """
+        Handle scrolling events (mousewheel, slider drag).
+        
+        Event Priority:
+        1. Mousewheel over content area: Direct scroll (20px per tick)
+        2. Slider interaction: Delegated to slider (updates via callback)
+        
+        Scroll Update:
+        - Updates content_scroll and invalidates absolute rects
+        - Keeps scroll clamped to [0, max_scroll]
+        - Syncs slider value with scroll position
+        
+        Returns True if event consumed.
+        """
         # Handle mouse wheel scrolling
         if event.type == pygame.MOUSEWHEEL:
             abs_content_rect = self.get_absolute_content_rect()
@@ -161,7 +256,28 @@ class ScrollableArea(UIElement):
         
         return False
 
+    ## --- RENDERING --- ##
+
     def draw(self, surface: pygame.Surface):
+        """
+        Draw scrollable area with viewport clipping.
+        
+        Rendering Order:
+        1. Background (at actual_rect position, unaffected by scroll)
+        2. Content surface and child elements (clipped to viewport, offset by scroll)
+        3. Slider (at actual_rect position, on top of everything)
+        
+        Clipping Strategy:
+        - Create subsurface for content viewport
+        - Draw content_surface at (0, -content_scroll) within subsurface
+        - Children draw themselves with scroll offset (via get_absolute_rect)
+        - Only visible children are drawn (viewport intersection check)
+        
+        Coordinate Spaces:
+        - actual_rect: Container position on screen (unscrolled)
+        - content_abs_rect: Viewport position on screen (clipping region)
+        - Child positions: Include scroll offset (move with content)
+        """
         if not self.shown:
             return
         
@@ -210,11 +326,15 @@ class ScrollableArea(UIElement):
             # Restore slider position
             self.slider.rect.x, self.slider.rect.y = original_slider_pos
 
+    ## --- SURFACE CREATION --- ##
+
     def create_surfaces(self):
+        """Initialize background and slider (called after layout read)."""
         self.create_background_surface()
         self.create_slider()
 
     def create_background_surface(self):
+        """Create background surface from image or solid color."""
         self.background_surface = pygame.Surface((self.rect.width, self.rect.height))
         if self.background_image:
             self.background_surface.blit(self.background_image, (0, 0))
@@ -222,6 +342,12 @@ class ScrollableArea(UIElement):
             self.background_surface.fill(self.background_color)
 
     def create_slider(self):
+        """
+        Create vertical slider with callback to update scroll position.
+        
+        Slider value: 0.0 (top) to 1.0 (bottom)
+        Callback: set_content_scroll() converts to pixel offset
+        """
         self.slider = Slider(
             self.slider_layout_props,
             0,  # initial_value
@@ -232,6 +358,12 @@ class ScrollableArea(UIElement):
         )
 
     def calculate_dependent_properties(self):
+        """
+        Recalculate viewport dimensions and slider layout from base properties.
+        
+        Called when rect, padding, or content_width_percentage changes.
+        Updates slider_layout_props with new dimensions.
+        """
         self.viewable_content_height = self.rect.height - 2 * self.exterior_padding
         # Calculate usable width (after exterior padding and interior padding between content and slider)
         usable_width = self.rect.width - 2 * self.exterior_padding - self.interior_padding
@@ -246,20 +378,40 @@ class ScrollableArea(UIElement):
             "handle_radius": int(self.slider_width / 2) - self.slider_handle_inset
         })
 
-    #called by slider to update content scroll, the area of the content surface to draw
+    ## --- SCROLL CONTROL --- ##
+
     def set_content_scroll(self) -> None:
-        #takes slider value (0 to 1) and sets content surface scroll accordingly
+        """
+        Update content scroll from slider value (callback from slider).
+        
+        Converts slider.value (0 to 1) to pixel offset (0 to max_scroll).
+        Invalidates children absolute rects since they move with scroll.
+        """
         self.content_scroll = self.slider.value * self.max_scroll
         self._invalidate_absolute_rect()  # Children positions changed
 
-    #called on mouse drag
     def update_scroll(self, x: int, y: int) -> None:
+        """
+        Update scroll from mouse coordinates (legacy drag handler).
+        
+        Note: This may be unused - event handling now done via _handle_own_event.
+        """
         # Adjust coordinates to be relative to the scrollable area
         relative_x = x - self.rect.x
         relative_y = y - self.rect.y
         self.slider.update_location(relative_x, relative_y)
 
+    ## --- SERIALIZATION --- ##
+
     def read_layout(self, layout_props: dict) -> None:
+        """
+        Load scrollable area properties from config dict.
+        
+        Deferred Loading:
+        - content_elements stored in _pending_content_elements
+        - Must call restore_content_elements() after loading to create children
+        - Necessary because element creation requires factory callback
+        """
         self._read_common_layout(layout_props)
 
         self.slider_layout_props: dict = layout_props.get("slider_layout_props", {})
@@ -287,11 +439,15 @@ class ScrollableArea(UIElement):
         self.create_surfaces()
     
     def restore_content_elements(self, element_factory_callback) -> None:
-        """Restore content elements from layout after loading.
+        """
+        Create and add child elements from pending layout data.
         
         Args:
-            element_factory_callback: Function that creates a UI element from layout dict
-                                     Should have signature: (layout_props: dict, game_manager) -> UIElement
+            element_factory_callback: Factory function with signature:
+                (layout_props: dict, game_manager) -> UIElement
+        
+        Must be called after read_layout() to complete deserialization.
+        Factory pattern allows polymorphic element creation without circular imports.
         """
         if hasattr(self, '_pending_content_elements'):
             for element_layout in self._pending_content_elements:
@@ -303,6 +459,7 @@ class ScrollableArea(UIElement):
             delattr(self, '_pending_content_elements')
 
     def get_layout(self) -> dict:
+        """Serialize scrollable area and all child elements to config dict."""
         layout = self._get_common_layout()
         layout.update({
             "_type": "ScrollableArea",
@@ -329,6 +486,7 @@ class ScrollableArea(UIElement):
         return layout
     
     def print_info(self) -> None:
+        """Print scrollable area properties and slider info for debugging."""
         self.print_common_info()
         print(f"  Exterior Padding: {self.exterior_padding}")
         print(f"  Interior Padding: {self.interior_padding}")

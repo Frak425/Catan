@@ -9,10 +9,47 @@ if TYPE_CHECKING:
 
 
 class Button(UIElement):
+    """
+    Interactive button element with text, visual states, and click handling.
+    
+    Features:
+    - Text rendering with alignment (left/center/right)
+    - Visual states: normal, hover, disabled, active
+    - Optional background image
+    - Configurable colors, padding, and border radius
+    - Callback execution on click
+    
+    Visual States:
+    - Normal: Default color
+    - Hover: 20% lighter when mouse over
+    - Disabled: 50% darker, no interaction
+    - Active: Shows guiding lines (dev mode selection)
+    """
 
     text_color: tuple[int, int, int]
 
     def __init__(self, layout_props: dict, font: pygame.font.Font, game_manager: "GameManager", background_image: pygame.Surface | None = None, callback: Optional[Callable] = None, shown: bool = True) -> None:
+        """
+        Initialize button with text, colors, and visual properties.
+        
+        Args:
+            layout_props: Configuration from layout.json
+            font: Pygame font for text rendering
+            game_manager: Central game state manager
+            background_image: Optional background (overrides color fill)
+            callback: Function called on click
+            shown: Initial visibility
+        
+            NOTE: Update as needed when adding new properties.
+        Properties:
+        - text: Button label
+        - color: Background color (r, g, b)
+        - text_color: Text color (r, g, b)
+        - text_align: "left", "center", or "right"
+        - padding: Pixels between text and button edge
+        - disabled: If True, button is non-interactive and darkened
+        - border_radius: Corner rounding (not yet implemented in draw)
+        """
         # Initialize element-specific defaults
         self.text = ""
         self.color = (0, 0, 0)
@@ -50,19 +87,24 @@ class Button(UIElement):
         # read layout after setting defaults
         self.read_layout(layout_props)
 
+    ## --- TEXT MANAGEMENT --- ##
+
     def update_text(self, new_text: str) -> None:
+        """Update button text and regenerate text surface."""
         self.text = new_text
         self.text_surface = self.font.render(self.text, True, self.text_color)
         self.text_rect = self.text_surface.get_rect()
         self.set_text_align(self.text_align)
 
     def update_text_color(self, new_color: tuple[int, int, int]) -> None:
+        """Update text color and regenerate text surface."""
         self.text_color = new_color
         self.text_surface = self.font.render(self.text, True, self.text_color)
         self.text_rect = self.text_surface.get_rect()
         self.set_text_align(self.text_align)
 
     def set_text_align(self, text_align: str) -> None:
+        """Position text within button based on alignment (left/center/right)."""
         if text_align == "center":
             self.text_rect.center = self.surface.get_rect().center
         elif text_align == "left":
@@ -70,8 +112,15 @@ class Button(UIElement):
         elif text_align == "right":
             self.text_rect.midright = (self.surface.get_rect().width - self.padding, self.surface.get_rect().centery)
 
+    ## --- EVENT HANDLING --- ##
+
     def _handle_own_event(self, event: pygame.event.Event) -> bool:
-        """Handle button-specific events (clicks, hover)."""
+        """
+        Handle button-specific events (clicks, hover).
+        
+        Tracks hover state for visual feedback and triggers callback on click.
+        Respects disabled state. Returns True if click consumed.
+        """
         if self.disabled or not self.shown:
             return False
         
@@ -91,7 +140,19 @@ class Button(UIElement):
         
         return False
 
+    ## --- RENDERING --- ##
+
     def draw(self, surface: pygame.Surface) -> None:
+        """
+        Draw button with text and visual state effects.
+        
+        Visual Modifications:
+        - Disabled: Colors darkened to 50%
+        - Hover: Background lightened to 120%
+        - Active: Shows guiding lines (dev mode)
+        
+        Uses absolute coordinates for positioning (accounts for parent offset).
+        """
         if not self.shown:
             return
         
@@ -129,6 +190,7 @@ class Button(UIElement):
             self.draw_guiding_lines(surface)
 
     def get_text_rect(self, text_surface: pygame.Surface) -> pygame.Rect:
+        """Calculate text position based on alignment. Returns rect in relative coordinates."""
         text_rect = text_surface.get_rect()
         if self.text_align == "center":
             text_rect.center = self.rect.center
@@ -138,7 +200,15 @@ class Button(UIElement):
             text_rect.midright = (self.rect.right - 5, self.rect.centery)
         return text_rect
 
+    ## --- SERIALIZATION --- ##
+
     def read_layout(self, layout: dict) -> None:
+        """
+        Load button properties from config dict.
+        
+        Properties: color, text, text_color, padding, text_align
+        See layout.json for schema reference.
+        """
         # Schema reference: See [layout.json](./config/layout.json#L23-L41)
         self._read_common_layout(layout)
         
@@ -151,6 +221,12 @@ class Button(UIElement):
         self.text_align = layout.get("text_align", self.text_align)
 
     def get_layout(self) -> dict:
+        """
+        Serialize button properties to config dict.
+        
+        Includes reverse callback lookup to save callback name (if registered).
+        Note: Nested loop for callback lookup - could be optimized with reverse registry.
+        """
         layout = self._get_common_layout()
         layout.update({
             "_type": "Button",
@@ -186,8 +262,9 @@ class Button(UIElement):
         
         return layout
     
-    #print all layout info
     def print_info(self) -> None:
+        """Print all button properties for debugging (used by dev mode print_info command)."""
+
         self.print_common_info()
         print(f"Button: {self.name}")
         print(f"Text: {self.text}")
