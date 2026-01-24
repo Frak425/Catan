@@ -281,6 +281,8 @@ class ScrollableArea(UIElement):
         if not self.shown:
             return
         
+        self.update()
+
         # Get actual screen position (not offset by scroll)
         actual_rect = super().get_absolute_rect()
         

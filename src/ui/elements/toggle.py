@@ -173,7 +173,7 @@ class Toggle(UIElement):
 
     ## --- RENDERING --- ##
 
-    def draw(self, surface: pygame.Surface, time: int | None = None):
+    def draw(self, surface: pygame.Surface, time: int):
         """
         Draw toggle track and handle, updating animation if active.
         
@@ -192,6 +192,8 @@ class Toggle(UIElement):
         if not self.shown:
             return
         
+        self.update(time)
+
         # Get absolute position for drawing
         abs_rect = self.get_absolute_rect()
         

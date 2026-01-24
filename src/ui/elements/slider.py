@@ -71,10 +71,6 @@ class Slider(UIElement):
 
         self.slider_position = self.calculate_slider_position(self.value)
 
-        #store the coordinates of where the mouse clicked on the slider to compare to the slider. e.g you have to click on the circle
-        self.click_x = 0
-        self.click_y = 0
-
         #create the drawing surface, cleared every frame
         self.draw_surface = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
         self.draw_surface.fill((0, 0, 0, 0))  # Transparent background
@@ -222,10 +218,10 @@ class Slider(UIElement):
             if hasattr(self, 'is_dragging') and self.is_dragging:
                 # Update slider position based on mouse movement
                 if self.direction == "horizontal":
-                    new_pos = mouse_pos[0] - abs_rect.x - self.click_x + self.handle_surface.get_width() / 2
+                    new_pos = mouse_pos[0] - abs_rect.x  + self.handle_surface.get_width() / 2
                     self.slider_position = max(0, min(new_pos, self.rect.width - self.rect.height))
                 else:
-                    new_pos = mouse_pos[1] - abs_rect.y - self.click_y + self.handle_surface.get_height() / 2
+                    new_pos = mouse_pos[1] - abs_rect.y  + self.handle_surface.get_height() / 2
                     self.slider_position = max(0, min(new_pos, self.rect.height - self.rect.width))
                 
                 self.value = self.calculate_value()
@@ -275,7 +271,7 @@ class Slider(UIElement):
         """
         # Calculate the new slider position based on mouse x-coordinate
         if self.direction == "horizontal":
-            self.slider_position = mouse_x - self.click_x - self.rect.x - self.handle_surface.get_width() / 2
+            self.slider_position = mouse_x  - self.rect.x  - self.handle_surface.get_width() / 2
             # Ensure the slider position is within the bar's bounds
             if self.slider_position < 0:
                 self.slider_position = 0
@@ -283,7 +279,7 @@ class Slider(UIElement):
                 self.slider_position = self.rect.width - self.rect.height
 
         else:
-            self.slider_position = mouse_y - self.click_y - self.rect.y - self.handle_surface.get_height() / 2
+            self.slider_position = mouse_y - self.rect.y - self.handle_surface.get_height() / 2
             # Ensure the slider position is within the bar's bounds
             if self.slider_position < 0:
                 self.slider_position = 0
@@ -311,6 +307,8 @@ class Slider(UIElement):
         if not self.shown:
             return
         
+        self.update()
+
         # Get absolute position for drawing
         abs_rect = self.get_absolute_rect()
         

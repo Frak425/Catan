@@ -2,6 +2,9 @@ import pygame
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Callable, Optional, List
 
+from src.managers.animation.animation import SpriteAnimation
+from src.managers.animation.driver import AnimationDriver
+
 if TYPE_CHECKING:
     from src.managers.game_manager import GameManager
 
@@ -76,6 +79,7 @@ class UIElement(ABC):
         # Initialize common defaults
         self.name = ""
         self.rect = pygame.Rect(0, 0, 0, 0)  # Position relative to parent
+        self.offset = (0, 0)
         self.guiding_line_color = (100, 100, 200)
         self.is_active = False
         
@@ -84,6 +88,10 @@ class UIElement(ABC):
         self.children: List['UIElement'] = []
         self._absolute_rect: Optional[pygame.Rect] = None  # Cached screen coordinates
         
+        # Animation management
+        self.animation: Optional[SpriteAnimation] = None
+        self.drivers: List[AnimationDriver] = []
+
         # Subclasses can add their own defaults before calling read_layout
     
     ## --- CALLBACK EXECUTION --- ##
@@ -151,6 +159,32 @@ class UIElement(ABC):
             self.children.remove(child)
             child._invalidate_absolute_rect()
     
+    ## --- ANIMATION AND DRIVER MANAGEMENT --- ##
+
+    def set_animation(self, animation: SpriteAnimation) -> None:
+        """
+        Assign an animation to the UI element.
+        
+        Args:
+            animation: Animation object to assign
+        
+        Note: Placeholder method for future animation handling.
+              Subclasses can override to implement specific animations.
+        """
+        self.animation = animation
+
+    def add_driver(self, driver: AnimationDriver) -> None:
+        """
+        Assign a driver to the UI element.
+        
+        Args:
+            driver: Driver object to assign
+        
+        Note: Placeholder method for future driver handling.
+              Subclasses can override to implement specific drivers.
+        """
+        self.drivers.append(driver)
+
     ## --- COORDINATE SYSTEM --- ##
     
     def _invalidate_absolute_rect(self) -> None:
@@ -429,6 +463,16 @@ class UIElement(ABC):
         """
         pass
 
+    def update(self):
+        #TODO: add docstring
+        time = self.game_manager.graphics_manager.time
+        if self.drivers:
+            for driver in self.drivers:
+                driver.update(time)
+
+        if self.animation:
+            self.animation.update(time)
+
     ## --- OPTIONAL OVERRIDES (DEFAULT IMPLEMENTATIONS PROVIDED) --- ##
 
     def print_common_info(self) -> None:
@@ -520,6 +564,58 @@ class UIElement(ABC):
         """
         self.shown = True
     
+    ## --- ANIMATION HANDLING --- ##
+
+    def update_animation(self, delta_time: float) -> None:
+        """
+        Update any animations for the UI element. Override in subclasses if needed.
+        
+        Args:
+            delta_time: Time elapsed since last update (in seconds)
+        
+        Default Implementation:
+        - No-op (base class has no animations)
+        
+        Override Examples:
+        - Button: Animate special effects on hover/click
+        - Slider: Animate thumb movement
+        - Toggle: Animate switch transition
+        
+        Use Case:
+        - Called each frame by InputManager or GameManager
+        - Allows smooth visual updates independent of input events
+        """
+        pass
+
+
+    def update_drivers(self, delta_time: float) -> None:
+        """
+        Update any driver-based properties for the UI element. Override in subclasses if needed.
+        
+        Args:
+            delta_time: Time elapsed since last update (in seconds)
+        
+        Default Implementation:
+        - No-op (base class has no drivers)
+        
+        Override Examples:
+        - Slider: Update value based on external data source
+        - TextDisplay: Update text content from game state
+        - Image: Change image based on game events
+        
+        Use Case:
+        - Called each frame by InputManager or GameManager
+        - Allows dynamic updates driven by game logic or external inputs
+
+        A driver is of the form:
+        {
+            "property_name": "text",
+            "driver": DriverObject
+        }
+
+        """
+        pass
+
     ## --- DEV MODE FUNCTIONALITY --- ##
     
     def dev_mode_drag(self, x: int, y: int) -> None:

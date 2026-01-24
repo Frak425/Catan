@@ -142,6 +142,7 @@ class Button(UIElement):
 
     ## --- RENDERING --- ##
 
+    #TODO: absract all draw functions into parent class, leaving room for custom functionality
     def draw(self, surface: pygame.Surface) -> None:
         """
         Draw button with text and visual state effects.
@@ -156,6 +157,7 @@ class Button(UIElement):
         if not self.shown:
             return
         
+        self.update()
         # Get absolute position for drawing
         abs_rect = self.get_absolute_rect()
         

@@ -234,6 +234,8 @@ class Menu(UIElement):
         if not self.shown:
             return
         
+        self.update()
+
         # Update menu state
         if time is not None:
             self.update_menu(time)
@@ -258,7 +260,7 @@ class Menu(UIElement):
                 if isinstance(child, Toggle) and time is not None:
                     child.draw(surface, time)
                 else:
-                    child.draw(surface)
+                    child.draw(surface) # type: ignore
         
         # Draw guiding lines in dev mode
         if self.game_manager.dev_mode and self.is_active:

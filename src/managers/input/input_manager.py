@@ -14,6 +14,7 @@ from src.managers.input.helper.mouse_input_handler import MouseInputHandler
 from src.managers.input.helper.keyboard_input_handler import KeyboardInputHandler
 from src.managers.input.helper.dev_mode_handler import DevModeHandler
 from src.managers.input.helper.ui_factory import UIFactory
+from src.managers.animation.animation_manager import AnimationManager
 from src.ui.elements.scrollable_area import ScrollableArea
 
 
@@ -77,16 +78,17 @@ class InputManager:
         
         # Build callback registry for UI actions
         callbacks = self._create_callbacks()
+        animations = self.game_manager.animation_manager.animations
         
         # Create all UI element collections from layout config
-        self.buttons = self.ui_factory.create_all_buttons(callbacks)
-        self.toggles = self.ui_factory.create_all_toggles(callbacks)
-        self.sliders = self.ui_factory.create_all_sliders(callbacks)
-        self.images = self.ui_factory.create_all_images(callbacks)
-        self.text_displays = self.ui_factory.create_all_text_displays(callbacks)
-        self.scrollable_areas = self.ui_factory.create_all_scrollable_areas(callbacks)
+        self.buttons = self.ui_factory.create_all_buttons(callbacks, animations)
+        self.toggles = self.ui_factory.create_all_toggles(callbacks, animations)
+        self.sliders = self.ui_factory.create_all_sliders(callbacks, animations)
+        self.images = self.ui_factory.create_all_images(callbacks, animations)
+        self.text_displays = self.ui_factory.create_all_text_displays(callbacks, animations)
+        self.scrollable_areas = self.ui_factory.create_all_scrollable_areas(callbacks, animations)
         self.menus = self.ui_factory.create_all_menus(
-            #TODO: ask why menu is singular here
+            #TODO: update for newer implemtation
             self.buttons["menu"], 
             self.toggles["menu"], 
             self.sliders["menu"], 

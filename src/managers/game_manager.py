@@ -2,12 +2,12 @@ import json
 from pathlib import Path
 import pygame
 
+from src.managers.animation.animation_manager import AnimationManager
 from src.ui.elements.button import Button
 from src.ui.elements.image import Image
 from src.ui.elements.slider import Slider
 from src.ui.elements.text_display import TextDisplay
 from src.ui.elements.toggle import Toggle
-from src.entities.player import Player
 from src.entities.board import Board
 from src.ui.elements.menu import Menu
 from src.managers.input.input_manager import InputManager
@@ -46,6 +46,8 @@ class GameManager:
         # Core game state
         self.running = True
         self.edited = False  # Whether user has modified default layout/settings
+
+        self.animation_manager = AnimationManager()
         
         # Configuration file paths
         self._init_config_paths()
@@ -142,9 +144,6 @@ class GameManager:
         Returns:
             Board: Initialized game board ready for play
         """
-        # Create player objects
-        for i in range(self.players_num):
-            self.players_list.append(Player(self.player_colors, self.points_to_win))
 
         # Calculate board sizing (screen_w / 27.32 determines tile size)
         global board

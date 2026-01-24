@@ -52,6 +52,8 @@ class Image(UIElement):
         if not self.shown:
             return
         
+        self.update()
+        
         # Get absolute position for drawing
         abs_rect = self.get_absolute_rect()
         surface.blit(self.surface, abs_rect.topleft)

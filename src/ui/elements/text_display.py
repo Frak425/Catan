@@ -126,6 +126,8 @@ class TextDisplay(UIElement):
         if not self.shown:
             return
         
+        self.update()
+
         # Get absolute position for drawing
         abs_rect = self.get_absolute_rect()
         

@@ -54,7 +54,7 @@
         "text_inputs": [],
         "multi_selects": [],
         "menus": [
-            "settings_menu"
+            "settings"
         ]
     },
     "setup": {
@@ -333,7 +333,7 @@
         "text_inputs": [],
         "multi_selects": [],
         "menus": [
-            "settings_menu"
+            "settings"
         ]
     },
     "game": {
@@ -496,15 +496,15 @@
         "text_inputs": [],
         "multi_selects": [],
         "menus": [
-            "settings_menu"
+            "settings"
         ]
     },
     "menus": [
         {
             "name": "settings",
             "rect": [
-                -195,
-                -161,
+                -201,
+                -158,
                 1346,
                 780
             ],
@@ -544,7 +544,10 @@
                 "aa",
                 "fullscreen",
                 "shadows",
-                "brightness"
+                "brightness",
+                "new_button_41038",
+                "new_toggle_69459",
+                "new_slider_93487"
             ],
             "_type": "Menu",
             "bckg_color": [
@@ -553,12 +556,12 @@
                 100
             ],
             "init_location": [
-                15,
-                8
+                9,
+                11
             ],
             "final_location": [
-                15,
-                8
+                9,
+                11
             ],
             "anim_length": 0.5,
             "active_tab": "input",
@@ -614,7 +617,7 @@
                         "name": "accessibility",
                         "rect": [
                             396,
-                            37,
+                            19,
                             130,
                             35
                         ],
@@ -808,6 +811,40 @@
                         ],
                         "text_align": "center",
                         "text": "1",
+                        "shown": true,
+                        "padding": 5,
+                        "text_color": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
+                    },
+                    "new_button_41038": {
+                        "name": "new_button_41038",
+                        "rect": [
+                            649,
+                            210,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "_type": "Button",
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "text_align": "center",
+                        "text": "new button",
                         "shown": true,
                         "padding": 5,
                         "text_color": [
@@ -1037,6 +1074,37 @@
                         "rect": [
                             400,
                             300,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "_type": "Toggle",
+                        "on": false,
+                        "guiding_lines": true,
+                        "height": 50,
+                        "center_width": 100,
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "handle_color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "toggle_gap": 7,
+                        "time_to_flip": 0.25
+                    },
+                    "new_toggle_69459": {
+                        "name": "new_toggle_69459",
+                        "rect": [
+                            645,
+                            270,
                             150,
                             50
                         ],
@@ -1462,7 +1530,7 @@
                             200
                         ],
                         "_type": "Slider",
-                        "value": 0,
+                        "value": 0.3535714285714286,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [
@@ -1474,6 +1542,38 @@
                             100,
                             0,
                             0
+                        ],
+                        "handle_radius": 10,
+                        "direction": "horizontal",
+                        "handle_shape": "circle",
+                        "handle_length": 0
+                    },
+                    "new_slider_93487": {
+                        "name": "new_slider_93487",
+                        "rect": [
+                            100,
+                            100,
+                            200,
+                            40
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "_type": "Slider",
+                        "value": 46.25,
+                        "min_value": 0,
+                        "max_value": 100,
+                        "color": [
+                            100,
+                            0,
+                            0
+                        ],
+                        "handle_color": [
+                            200,
+                            200,
+                            200
                         ],
                         "handle_radius": 10,
                         "direction": "horizontal",

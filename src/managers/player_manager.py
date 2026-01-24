@@ -1,5 +1,4 @@
 import pygame
-from src.entities.player import Player
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -10,7 +9,7 @@ if TYPE_CHECKING:
     from src.managers.graphics_manager import GraphicsManager
 
 class PlayerManager:
-    def init(self, player_list: list[Player]):
+    def init(self, player_list: list):
         self.players = player_list
         self.current_turn = 0
 
@@ -18,7 +17,7 @@ class PlayerManager:
         """Moves turn to the next player"""
         pass
 
-    def current_player(self) -> Player:
+    def current_player(self):
         """Return a reference to the current player"""
         return self.players[self.current_turn]
 
@@ -29,7 +28,7 @@ class PlayerManager:
     def perform_action(self, action: str, *args) -> None:
         pass
 
-    def check_winner(self) -> Player | None:
+    def check_winner(self):
         for player in self.players:
             if player.points > 10:
                 return player

@@ -199,7 +199,7 @@ class UIFactory:
             'close_menu': 'close_menu'
         }
     
-    def create_all_buttons(self, callbacks):
+    def create_all_buttons(self, callbacks, animations: dict):
         """
         Create all buttons dynamically from layout config.
         
@@ -233,8 +233,24 @@ class UIFactory:
                 callback_name = button_name_to_callback.get(button_name)
             
             callback = self._get_callback(callback_name) if callback_name else None
+
+            button = Button(props, self.game_manager.game_font, self.game_manager, callback=callback)
             
-            return Button(props, self.game_manager.game_font, self.game_manager, callback=callback)
+            # Attach sprite animation if available
+            element_name = props.get('name')
+            if element_name and "sprite" in animations:
+                sprite_animation = animations["sprite"].get(element_name, None)
+                if sprite_animation:
+                    button.set_animation(sprite_animation)
+
+            # Attach animation drivers if available
+            if element_name and "driver" in animations:
+                drivers = animations["driver"].get(element_name, None)
+                if drivers:
+                    for driver in drivers:
+                        button.add_driver(driver)
+            
+            return button
         
         result = self._create_elements_from_layout('buttons', button_factory, callbacks)
         
@@ -245,7 +261,7 @@ class UIFactory:
         
         return result
 
-    def create_all_sliders(self, callbacks) -> Dict[str, Dict]:
+    def create_all_sliders(self, callbacks, animations)-> Dict[str, Dict]:
         """
         Create all sliders dynamically from layout config.
         
@@ -274,11 +290,25 @@ class UIFactory:
             elif callback_name:
                 slider.callback = self._get_callback(callback_name)
             
+            # Attach sprite animation if available
+            element_name = props.get('name')
+            if element_name and "sprite" in animations:
+                sprite_animation = animations["sprite"].get(element_name, None)
+                if sprite_animation:
+                    slider.set_animation(sprite_animation)
+
+            # Attach animation drivers if available
+            if element_name and "driver" in animations:
+                drivers = animations["driver"].get(element_name, None)
+                if drivers:
+                    for driver in drivers:
+                        slider.add_driver(driver)
+            
             return slider
         
         return self._create_elements_from_layout('sliders', slider_factory, callbacks)
 
-    def create_all_toggles(self, callbacks) -> Dict[str, Dict]:
+    def create_all_toggles(self, callbacks, animations)-> Dict[str, Dict]:
         """
         Create all toggles (on/off switches) dynamically from layout config.
         
@@ -297,11 +327,27 @@ class UIFactory:
             initial_on = props.get('on', self.game_manager.default_on)
             callback_name = props.get('callback')
             callback = self._get_callback(callback_name) if callback_name else None
-            return Toggle(props, self.game_manager.graphics_manager.time, self.game_manager, on=initial_on, callback=callback)
+            toggle = Toggle(props, self.game_manager.graphics_manager.time, self.game_manager, on=initial_on, callback=callback)
+            
+            # Attach sprite animation if available
+            element_name = props.get('name')
+            if element_name and "sprite" in animations:
+                sprite_animation = animations["sprite"].get(element_name, None)
+                if sprite_animation:
+                    toggle.set_animation(sprite_animation)
+
+            # Attach animation drivers if available
+            if element_name and "driver" in animations:
+                drivers = animations["driver"].get(element_name, None)
+                if drivers:
+                    for driver in drivers:
+                        toggle.add_driver(driver)
+            
+            return toggle
         
         return self._create_elements_from_layout('toggles', toggle_factory, callbacks)
 
-    def create_all_images(self, callbacks) -> Dict[str, Dict]:
+    def create_all_images(self, callbacks, animations)-> Dict[str, Dict]:
         """
         Create all image display elements dynamically from layout config.
         
@@ -318,11 +364,27 @@ class UIFactory:
         def image_factory(props, cbs, state, tab):
             callback_name = props.get('callback')
             callback = self._get_callback(callback_name) if callback_name else None
-            return Image(props, self.game_manager, callback=callback)
+            image = Image(props, self.game_manager, callback=callback)
+            
+            # Attach sprite animation if available
+            element_name = props.get('name')
+            if element_name and "sprite" in animations:
+                sprite_animation = animations["sprite"].get(element_name, None)
+                if sprite_animation:
+                    image.set_animation(sprite_animation)
+
+            # Attach animation drivers if available
+            if element_name and "driver" in animations:
+                drivers = animations["driver"].get(element_name, None)
+                if drivers:
+                    for driver in drivers:
+                        image.add_driver(driver)
+                    
+            return image
         
         return self._create_elements_from_layout('images', image_factory, callbacks)
 
-    def create_all_text_displays(self, callbacks) -> Dict[str, Dict]:
+    def create_all_text_displays(self, callbacks, animations)-> Dict[str, Dict]:
         """
         Create all text display elements dynamically from layout config.
         
@@ -340,7 +402,23 @@ class UIFactory:
         def text_display_factory(props, cbs, state, tab):
             callback_name = props.get('callback')
             callback = self._get_callback(callback_name) if callback_name else None
-            return TextDisplay(props, self.game_manager, self.game_manager.game_font, callback=callback)
+            text_display = TextDisplay(props, self.game_manager, self.game_manager.game_font, callback=callback)
+            
+            # Attach sprite animation if available
+            element_name = props.get('name')
+            if element_name and "sprite" in animations:
+                sprite_animation = animations["sprite"].get(element_name, None)
+                if sprite_animation:
+                    text_display.set_animation(sprite_animation)
+
+            # Attach animation drivers if available
+            if element_name and "driver" in animations:
+                drivers = animations["driver"].get(element_name, None)
+                if drivers:
+                    for driver in drivers:
+                        text_display.add_driver(driver)
+            
+            return text_display
         
         return self._create_elements_from_layout('text_displays', text_display_factory, callbacks)
 
@@ -370,7 +448,7 @@ class UIFactory:
         
         return surface
     
-    def create_all_scrollable_areas(self, callbacks) -> Dict[str, Dict]:
+    def create_all_scrollable_areas(self, callbacks, animations)-> Dict[str, Dict]:
         """
         Create all scrollable area elements dynamically from layout config.
         
