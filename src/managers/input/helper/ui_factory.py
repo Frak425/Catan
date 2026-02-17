@@ -76,36 +76,81 @@ class UIFactory:
         """
         return self.callback_registry.get(callback_name, None)
 
-    ## --- LAYOUT ACCESS HELPERS --- ##
-    
-    def _get_from_layout(self, element_type: str, state: str, name: str, tab: str | None = None):
+    ## --- ELEMENT FACTORIES (CONFIG-DRIVEN CREATION) --- ##
+
+    def _create_state_elements(self, layout: dict, element_type: str, factory_func, callbacks: dict) -> Dict[str, Dict]:
         """
-        Helper to retrieve element config from layout structure by name.
-        
-        Args:
-            element_type: Type of element ('buttons', 'sliders', 'toggles', etc.)
-            state: State name ('home', 'setup', 'game', 'menu')
-            name: Element name to find (e.g., 'close_menu', 'volume_slider')
-            tab: Optional menu tab name (e.g., 'audio', 'graphics')
-        
-        Returns:
-            dict or None: Element config dict from layout, or None if not found
-        
-        Layout Navigation:
-        - Non-menu: layout[state][element_type] -> find by name
-        - Menu: layout[state][tab][element_type] -> find by name
+        Create elements for non-menu states (home/setup/game).
         """
-        layout = getattr(self.game_manager, 'layout', None)
-        if not layout:
-            return None
-        try:
-            if state == 'menu' and tab:
-                elements = layout[state][tab].get(element_type, [])
-            else:
-                elements = layout[state].get(element_type, [])
-            return next((e for e in elements if e.get('name') == name), None)
-        except Exception:
-            return None
+        result = {}
+        for state in ["home", "setup", "game"]:
+            result[state] = {}
+            if state in layout and element_type in layout[state]:
+                elements_list = layout[state][element_type]
+                for element_props in elements_list:
+                    name = element_props.get('name')
+                    element = factory_func(element_props, callbacks, state, None)
+                    if element:
+                        result[state][name] = element
+        return result
+
+    def _resolve_menu_tabs(self, menu_config: dict, element_config, default_tabs: list[str]) -> list[str]:
+        """
+        Resolve tab names for a menu from config.
+        """
+        tabs_from_menu = menu_config.get("tabs", [])
+        if not isinstance(tabs_from_menu, list):
+            tabs_from_menu = []
+
+        tabs = list(tabs_from_menu)
+        if isinstance(element_config, dict):
+            for tab_name in element_config.keys():
+                if tab_name not in tabs:
+                    tabs.append(tab_name)
+
+        if not tabs:
+            tabs = list(element_config.keys()) if isinstance(element_config, dict) else default_tabs
+
+        return tabs
+
+    def _create_menu_elements(self, layout: dict, element_type: str, factory_func, callbacks: dict) -> Dict[str, Dict]:
+        """
+        Create elements for menu tabs (multi-menu support).
+        """
+        result = {"menus": {}}
+        default_tabs = ["tabs", "input", "accessibility", "graphics", "audio", "gameplay"]
+
+        menus = layout.get("menus", [])
+        if isinstance(menus, list):
+            for menu_config in menus:
+                menu_name = menu_config.get("name", "menu")
+                element_config = menu_config.get(element_type, {})
+                tabs = self._resolve_menu_tabs(menu_config, element_config, default_tabs)
+
+                result["menus"][menu_name] = {tab: {} for tab in tabs}
+
+                if isinstance(element_config, dict):
+                    for tab in tabs:
+                        tab_elements = element_config.get(tab, {})
+                        if isinstance(tab_elements, dict):
+                            for name, element_props in tab_elements.items():
+                                element = factory_func(element_props, callbacks, "menu", tab)
+                                if element:
+                                    result["menus"][menu_name][tab][name] = element
+                        elif isinstance(tab_elements, list):
+                            for element_props in tab_elements:
+                                name = element_props.get("name")
+                                element = factory_func(element_props, callbacks, "menu", tab)
+                                if element:
+                                    result["menus"][menu_name][tab][name] = element
+
+        if result["menus"]:
+            first_menu_name = next(iter(result["menus"]))
+            result["menu"] = result["menus"][first_menu_name]
+        else:
+            result["menu"] = {tab: {} for tab in default_tabs}
+
+        return result
 
     def _create_elements_from_layout(self, element_type: str, factory_func, callbacks: dict) -> Dict[str, Dict]:
         """
@@ -144,40 +189,13 @@ class UIFactory:
         """
         layout = getattr(self.game_manager, 'layout', None)
         if not layout:
-            return {"home": {}, "setup": {}, "game": {}, "menu": {"tabs": {}, "input": {}, "accessibility": {}, "graphics": {}, "audio": {}, "gameplay": {}}}
-        
-        result = {}
-        
-        # Load non-menu states
-        for state in ["home", "setup", "game"]:
-            result[state] = {}
-            if state in layout and element_type in layout[state]:
-                elements_list = layout[state][element_type]
-                for element_props in elements_list:
-                    name = element_props.get('name')
-                    element = factory_func(element_props, callbacks, state, None)
-                    if element:
-                        result[state][name] = element
-        
-        # Load menu elements from the menus array
-        menu_tabs = ["tabs", "input", "accessibility", "graphics", "audio", "gameplay"]
-        result["menu"] = {tab: {} for tab in menu_tabs}
-        if "menus" in layout and isinstance(layout["menus"], list):
-            for menu_config in layout["menus"]:
-                # Each menu has element_type as key, then tabs inside
-                # Structure: menu_config[element_type][tab] = {name: element_config}
-                if element_type in menu_config:
-                    for tab in menu_tabs:
-                        if tab in menu_config[element_type]:
-                            # The config is a dict of name->properties, not a list
-                            for name, element_props in menu_config[element_type][tab].items():
-                                element = factory_func(element_props, callbacks, "menu", tab)
-                                if element:
-                                    result["menu"][tab][name] = element
-        
-        return result
+            return {"home": {}, "setup": {}, "game": {}, "menus": {}, "menu": {}}
 
-    ## --- ELEMENT FACTORIES (CONFIG-DRIVEN CREATION) --- ##
+        result = self._create_state_elements(layout, element_type, factory_func, callbacks)
+        menu_result = self._create_menu_elements(layout, element_type, factory_func, callbacks)
+
+        result.update(menu_result)
+        return result
 
     def _get_default_button_callbacks(self) -> dict:
         """
@@ -256,7 +274,8 @@ class UIFactory:
         
         # Note: Tab buttons should always be loaded from layout.json
         # If no tabs found in config, the layout.json is incomplete
-        if not result["menu"]["tabs"]:
+        menu_tabs = result.get("menu", {}).get("tabs", {})
+        if not menu_tabs:
             print("Warning: No tab buttons found in layout.json. Menu tabs will not work.")
         
         return result
@@ -504,18 +523,32 @@ class UIFactory:
         """
         layout = getattr(self.game_manager, 'layout', None)
         menus = {}
-        
+
+        # Support both old (single menu) and new (multi-menu) element collections
+        buttons_by_menu = buttons.get("menus", {}) if isinstance(buttons, dict) else {}
+        toggles_by_menu = toggles.get("menus", {}) if isinstance(toggles, dict) else {}
+        sliders_by_menu = sliders.get("menus", {}) if isinstance(sliders, dict) else {}
+        images_by_menu = images.get("menus", {}) if isinstance(images, dict) else {}
+        text_displays_by_menu = text_displays.get("menus", {}) if isinstance(text_displays, dict) else {}
+
         if layout and "menus" in layout and isinstance(layout["menus"], list):
             for menu_config in layout["menus"]:
                 menu_name = menu_config.get("name", "menu")
+
+                menu_buttons = buttons_by_menu.get(menu_name, buttons)
+                menu_toggles = toggles_by_menu.get(menu_name, toggles)
+                menu_sliders = sliders_by_menu.get(menu_name, sliders)
+                menu_images = images_by_menu.get(menu_name, images)
+                menu_text_displays = text_displays_by_menu.get(menu_name, text_displays)
+
                 menu = Menu(
                     layout_props=menu_config,
                     game_manager=self.game_manager,
-                    buttons=buttons,
-                    toggles=toggles,
-                    sliders=sliders,
-                    images=images,
-                    text_displays=text_displays
+                    buttons=menu_buttons,
+                    toggles=menu_toggles,
+                    sliders=menu_sliders,
+                    images=menu_images,
+                    text_displays=menu_text_displays
                 )
                 menus[menu_name] = menu
         

@@ -56,7 +56,13 @@ class Image(UIElement):
         
         # Get absolute position for drawing
         abs_rect = self.get_absolute_rect()
-        surface.blit(self.surface, abs_rect.topleft)
+        if self.animation:
+            frame = self.animation.get_current_frame()
+            if frame.get_size() != self.rect.size:
+                frame = pygame.transform.scale(frame, self.rect.size)
+            surface.blit(frame, abs_rect.topleft)
+        else:
+            surface.blit(self.surface, abs_rect.topleft)
         
         if self.is_active:
             self.draw_guiding_lines(surface)

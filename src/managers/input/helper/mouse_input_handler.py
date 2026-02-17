@@ -241,6 +241,7 @@ class MouseInputHandler:
         
         Note: In dev mode, TextDisplay and Menu backgrounds become clickable.
         """
+        # Deactivate previously active element
         if self.active:
             self.prev_active = self.active
             self.active.is_active = False
@@ -258,7 +259,7 @@ class MouseInputHandler:
         toggle_clicked = None
         slider_clicked = None
         text_display_clicked = None
-        image_clicked = None
+        #image_clicked = None
         scrollable_area_clicked = None
         menu_clicked = None
         
@@ -306,12 +307,12 @@ class MouseInputHandler:
                     menu_offset_y
                 )
             
-            temp_image = self.helper_manager.check_clickable_from_dict(
-                self.images["menu"][menu.active_tab], 
-                (x, y),
-                menu_offset_x,
-                menu_offset_y
-            )
+            #temp_image = self.helper_manager.check_clickable_from_dict(
+            #    self.images["menu"][menu.active_tab], 
+            #    (x, y),
+            #    menu_offset_x,
+            #    menu_offset_y
+            #)
             temp_scrollable_area = self.helper_manager.check_clickable_from_dict(
                 self.scrollable_areas["menu"][menu.active_tab],
                 (x, y),
@@ -345,18 +346,18 @@ class MouseInputHandler:
                     temp_menu = menu
             
             # If we found any element in this menu, use it and stop checking lower menus
-            if temp_button or temp_toggle or temp_slider or temp_text_display or temp_image or temp_scrollable_area or temp_menu:
+            if temp_button or temp_toggle or temp_slider or temp_text_display or temp_scrollable_area or temp_menu: #or temp_image
                 button_clicked = temp_button
                 toggle_clicked = temp_toggle
                 slider_clicked = temp_slider
                 text_display_clicked = temp_text_display
-                image_clicked = temp_image
+                #image_clicked = temp_image
                 scrollable_area_clicked = temp_scrollable_area
                 menu_clicked = temp_menu
                 break  # Stop checking lower priority menus
     
         # If no menu elements were clicked, check game state UI
-        if not (button_clicked or toggle_clicked or slider_clicked or text_display_clicked or image_clicked or scrollable_area_clicked or menu_clicked):
+        if not (button_clicked or toggle_clicked or slider_clicked or text_display_clicked or scrollable_area_clicked or menu_clicked): #or image_clicked
             # Check the buttons for the current game state
             button_clicked = self.helper_manager.check_clickable_from_dict(
                 self.buttons[state], (x, y)
@@ -379,9 +380,9 @@ class MouseInputHandler:
                     self.text_display[state], (x, y)
                 )
             
-            image_clicked = self.helper_manager.check_clickable_from_dict(
-                self.images[state], (x, y)
-            )
+            #image_clicked = self.helper_manager.check_clickable_from_dict(
+            #    self.images[state], (x, y)
+            #)
             scrollable_area_clicked = self.helper_manager.check_clickable_from_dict(
                 self.scrollable_areas[state], (x, y)
             )
@@ -406,8 +407,8 @@ class MouseInputHandler:
         if text_display_clicked:
             self.active = text_display_clicked
 
-        if image_clicked:
-            self.active = image_clicked
+        #if image_clicked:
+        #    self.active = image_clicked
 
         if scrollable_area_clicked:
             self.active = scrollable_area_clicked

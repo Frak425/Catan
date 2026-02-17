@@ -90,7 +90,7 @@ class UIElement(ABC):
         
         # Animation management
         self.animation: Optional[SpriteAnimation] = None
-        self.drivers: List[AnimationDriver] = []
+        self.drivers: List[tuple[str, AnimationDriver]] = []
 
         # Subclasses can add their own defaults before calling read_layout
     
@@ -172,8 +172,10 @@ class UIElement(ABC):
               Subclasses can override to implement specific animations.
         """
         self.animation = animation
+        if self.animation and not self.animation.animating:
+            self.animation.start(self._get_time())
 
-    def add_driver(self, driver: AnimationDriver) -> None:
+    def add_driver(self, driver: AnimationDriver | dict) -> None:
         """
         Assign a driver to the UI element.
         
@@ -183,7 +185,23 @@ class UIElement(ABC):
         Note: Placeholder method for future driver handling.
               Subclasses can override to implement specific drivers.
         """
-        self.drivers.append(driver)
+        # Support both AnimationDriver and dict-based driver definitions.
+        if isinstance(driver, AnimationDriver):
+            self.drivers.append(("", driver))
+            return
+
+        # Dict format: {"property_name": "rect.x", "driver": AnimationDriver}
+        if isinstance(driver, dict) and "driver" in driver and "property_name" in driver:
+            if isinstance(driver["driver"], AnimationDriver):
+                self.drivers.append((driver["property_name"], driver["driver"]))
+            return
+
+        # Dict format: {"rect.x": AnimationDriver, ...}
+        if isinstance(driver, dict):
+            for prop, driver_obj in driver.items():
+                if isinstance(driver_obj, AnimationDriver):
+                    self.drivers.append((prop, driver_obj))
+            return
 
     ## --- COORDINATE SYSTEM --- ##
     
@@ -463,15 +481,44 @@ class UIElement(ABC):
         """
         pass
 
+    def _get_time(self) -> int:
+        """Get current time in milliseconds for animations/drivers."""
+        graphics_manager = getattr(self.game_manager, "graphics_manager", None)
+        if graphics_manager and hasattr(graphics_manager, "time"):
+            return graphics_manager.time
+        return pygame.time.get_ticks()
+
+    def _apply_driver_value(self, property_path: str, value: float) -> None:
+        """Apply driver output to a property path (supports dot notation)."""
+        if not property_path:
+            return
+
+        target = self
+        parts = property_path.split(".")
+        for part in parts[:-1]:
+            if not hasattr(target, part):
+                return
+            target = getattr(target, part)
+
+        if not hasattr(target, parts[-1]):
+            return
+
+        setattr(target, parts[-1], value)
+        if property_path.startswith("rect."):
+            self._invalidate_absolute_rect()
+
     def update(self):
-        #TODO: add docstring
-        time = self.game_manager.graphics_manager.time
+        """Update any drivers and animations for this element."""
+        current_time = self._get_time()
         if self.drivers:
-            for driver in self.drivers:
-                driver.update(time)
+            for prop, driver in self.drivers:
+                driver.update(current_time)
+                self._apply_driver_value(prop, driver.value)
 
         if self.animation:
-            self.animation.update(time)
+            if not self.animation.animating:
+                self.animation.start(current_time)
+            self.animation.update(current_time)
 
     ## --- OPTIONAL OVERRIDES (DEFAULT IMPLEMENTATIONS PROVIDED) --- ##
 

@@ -25,8 +25,6 @@ class AnimationManager:
     TODO: create a serialization system for animations and drivers
 
     """
-
-
     def __init__(self):
         self.animations = {}
         self.create_animation_drivers()

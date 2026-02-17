@@ -4,8 +4,8 @@
             {
                 "name": "play",
                 "rect": [
-                    260,
-                    362,
+                    322,
+                    325,
                     200,
                     75
                 ],
@@ -26,8 +26,8 @@
             {
                 "name": "quit",
                 "rect": [
-                    260,
-                    444,
+                    323,
+                    409,
                     200,
                     75
                 ],
@@ -46,7 +46,18 @@
                 "callback": "quit"
             }
         ],
-        "images": [],
+        "images": [
+            {
+                "name": "main_menu_background",
+                "rect": [
+                    0,
+                    0,
+                    1366,
+                    768
+                ],
+                "image_path": ""
+            }
+        ],
         "sliders": [],
         "toggles": [],
         "text_displays": [],
@@ -521,33 +532,33 @@
                 "graphics",
                 "close_menu",
                 "test3",
-                "aa",
-                "fullscreen",
-                "shadows",
-                "brightness",
-                "test3",
-                "aa",
-                "fullscreen",
-                "shadows",
-                "brightness",
-                "test3",
-                "aa",
-                "fullscreen",
-                "shadows",
-                "brightness",
-                "test3",
-                "aa",
-                "fullscreen",
-                "shadows",
-                "brightness",
-                "test3",
-                "aa",
-                "fullscreen",
-                "shadows",
-                "brightness",
                 "new_button_41038",
+                "aa",
+                "fullscreen",
+                "shadows",
                 "new_toggle_69459",
-                "new_slider_93487"
+                "brightness",
+                "new_slider_93487",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness",
+                "test3",
+                "aa",
+                "fullscreen",
+                "shadows",
+                "brightness"
             ],
             "_type": "Menu",
             "bckg_color": [
@@ -577,6 +588,220 @@
             "modal": false,
             "close_on_state_change": true,
             "buttons": {
+                "input": {
+                    "test3": {
+                        "name": "test3",
+                        "rect": [
+                            275,
+                            105,
+                            100,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "_type": "Button",
+                        "color": [
+                            200,
+                            50,
+                            100
+                        ],
+                        "text_align": "center",
+                        "text": "1",
+                        "shown": true,
+                        "padding": 5,
+                        "text_color": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
+                    },
+                    "new_button_41038": {
+                        "name": "new_button_41038",
+                        "rect": [
+                            649,
+                            210,
+                            150,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "_type": "Button",
+                        "color": [
+                            0,
+                            100,
+                            0
+                        ],
+                        "text_align": "center",
+                        "text": "new button",
+                        "shown": true,
+                        "padding": 5,
+                        "text_color": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
+                    }
+                },
+                "accessibility": {
+                    "test3": {
+                        "name": "test3",
+                        "rect": [
+                            275,
+                            105,
+                            100,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "_type": "Button",
+                        "color": [
+                            200,
+                            50,
+                            100
+                        ],
+                        "text_align": "center",
+                        "text": "4",
+                        "shown": false,
+                        "padding": 5,
+                        "text_color": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
+                    }
+                },
+                "gameplay": {
+                    "test3": {
+                        "name": "test3",
+                        "rect": [
+                            275,
+                            105,
+                            100,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "_type": "Button",
+                        "color": [
+                            200,
+                            50,
+                            100
+                        ],
+                        "text_align": "center",
+                        "text": "4",
+                        "shown": false,
+                        "padding": 5,
+                        "text_color": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
+                    }
+                },
+                "audio": {
+                    "test3": {
+                        "name": "test3",
+                        "rect": [
+                            275,
+                            105,
+                            100,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "_type": "Button",
+                        "color": [
+                            200,
+                            50,
+                            100
+                        ],
+                        "text_align": "center",
+                        "text": "4",
+                        "shown": false,
+                        "padding": 5,
+                        "text_color": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
+                    }
+                },
+                "graphics": {
+                    "test3": {
+                        "name": "test3",
+                        "rect": [
+                            275,
+                            105,
+                            100,
+                            50
+                        ],
+                        "guiding_line_color": [
+                            100,
+                            100,
+                            200
+                        ],
+                        "_type": "Button",
+                        "color": [
+                            200,
+                            50,
+                            100
+                        ],
+                        "text_align": "center",
+                        "text": "4",
+                        "shown": false,
+                        "padding": 5,
+                        "text_color": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "border_radius": 0,
+                        "border_top_right_radius": 0,
+                        "border_top_left_radius": 0,
+                        "border_bottom_right_radius": 0,
+                        "border_bottom_left_radius": 0
+                    }
+                },
                 "tabs": {
                     "input": {
                         "name": "input",
@@ -788,224 +1013,9 @@
                         "border_bottom_left_radius": 0,
                         "callback": "close_menu"
                     }
-                },
-                "input": {
-                    "test3": {
-                        "name": "test3",
-                        "rect": [
-                            275,
-                            105,
-                            100,
-                            50
-                        ],
-                        "guiding_line_color": [
-                            100,
-                            100,
-                            200
-                        ],
-                        "_type": "Button",
-                        "color": [
-                            200,
-                            50,
-                            100
-                        ],
-                        "text_align": "center",
-                        "text": "1",
-                        "shown": true,
-                        "padding": 5,
-                        "text_color": [
-                            0,
-                            0,
-                            0
-                        ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
-                    },
-                    "new_button_41038": {
-                        "name": "new_button_41038",
-                        "rect": [
-                            649,
-                            210,
-                            150,
-                            50
-                        ],
-                        "guiding_line_color": [
-                            100,
-                            100,
-                            200
-                        ],
-                        "_type": "Button",
-                        "color": [
-                            0,
-                            100,
-                            0
-                        ],
-                        "text_align": "center",
-                        "text": "new button",
-                        "shown": true,
-                        "padding": 5,
-                        "text_color": [
-                            0,
-                            0,
-                            0
-                        ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
-                    }
-                },
-                "accessibility": {
-                    "test3": {
-                        "name": "test3",
-                        "rect": [
-                            275,
-                            105,
-                            100,
-                            50
-                        ],
-                        "guiding_line_color": [
-                            100,
-                            100,
-                            200
-                        ],
-                        "_type": "Button",
-                        "color": [
-                            200,
-                            50,
-                            100
-                        ],
-                        "text_align": "center",
-                        "text": "4",
-                        "shown": false,
-                        "padding": 5,
-                        "text_color": [
-                            0,
-                            0,
-                            0
-                        ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
-                    }
-                },
-                "graphics": {
-                    "test3": {
-                        "name": "test3",
-                        "rect": [
-                            275,
-                            105,
-                            100,
-                            50
-                        ],
-                        "guiding_line_color": [
-                            100,
-                            100,
-                            200
-                        ],
-                        "_type": "Button",
-                        "color": [
-                            200,
-                            50,
-                            100
-                        ],
-                        "text_align": "center",
-                        "text": "4",
-                        "shown": false,
-                        "padding": 5,
-                        "text_color": [
-                            0,
-                            0,
-                            0
-                        ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
-                    }
-                },
-                "audio": {
-                    "test3": {
-                        "name": "test3",
-                        "rect": [
-                            275,
-                            105,
-                            100,
-                            50
-                        ],
-                        "guiding_line_color": [
-                            100,
-                            100,
-                            200
-                        ],
-                        "_type": "Button",
-                        "color": [
-                            200,
-                            50,
-                            100
-                        ],
-                        "text_align": "center",
-                        "text": "4",
-                        "shown": false,
-                        "padding": 5,
-                        "text_color": [
-                            0,
-                            0,
-                            0
-                        ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
-                    }
-                },
-                "gameplay": {
-                    "test3": {
-                        "name": "test3",
-                        "rect": [
-                            275,
-                            105,
-                            100,
-                            50
-                        ],
-                        "guiding_line_color": [
-                            100,
-                            100,
-                            200
-                        ],
-                        "_type": "Button",
-                        "color": [
-                            200,
-                            50,
-                            100
-                        ],
-                        "text_align": "center",
-                        "text": "4",
-                        "shown": false,
-                        "padding": 5,
-                        "text_color": [
-                            0,
-                            0,
-                            0
-                        ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
-                    }
                 }
             },
             "toggles": {
-                "tabs": {},
                 "input": {
                     "aa": {
                         "name": "aa",
@@ -1227,7 +1237,7 @@
                         "time_to_flip": 0.25
                     }
                 },
-                "graphics": {
+                "gameplay": {
                     "aa": {
                         "name": "aa",
                         "rect": [
@@ -1417,7 +1427,7 @@
                         "time_to_flip": 0.25
                     }
                 },
-                "gameplay": {
+                "graphics": {
                     "aa": {
                         "name": "aa",
                         "rect": [
@@ -1511,10 +1521,10 @@
                         "toggle_gap": 7,
                         "time_to_flip": 0.25
                     }
-                }
+                },
+                "tabs": {}
             },
             "sliders": {
-                "tabs": {},
                 "input": {
                     "brightness": {
                         "name": "brightness",
@@ -1530,7 +1540,7 @@
                             200
                         ],
                         "_type": "Slider",
-                        "value": 0.3535714285714286,
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 1,
                         "color": [
@@ -1562,7 +1572,7 @@
                             200
                         ],
                         "_type": "Slider",
-                        "value": 46.25,
+                        "value": 0,
                         "min_value": 0,
                         "max_value": 100,
                         "color": [
@@ -1615,7 +1625,7 @@
                         "handle_length": 0
                     }
                 },
-                "graphics": {
+                "gameplay": {
                     "brightness": {
                         "name": "brightness",
                         "rect": [
@@ -1683,7 +1693,7 @@
                         "handle_length": 0
                     }
                 },
-                "gameplay": {
+                "graphics": {
                     "brightness": {
                         "name": "brightness",
                         "rect": [
@@ -1716,23 +1726,24 @@
                         "handle_shape": "circle",
                         "handle_length": 0
                     }
-                }
+                },
+                "tabs": {}
             },
             "images": {
-                "tabs": {},
                 "input": {},
                 "accessibility": {},
-                "graphics": {},
+                "gameplay": {},
                 "audio": {},
-                "gameplay": {}
+                "graphics": {},
+                "tabs": {}
             },
             "text_displays": {
-                "tabs": {},
                 "input": {},
                 "accessibility": {},
-                "graphics": {},
+                "gameplay": {},
                 "audio": {},
-                "gameplay": {}
+                "graphics": {},
+                "tabs": {}
             }
         }
     ]

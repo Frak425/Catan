@@ -277,6 +277,9 @@ class GameManager:
         section_data["buttons"] = self.convert_buttons_to_list(
             self.input_manager.buttons[section]
         )
+        section_data["images"] = self.convert_images_to_list(
+            self.input_manager.images[section]
+        )
         section_data["sliders"] = self.convert_sliders_to_list(
             self.input_manager.sliders[section]
         )
@@ -378,7 +381,7 @@ class GameManager:
             layout_object = {
                 "name": image.name,
                 "rect": [image.rect[0], image.rect[1], image.rect[2], image.rect[3]],
-                "file_path": image.image_path,
+                "image_path": image.image_path,
             }
             layout_object_list.append(layout_object)
         return layout_object_list
