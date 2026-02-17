@@ -9,6 +9,7 @@ from src.managers.graphics_manager import GraphicsManager
 from src.managers.helper_manager import HelperManager
 from src.managers.input.input_manager import InputManager
 from src.managers.player_manager import PlayerManager
+from src.managers.animation.driver_manager import DriverManager
 
 #initialize game
 pygame.init()
@@ -75,6 +76,10 @@ game_manager.load_config("layout", False)
 #init all managers
 graphics_manager.init(pygame.time.get_ticks())
 input_manager.init()  # Creates UI from game_manager.layout
+
+driver_manager = DriverManager(game_manager, input_manager, graphics_manager)
+game_manager.set_driver_manager(driver_manager)
+driver_manager.create_driver_registry()
 
 audio_manager.init()
 player_manager.init([])

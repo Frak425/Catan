@@ -1,4 +1,4 @@
-from typing import Optional, Callable, Union
+from typing import Optional, Callable
 import pygame
 import pytweening
 import math
@@ -36,7 +36,23 @@ class AnimationDriver:
         on_complete (Callable[[], None]): Callback when animation completes.
     """
 
-    def __init__(self, custom_function: Optional[Callable[[float], float]] = None, tween_function: Optional[str] = None, start_value: float = 0.0, stop_value: float = 1.0, duration: int = 1000, periodic: bool = False, on_complete: Optional[Callable[[], None]] = None) -> None:
+    def __init__(
+        self,
+        custom_function: Optional[Callable[[float], float]] = None,
+        tween_function: Optional[str] = None,
+        start_value: float = 0.0,
+        stop_value: float = 1.0,
+        duration: int = 1000,
+        periodic: bool = False,
+        on_complete: Optional[Callable[[], None]] = None,
+        target_element_id: Optional[str] = None,
+        target_property: Optional[str] = None,
+        blend_mode: str = "override",
+        weight: float = 1.0,
+        priority: int = 0,
+        enabled: bool = True,
+        value_function: Optional[Callable[[dict], float]] = None,
+    ) -> None:
         """
         Initialize an AnimationDriver.
         
@@ -62,6 +78,17 @@ class AnimationDriver:
         self.paused_elapsed: int = 0  # Track elapsed time when paused
         self.on_complete: Optional[Callable[[], None]] = on_complete
         self._completed: bool = False  # Track if callback has been called
+
+        # Driver target metadata
+        self.target_element_id = target_element_id
+        self.target_property = target_property
+        self.blend_mode = blend_mode
+        self.weight = weight
+        self.priority = priority
+        self.enabled = enabled
+
+        # Optional custom evaluator (bypasses tweening)
+        self.value_function = value_function
 
         
     def update(self, current_time: int) -> None:
@@ -182,4 +209,41 @@ class AnimationDriver:
             elapsed_time = self.paused_elapsed + (current_time - self.start_time)
             return elapsed_time >= self.duration
         return False
+
+    def evaluate(self, context: dict) -> Optional[float]:
+        """
+        Evaluate driver value for the current frame.
+
+        If value_function is set, it overrides tweening and receives the context.
+        Otherwise, uses the tweening pipeline and returns self.value.
+        """
+        if not self.enabled:
+            return None
+
+        current_time = context.get("time", pygame.time.get_ticks())
+
+        if self.value_function:
+            return self.value_function(context)
+
+        # Auto-start if not running
+        if not self.animating and self.start_time is None:
+            self.start(current_time)
+
+        self.update(current_time)
+        return self.value
+
+    def blend(self, base_value: float, driver_value: float) -> float:
+        """Blend driver value with a base value."""
+        if driver_value is None:
+            return base_value
+
+        if self.blend_mode == "add":
+            return base_value + driver_value
+        if self.blend_mode == "mul":
+            return base_value * driver_value
+        if self.blend_mode == "lerp":
+            return base_value + (driver_value - base_value) * self.weight
+
+        # Default override
+        return driver_value
     

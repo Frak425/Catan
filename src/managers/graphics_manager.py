@@ -46,6 +46,9 @@ class GraphicsManager:
         assert self.game_manager is not None, "GraphicsManager: game_manager not set"
         assert self.input_manager is not None, "GraphicsManager: input_manager not set"
 
+        if hasattr(self.game_manager, "driver_manager") and self.game_manager.driver_manager:
+            self.game_manager.driver_manager.evaluate_drivers()
+
         if (self.game_manager.game_state == "home"):
             for func in self.home_ui_draw_funcs:
                 func()

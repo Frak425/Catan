@@ -186,6 +186,10 @@ class GameManager:
         """Inject PlayerManager dependency. Used for circular dependency resolution."""
         self.player_manager = player_manager
 
+    def set_driver_manager(self, driver_manager) -> None:
+        """Inject DriverManager dependency. Used for circular dependency resolution."""
+        self.driver_manager = driver_manager
+
     ## --- LAYOUT/SETTINGS GENERATION --- ##
     
     def get_layout(self) -> dict:

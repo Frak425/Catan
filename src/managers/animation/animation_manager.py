@@ -43,11 +43,11 @@ class AnimationManager:
         }
 
     def create_animation_drivers(self):
-        test_driver = AnimationDriver(tween_function="linear", )
+        test_driver = AnimationDriver(tween_function="")
         self.animations["driver"] = {
             "target": [
                 {
-                    "test_attr_1": test_driver
+                    "play": test_driver
                 }
             ]
         }
