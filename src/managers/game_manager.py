@@ -111,7 +111,7 @@ class GameManager:
         """Set default values for UI elements (sliders, toggles, etc.)."""
         # Framerate options and current selection
         self.framerates = [30, 60, 120, 240]
-        self.framerate_index = 1  # Default to 60 FPS
+        self.framerate_index = 2  # Default to 60 FPS
         
         # Buy menu positioning
         self.buy_selection_backdrop_offset = (self.screen_w / 8 * 5, self.screen_h / 8 * 7)

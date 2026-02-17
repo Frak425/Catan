@@ -17,25 +17,38 @@ class DriverManager:
         # Stores the original (baseline) value per (element_id, property_path)
         # so additive drivers do not accumulate over time.
         self._baselines: dict[tuple[str, str], object] = {}
+        # Pre-grouped drivers per (element_id, property_path) to avoid
+        # rebuilding this mapping every frame.
+        self._groups: dict[tuple[str, str], list[AnimationDriver]] = {}
+        # Cached UI element registry; built on first use.
+        self._element_registry: dict[str, UIElement] = {}
 
     def create_driver_registry(self) -> None:
+        # Clear any existing drivers/groups before creating test drivers
+        self.driver_registry = []
+        self._groups.clear()
+
         play_button_driver_x = AnimationDriver(
-            value_function=lambda ctx: math.cos(ctx["time"] / 500) * 10,
+            value_function=lambda ctx: math.cos(ctx["time"] / 250) * 30,
             target_element_id="play",
             target_property="rect.x",
             blend_mode="add"
         )
         play_button_driver_y = AnimationDriver(
-            value_function=lambda ctx: math.sin(ctx["time"] / 500) * 10,
+            value_function=lambda ctx: math.sin(ctx["time"] / 250) * 30,
             target_element_id="play",
             target_property="rect.y",
             blend_mode="add"
         )
 
-        self.driver_registry = [play_button_driver_x, play_button_driver_y]
+        self.register_driver(play_button_driver_x)
+        self.register_driver(play_button_driver_y)
 
     def register_driver(self, driver: AnimationDriver) -> None:
         self.driver_registry.append(driver)
+        if driver.target_element_id and driver.target_property:
+            key = (driver.target_element_id, driver.target_property)
+            self._groups.setdefault(key, []).append(driver)
 
     def _get_time(self) -> int:
         if self.graphics_manager and hasattr(self.graphics_manager, "time"):
@@ -43,6 +56,11 @@ class DriverManager:
         return pygame.time.get_ticks()
 
     def _collect_elements(self) -> dict[str, UIElement]:
+        # Cache the element registry; UI is mostly static so we
+        # avoid walking all containers every frame.
+        if self._element_registry:
+            return self._element_registry
+
         registry: dict[str, UIElement] = {}
 
         def add_elements(container: dict):
@@ -63,7 +81,8 @@ class DriverManager:
         for menu in self.input_manager.menus.values():
             registry[menu.name] = menu
 
-        return registry
+        self._element_registry = registry
+        return self._element_registry
 
     def _get_property(self, target: object, property_path: str):
         if not property_path:
@@ -115,23 +134,17 @@ class DriverManager:
             return
 
         registry = self._collect_elements()
+        current_time = self._get_time()
         context = {
-            "time": self._get_time(),
+            "time": current_time,
             "registry": registry,
             "game_manager": self.game_manager,
             "input_manager": self.input_manager,
             "graphics_manager": self.graphics_manager,
         }
 
-        # Group drivers per target element/property
-        grouped: dict[tuple[str, str], list[AnimationDriver]] = {}
-        for driver in self.driver_registry:
-            if not driver.target_element_id or not driver.target_property:
-                continue
-            key = (driver.target_element_id, driver.target_property)
-            grouped.setdefault(key, []).append(driver)
-
-        for (element_id, property_path), drivers in grouped.items():
+        # Use pre-grouped drivers per target element/property
+        for (element_id, property_path), drivers in self._groups.items():
             target = registry.get(element_id)
             if not target:
                 continue
