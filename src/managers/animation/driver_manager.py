@@ -28,21 +28,14 @@ class DriverManager:
         self.driver_registry = []
         self._groups.clear()
 
-        play_button_driver_x = AnimationDriver(
+        """play_button_driver_x = AnimationDriver(
             value_function=lambda ctx: math.cos(ctx["time"] / 250) * 30,
             target_element_id="play",
             target_property="rect.x",
             blend_mode="add"
         )
-        play_button_driver_y = AnimationDriver(
-            value_function=lambda ctx: math.sin(ctx["time"] / 250) * 30,
-            target_element_id="play",
-            target_property="rect.y",
-            blend_mode="add"
-        )
 
-        self.register_driver(play_button_driver_x)
-        self.register_driver(play_button_driver_y)
+        self.register_driver(play_button_driver_x)"""
 
     def register_driver(self, driver: AnimationDriver) -> None:
         self.driver_registry.append(driver)
@@ -171,34 +164,3 @@ class DriverManager:
 
             if current_value != base_value:
                 self._set_property(target, property_path, current_value)
-    
-    """
-    def create_all_drivers(self) -> dict:
-        return {
-            "button": self.create_button_drivers(),
-            "slider": self.create_slider_drivers(),
-            "image": self.create_image_drivers(),
-            "text_display": self.create_text_display_drivers(),
-            "scrollable_area": self.create_scrollable_area_drivers(),
-            "toggle": self.create_toggle_drivers()
-        }
-    
-    def create_button_drivers(self) -> dict:
-        return {}
-    
-    def create_slider_drivers(self) -> dict:
-        return {}
-    
-    def create_image_drivers(self) -> dict:
-        return {}
-    
-    def create_text_display_drivers(self) -> dict:
-        return {}
-    
-    def create_scrollable_area_drivers(self) -> dict:
-        return {}
-    
-    def create_toggle_drivers(self) -> dict:
-        return {}
-    
-"""

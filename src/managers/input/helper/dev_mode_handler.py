@@ -1,5 +1,5 @@
 import pygame
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from game_manager import GameManager
@@ -357,49 +357,32 @@ class DevModeHandler:
               calculate_dependent_properties() after property changes.
         """
         assert self.mouse_handler.active is not None, "No active element selected."
-        # Direct attribute setting: attr_name+value
-        # Examples: x100, y50, w200, h150
-        simple_attrs = {
-            'x': ('rect.x', int),
-            'y': ('rect.y', int),
-            'w': ('rect.width', int),
-            'h': ('rect.height', int),
-        }
-        
-        # Handle simple attribute commands
-        for prefix, (attr_path, value_type) in simple_attrs.items():
-            if text.startswith(prefix) and text[len(prefix):].lstrip('-').isdigit():
-                self._set_nested_attr(attr_path, value_type(text[len(prefix):]))
+
+        # Generic dynamic setter: "set <attr_path> <value>"
+        # Examples:
+        #   set rect.x 100
+        #   set color 255,0,0
+        #   set text Hello world
+        # This infers the target type from the current attribute value.
+        if text.startswith("set "):
+            parts = text.split(" ", 2)
+            if len(parts) < 3:
+                print("Usage: set <attr_path> <value>")
                 return
+            _, attr_path, raw_value = parts
+
+            # Infer type based on current value (if any)
+            value = self._infer_and_parse_value(attr_path, raw_value)
+            if "." in attr_path:
+                self._set_nested_attr(attr_path, value)
+            else:
+                self._set_attr(attr_path, value)
+            return
         
-        # Color commands: c+r,g,b
-        if text.startswith("tc") and ',' in text:
-            self._set_color_attr('text_color', text[2:])
-        elif text.startswith("hc") and ',' in text:
-            self._set_color_attr('handle_color', text[2:])
-        elif text.startswith("c") and ',' in text:
-            self._set_color_attr('color', text[1:])
-        
-        # Slider commands
-        elif text.startswith("smin"):
-            self._set_attr('min_value', int(text[4:]))
-        elif text.startswith("smax"):
-            self._set_attr('max_value', int(text[4:]))
-        elif text.startswith("sv"):
-            self._set_attr('value', int(text[2:]))
-        
-        # Toggle commands
-        elif text == "ton":
-            self._set_attr('on', True)
-        elif text == "toff":
-            self._set_attr('on', False)
-        elif text == "tflip":
+        if text == "tflip":
             if isinstance(self.mouse_handler.active, Toggle):
                 self.mouse_handler.active.on = not self.mouse_handler.active.on
         
-        # Text command
-        elif text.startswith("t") and not text.startswith("tc"):
-            self._set_attr('text', text[1:])
         
         # Other commands...
         elif text == "del":
@@ -484,6 +467,81 @@ class DevModeHandler:
 
         if isinstance(self.mouse_handler.active, ScrollableArea):
             self.mouse_handler.active.calculate_dependent_properties()
+
+    def _get_nested_attr(self, attr_path: str) -> Any:
+        """Safely get a nested attribute (e.g. 'rect.x') from the active element.
+
+        Returns None if any part of the path is missing.
+        """
+        obj: Any = self.mouse_handler.active
+        for part in attr_path.split('.'):
+            if not hasattr(obj, part):
+                return None
+            obj = getattr(obj, part)
+        return obj
+
+    def _infer_and_parse_value(self, attr_path: str, raw: str) -> Any:
+        """Infer target type from current attribute and parse raw string accordingly.
+
+        - If current value is bool: accept true/false/on/off/1/0
+        - If int/float: parse numeric
+        - If tuple/list of numbers (e.g. colors): parse "r,g,b" -> tuple[int, int, int]
+        - Fallback: keep raw string
+        """
+        # Try nested first, then direct attribute
+        current = self._get_nested_attr(attr_path)
+        if current is None and hasattr(self.mouse_handler.active, attr_path):
+            current = getattr(self.mouse_handler.active, attr_path)
+
+        # No existing value: try simple numeric parse, then fallback to string
+        if current is None:
+            if raw.lstrip('-').isdigit():
+                return int(raw)
+            try:
+                return float(raw)
+            except ValueError:
+                return raw
+
+        # Bool
+        if isinstance(current, bool):
+            lowered = raw.lower()
+            if lowered in ("true", "on", "1"):
+                return True
+            if lowered in ("false", "off", "0"):
+                return False
+            return bool(raw)
+
+        # Int / float
+        if isinstance(current, int):
+            try:
+                return int(raw)
+            except ValueError:
+                try:
+                    return int(float(raw))
+                except ValueError:
+                    return current
+
+        if isinstance(current, float):
+            try:
+                return float(raw)
+            except ValueError:
+                return current
+
+        # Tuple/list of numbers (e.g. colors, positions)
+        if isinstance(current, (tuple, list)) and raw.count(',') >= 1:
+            try:
+                parts = [p.strip() for p in raw.split(',')]
+                # Match length if possible, otherwise use all parts
+                if len(current) and len(parts) != len(current):
+                    # Still try; extra/missing values may be intentional during dev
+                    pass
+                nums = [int(p) if p.lstrip('-').isdigit() else float(p) for p in parts]
+                return type(current)(nums)  # preserve tuple vs list
+            except ValueError:
+                return current
+
+        # Fallback: string
+        return raw
 
     def _set_color_attr(self, attr_name: str, color_str: str) -> None:
         """

@@ -77,6 +77,8 @@ class Image(UIElement):
         """
         self._read_common_layout(layout)
         self.image_path = layout.get("image_path", self.image_path)
+        default_color_data = layout.get("default_color", [self.default_color[0], self.default_color[1], self.default_color[2]])
+        self.default_color = (default_color_data[0], default_color_data[1], default_color_data[2])
         if self.image_path and hasattr(self, 'surface'):
             self.image = pygame.image.load(self.image_path).convert_alpha()
             self.surface.blit(self.image, (0, 0))
@@ -87,6 +89,7 @@ class Image(UIElement):
         layout.update({
             "_type": "Image",
             "image_path": self.image_path,
+            "default_color": [self.default_color[0], self.default_color[1], self.default_color[2]],
             "shown": self.shown
         })
         return layout

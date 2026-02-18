@@ -4,8 +4,8 @@
             {
                 "name": "play",
                 "rect": [
-                    322,
-                    325,
+                    324,
+                    326,
                     200,
                     75
                 ],
@@ -319,7 +319,8 @@
                     "handle_radius": 12,
                     "direction": "vertical",
                     "handle_shape": "circle",
-                    "handle_length": 20
+                    "handle_length": 20,
+                    "shown": true
                 },
                 "exterior_padding": 5,
                 "interior_padding": 5,
@@ -338,7 +339,9 @@
                     255
                 ],
                 "slider_side": "right",
-                "content_width_percentage": 0.9
+                "slider_handle_inset": 2,
+                "content_width_percentage": 0.9,
+                "shown": true
             }
         ],
         "text_inputs": [],
@@ -612,16 +615,17 @@
                         "text": "1",
                         "shown": true,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1
                     },
                     "new_button_41038": {
                         "name": "new_button_41038",
@@ -646,16 +650,17 @@
                         "text": "new button",
                         "shown": true,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1
                     }
                 },
                 "accessibility": {
@@ -682,16 +687,17 @@
                         "text": "4",
                         "shown": false,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1
                     }
                 },
                 "gameplay": {
@@ -718,16 +724,17 @@
                         "text": "4",
                         "shown": false,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1
                     }
                 },
                 "audio": {
@@ -754,16 +761,17 @@
                         "text": "4",
                         "shown": false,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1
                     }
                 },
                 "graphics": {
@@ -790,16 +798,17 @@
                         "text": "4",
                         "shown": false,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1
                     }
                 },
                 "tabs": {
@@ -826,16 +835,17 @@
                         "text": "Input",
                         "shown": true,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0,
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1,
                         "callback": "change_tab_input"
                     },
                     "accessibility": {
@@ -861,16 +871,17 @@
                         "text": "Accessibility",
                         "shown": true,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0,
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1,
                         "callback": "change_tab_accessibility"
                     },
                     "gameplay": {
@@ -896,16 +907,17 @@
                         "text": "Gameplay",
                         "shown": true,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0,
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1,
                         "callback": "change_tab_gameplay"
                     },
                     "audio": {
@@ -931,16 +943,17 @@
                         "text": "Audio",
                         "shown": true,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0,
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1,
                         "callback": "change_tab_audio"
                     },
                     "graphics": {
@@ -966,16 +979,17 @@
                         "text": "Graphics",
                         "shown": true,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0,
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1,
                         "callback": "change_tab_graphics"
                     },
                     "close_menu": {
@@ -1001,16 +1015,17 @@
                         "text": "Close",
                         "shown": true,
                         "padding": 5,
+                        "disabled": false,
                         "text_color": [
                             0,
                             0,
                             0
                         ],
-                        "border_radius": 0,
-                        "border_top_right_radius": 0,
-                        "border_top_left_radius": 0,
-                        "border_bottom_right_radius": 0,
-                        "border_bottom_left_radius": 0,
+                        "border_radius": -1,
+                        "border_top_right_radius": -1,
+                        "border_top_left_radius": -1,
+                        "border_bottom_right_radius": -1,
+                        "border_bottom_left_radius": -1,
                         "callback": "close_menu"
                     }
                 }
@@ -1046,7 +1061,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": true
                     },
                     "fullscreen": {
                         "name": "fullscreen",
@@ -1077,7 +1093,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": true
                     },
                     "shadows": {
                         "name": "shadows",
@@ -1108,7 +1125,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": true
                     },
                     "new_toggle_69459": {
                         "name": "new_toggle_69459",
@@ -1139,7 +1157,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": true
                     }
                 },
                 "accessibility": {
@@ -1172,7 +1191,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     },
                     "fullscreen": {
                         "name": "fullscreen",
@@ -1203,7 +1223,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     },
                     "shadows": {
                         "name": "shadows",
@@ -1234,7 +1255,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     }
                 },
                 "gameplay": {
@@ -1267,7 +1289,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     },
                     "fullscreen": {
                         "name": "fullscreen",
@@ -1298,7 +1321,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     },
                     "shadows": {
                         "name": "shadows",
@@ -1329,7 +1353,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     }
                 },
                 "audio": {
@@ -1362,7 +1387,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     },
                     "fullscreen": {
                         "name": "fullscreen",
@@ -1393,7 +1419,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     },
                     "shadows": {
                         "name": "shadows",
@@ -1424,7 +1451,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     }
                 },
                 "graphics": {
@@ -1457,7 +1485,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     },
                     "fullscreen": {
                         "name": "fullscreen",
@@ -1488,7 +1517,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     },
                     "shadows": {
                         "name": "shadows",
@@ -1519,7 +1549,8 @@
                             0
                         ],
                         "toggle_gap": 7,
-                        "time_to_flip": 0.25
+                        "time_to_flip": 0.25,
+                        "shown": false
                     }
                 },
                 "tabs": {}
@@ -1556,7 +1587,8 @@
                         "handle_radius": 10,
                         "direction": "horizontal",
                         "handle_shape": "circle",
-                        "handle_length": 0
+                        "handle_length": 0,
+                        "shown": true
                     },
                     "new_slider_93487": {
                         "name": "new_slider_93487",
@@ -1588,7 +1620,8 @@
                         "handle_radius": 10,
                         "direction": "horizontal",
                         "handle_shape": "circle",
-                        "handle_length": 0
+                        "handle_length": 0,
+                        "shown": true
                     }
                 },
                 "accessibility": {
@@ -1622,7 +1655,8 @@
                         "handle_radius": 10,
                         "direction": "horizontal",
                         "handle_shape": "circle",
-                        "handle_length": 0
+                        "handle_length": 0,
+                        "shown": false
                     }
                 },
                 "gameplay": {
@@ -1656,7 +1690,8 @@
                         "handle_radius": 10,
                         "direction": "horizontal",
                         "handle_shape": "circle",
-                        "handle_length": 0
+                        "handle_length": 0,
+                        "shown": false
                     }
                 },
                 "audio": {
@@ -1690,7 +1725,8 @@
                         "handle_radius": 10,
                         "direction": "horizontal",
                         "handle_shape": "circle",
-                        "handle_length": 0
+                        "handle_length": 0,
+                        "shown": false
                     }
                 },
                 "graphics": {
@@ -1724,7 +1760,8 @@
                         "handle_radius": 10,
                         "direction": "horizontal",
                         "handle_shape": "circle",
-                        "handle_length": 0
+                        "handle_length": 0,
+                        "shown": false
                     }
                 },
                 "tabs": {}

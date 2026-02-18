@@ -181,7 +181,8 @@ class KeyboardInputHandler:
         """
         # Check if any menus are open by asking InputManager
         if hasattr(self.game_manager, 'input_manager') and self.game_manager.input_manager.get_open_menus():
-            self._close_menu()
+            for menu in self.game_manager.input_manager.get_open_menus():
+                menu.close()
         elif self.game_manager.dev_mode_typing:
             self.game_manager.dev_mode_typing = False
             self.game_manager.dev_mode_text = ""
@@ -285,6 +286,15 @@ class KeyboardInputHandler:
         # Backspace
         if key == pygame.K_BACKSPACE:
             self.game_manager.dev_mode_text = self.game_manager.dev_mode_text[:-1]
+            return
+
+        # Shift-aware special handling
+        # On many layouts, '_' is Shift + '-'. Pygame often reports this as
+        # K_MINUS with shift in modifiers rather than K_UNDERSCORE.
+        mods = pygame.key.get_mods()
+        shift_held = bool(mods & pygame.KMOD_SHIFT)
+        if shift_held and key == pygame.K_MINUS:
+            self.game_manager.dev_mode_text += "_"
             return
 
         # Add characters to buffer (letters, numbers, special chars)

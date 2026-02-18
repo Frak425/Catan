@@ -365,7 +365,8 @@ class Slider(UIElement):
             "handle_radius": self.handle_radius,
             "direction": self.direction,
             "handle_shape": self.handle_shape,
-            "handle_length": self.handle_length
+            "handle_length": self.handle_length,
+            "shown": self.shown
         })
         return layout
     

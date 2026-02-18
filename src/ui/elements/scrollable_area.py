@@ -428,7 +428,7 @@ class ScrollableArea(UIElement):
         self.content_background_color = (content_background_color_data[0], content_background_color_data[1], content_background_color_data[2], content_background_color_data[3])
                 
         self.slider_side = layout_props.get("slider_side", self.slider_side)
-
+        self.slider_handle_inset = layout_props.get("slider_handle_inset", self.slider_handle_inset)
         self.content_width_percentage = layout_props.get("content_width_percentage", self.content_width_percentage)
         
         # Store pending content elements for deferred loading
@@ -473,7 +473,9 @@ class ScrollableArea(UIElement):
             "background_color": [self.background_color[0], self.background_color[1], self.background_color[2], self.background_color[3]],
             "content_background_color": [self.content_background_color[0], self.content_background_color[1], self.content_background_color[2], self.content_background_color[3]],
             "slider_side": self.slider_side,
-            "content_width_percentage": self.content_width_percentage
+            "slider_handle_inset": self.slider_handle_inset,
+            "content_width_percentage": self.content_width_percentage,
+            "shown": self.shown
         })
         
         # Serialize content_elements (child UI elements)

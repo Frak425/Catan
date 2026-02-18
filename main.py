@@ -17,7 +17,7 @@ pygame.init()
 screen_info = pygame.display.Info()
 screen_w = screen_info.current_w
 screen_h = screen_info.current_h
-screen = pygame.display.set_mode((1366, 768), pygame.DOUBLEBUF | pygame.HWSURFACE, vsync=1)
+screen = pygame.display.set_mode((1366, 768), pygame.DOUBLEBUF, vsync=1)
 
 #set caption and icon
 pygame.display.set_caption("Catan")

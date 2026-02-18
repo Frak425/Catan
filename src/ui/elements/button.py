@@ -59,11 +59,11 @@ class Button(UIElement):
         self.font = font
         self.disabled = False
 
-        self.border_radius = 0
-        self.border_top_right_radius = 0
-        self.border_top_left_radius = 0
-        self.border_bottom_right_radius = 0
-        self.border_bottom_left_radius = 0
+        self.border_radius = -1
+        self.border_top_right_radius = -1
+        self.border_top_left_radius = -1
+        self.border_bottom_right_radius = -1
+        self.border_bottom_left_radius = -1
         
         # Call parent constructor
         super().__init__(layout_props, game_manager, callback, shown)
@@ -174,7 +174,7 @@ class Button(UIElement):
             draw_color = tuple(min(255, int(c * 1.2)) for c in self.color)
         
         # Draw using absolute rect
-        pygame.draw.rect(surface, draw_color, abs_rect)
+        pygame.draw.rect(surface, draw_color, abs_rect, 0, self.border_radius, self.border_top_left_radius, self.border_top_right_radius, self.border_bottom_left_radius, self.border_bottom_right_radius)
         text = self.game_font.render(self.text, False, draw_text_color)
         
         # Calculate text position based on absolute rect
@@ -221,6 +221,12 @@ class Button(UIElement):
         self.text_color = (text_color_data[0], text_color_data[1], text_color_data[2])
         self.padding = layout.get("padding", self.padding)
         self.text_align = layout.get("text_align", self.text_align)
+        self.disabled = layout.get("disabled", self.disabled)
+        self.border_radius = layout.get("border_radius", self.border_radius)
+        self.border_top_right_radius = layout.get("border_top_right_radius", self.border_top_right_radius)
+        self.border_top_left_radius = layout.get("border_top_left_radius", self.border_top_left_radius)
+        self.border_bottom_right_radius = layout.get("border_bottom_right_radius", self.border_bottom_right_radius)
+        self.border_bottom_left_radius = layout.get("border_bottom_left_radius", self.border_bottom_left_radius)
 
     def get_layout(self) -> dict:
         """
@@ -233,10 +239,11 @@ class Button(UIElement):
         layout.update({
             "_type": "Button",
             "color": [self.color[0], self.color[1], self.color[2]],
-            "text_align": "center",
+            "text_align": self.text_align,
             "text": self.text,
             "shown": self.shown,
             "padding": self.padding,
+            "disabled": self.disabled,
             "text_color": [self.text_color[0], self.text_color[1], self.text_color[2]],
             "border_radius": self.border_radius,
             "border_top_right_radius": self.border_top_right_radius,
