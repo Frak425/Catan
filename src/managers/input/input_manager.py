@@ -1,12 +1,13 @@
 import pygame
 from typing import Dict
 from typing import TYPE_CHECKING
+from src.managers.base_manager import BaseManager
 if TYPE_CHECKING:
-    from game_manager import GameManager
-    from graphics_manager import GraphicsManager
-    from helper_manager import HelperManager
-    from src.managers.audio_manager import AudioManager
-    from src.managers.player_manager import PlayerManager
+    from src.managers.game.game_manager import GameManager
+    from src.managers.graphics.graphics_manager import GraphicsManager
+    from src.managers.helper.helper_manager import HelperManager
+    from src.managers.audio.audio_manager import AudioManager
+    from src.managers.player.player_manager import PlayerManager
 
 # Import the new handler classes
 from src.ui.elements.menu import Menu
@@ -18,7 +19,7 @@ from src.managers.animation.animation_manager import AnimationManager
 from src.ui.elements.scrollable_area import ScrollableArea
 
 
-class InputManager:
+class InputManager(BaseManager):
     """
     Coordinates user input handling and manages all UI elements.
     
@@ -35,6 +36,17 @@ class InputManager:
     - Callbacks registered in _create_callbacks() connect UI actions to game logic
     """
     
+    def __init__(self):
+        super().__init__()
+        
+    def initialize(self) -> None:
+        """Initialize manager after all dependencies are injected."""
+        self.game_manager = self.get_dependency('game_manager')
+        self.graphics_manager = self.get_dependency('graphics_manager')
+        self.helper_manager = self.get_dependency('helper_manager')
+        self.audio_manager = self.get_dependency('audio_manager')
+        self.player_manager = self.get_dependency('player_manager')
+        
     def init(self):
         """
         Initialize input handling subsystems and create UI elements.
@@ -79,14 +91,15 @@ class InputManager:
         # Build callback registry for UI actions
         callbacks = self._create_callbacks()
         animations = self.game_manager.animation_manager.animations
+        drivers = self.game_manager.driver_manager.drivers
         
         # Create all UI element collections from layout config
-        self.buttons = self.ui_factory.create_all_buttons(callbacks, animations)
-        self.toggles = self.ui_factory.create_all_toggles(callbacks, animations)
-        self.sliders = self.ui_factory.create_all_sliders(callbacks, animations)
-        self.images = self.ui_factory.create_all_images(callbacks, animations)
-        self.text_displays = self.ui_factory.create_all_text_displays(callbacks, animations)
-        self.scrollable_areas = self.ui_factory.create_all_scrollable_areas(callbacks, animations)
+        self.buttons = self.ui_factory.create_all_buttons(callbacks, animations, drivers)
+        self.toggles = self.ui_factory.create_all_toggles(callbacks, animations, drivers)
+        self.sliders = self.ui_factory.create_all_sliders(callbacks, animations, drivers)
+        self.images = self.ui_factory.create_all_images(callbacks, animations, drivers)
+        self.text_displays = self.ui_factory.create_all_text_displays(callbacks, animations, drivers)
+        self.scrollable_areas = self.ui_factory.create_all_scrollable_areas(callbacks, animations, drivers)
         self.menus = self.ui_factory.create_all_menus(
             #TODO: update for newer implemtation
             self.buttons["menu"], 

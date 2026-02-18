@@ -6,7 +6,7 @@ from src.managers.animation.animation import SpriteAnimation
 from src.managers.animation.driver import AnimationDriver
 
 if TYPE_CHECKING:
-    from src.managers.game_manager import GameManager
+    from src.managers.game.game_manager import GameManager
 
 
 class UIElement(ABC):

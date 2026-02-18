@@ -3,12 +3,13 @@ import random
 import math
 import time
 
-from src.managers.game_manager import GameManager
-from src.managers.audio_manager import AudioManager
-from src.managers.graphics_manager import GraphicsManager
-from src.managers.helper_manager import HelperManager
+from src.managers.animation.animation_manager import AnimationManager
+from src.managers.game.game_manager import GameManager
+from src.managers.audio.audio_manager import AudioManager
+from src.managers.graphics.graphics_manager import GraphicsManager
+from src.managers.helper.helper_manager import HelperManager
 from src.managers.input.input_manager import InputManager
-from src.managers.player_manager import PlayerManager
+from src.managers.player.player_manager import PlayerManager
 from src.managers.animation.driver_manager import DriverManager
 
 #initialize game
@@ -37,38 +38,59 @@ graphics_manager = GraphicsManager()
 input_manager = InputManager()
 helper_manager = HelperManager()
 
-#set dependencies
+animation_manager = AnimationManager()
+driver_manager = DriverManager()
 
+# Inject dependencies using BaseManager dependency injection
+game_manager.inject('input_manager', input_manager)
+game_manager.inject('audio_manager', audio_manager)
+game_manager.inject('graphics_manager', graphics_manager)
+game_manager.inject('helper_manager', helper_manager)
+game_manager.inject('player_manager', player_manager)
+game_manager.inject('animation_manager', animation_manager)
+game_manager.inject('driver_manager', driver_manager)
 
-input_manager.set_game_manager(game_manager)
-input_manager.set_graphics_manager(graphics_manager)
-input_manager.set_helper_manager(helper_manager)
-input_manager.set_player_manager(player_manager)
-input_manager.set_audio_manager(audio_manager)
+input_manager.inject('game_manager', game_manager)
+input_manager.inject('graphics_manager', graphics_manager)
+input_manager.inject('helper_manager', helper_manager)
+input_manager.inject('player_manager', player_manager)
+input_manager.inject('audio_manager', audio_manager)
 
-graphics_manager.set_game_manager(game_manager)
-graphics_manager.set_input_manager(input_manager)
-graphics_manager.set_helper_manager(helper_manager)
-graphics_manager.set_player_manager(player_manager)
-graphics_manager.set_audio_manager(audio_manager)
+graphics_manager.inject('game_manager', game_manager)
+graphics_manager.inject('input_manager', input_manager)
+graphics_manager.inject('helper_manager', helper_manager)
+graphics_manager.inject('player_manager', player_manager)
+graphics_manager.inject('audio_manager', audio_manager)
 
-game_manager.set_graphics_manager(graphics_manager)
-game_manager.set_audio_manager(audio_manager)
-game_manager.set_helper_manager(helper_manager)
-game_manager.set_input_manager(input_manager)
-game_manager.set_player_manager(player_manager)
+audio_manager.inject('game_manager', game_manager)
+audio_manager.inject('input_manager', input_manager)
+audio_manager.inject('helper_manager', helper_manager)
+audio_manager.inject('player_manager', player_manager)
+audio_manager.inject('graphics_manager', graphics_manager)
 
-audio_manager.set_game_manager(game_manager)
-audio_manager.set_input_manager(input_manager)
-audio_manager.set_helper_manager(helper_manager)
-audio_manager.set_player_manager(player_manager)
-audio_manager.set_graphics_manager(graphics_manager)
+player_manager.inject('game_manager', game_manager)
+player_manager.inject('input_manager', input_manager)
+player_manager.inject('helper_manager', helper_manager)
+player_manager.inject('audio_manager', audio_manager)
+player_manager.inject('graphics_manager', graphics_manager)
 
-player_manager.set_game_manager(game_manager)
-player_manager.set_input_manager(input_manager)
-player_manager.set_helper_manager(helper_manager)
-player_manager.set_audio_manager(audio_manager)
-player_manager.set_graphics_manager(graphics_manager)
+driver_manager.inject('game_manager', game_manager)
+driver_manager.inject('input_manager', input_manager)
+driver_manager.inject('helper_manager', helper_manager)
+driver_manager.inject('player_manager', player_manager)
+driver_manager.inject('graphics_manager', graphics_manager)
+driver_manager.inject('audio_manager', audio_manager)
+driver_manager.inject('animation_manager', animation_manager)
+
+# Initialize all managers after dependencies are injected
+game_manager.initialize()
+graphics_manager.initialize()
+input_manager.initialize()
+audio_manager.initialize()
+player_manager.initialize()
+helper_manager.initialize()
+animation_manager.initialize()
+driver_manager.initialize()
 
 # Load layout config before initializing input_manager (which creates UI)
 game_manager.load_config("layout", False)
@@ -77,8 +99,6 @@ game_manager.load_config("layout", False)
 graphics_manager.init(pygame.time.get_ticks())
 input_manager.init()  # Creates UI from game_manager.layout
 
-driver_manager = DriverManager(game_manager, input_manager, graphics_manager)
-game_manager.set_driver_manager(driver_manager)
 driver_manager.create_driver_registry()
 
 audio_manager.init()

@@ -1,11 +1,12 @@
 import pygame
 import pytweening
 import os
+from src.managers.base_manager import BaseManager
 
 from .animation import SpriteAnimation
 from .driver import AnimationDriver
 
-class AnimationManager:
+class AnimationManager(BaseManager):
     """
     Initializer and handler for loading and managing animations
 
@@ -26,7 +27,11 @@ class AnimationManager:
 
     """
     def __init__(self):
+        super().__init__()
         self.animations = {}
+        
+    def initialize(self) -> None:
+        """Initialize manager after all dependencies are injected."""
         self.create_animation_drivers()
         self.create_sprite_animations()
 

@@ -12,7 +12,7 @@ from src.ui.elements.scrollable_area import ScrollableArea
 from src.ui.elements.menu import Menu
 
 if TYPE_CHECKING:
-    from src.managers.game_manager import GameManager
+    from src.managers.game.game_manager import GameManager
 
 
 def create_element_from_layout(layout_props: dict, game_manager: 'GameManager') -> UIElement:

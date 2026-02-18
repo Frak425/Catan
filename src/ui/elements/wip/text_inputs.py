@@ -1,7 +1,7 @@
 import pygame
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from src.managers.game_manager import GameManager  
+    from src.managers.game.game_manager import GameManager  
 
 class TextInput:
     def __init__(self, layout_props: dict, font: pygame.font.Font, game_manager: "GameManager") -> None:
@@ -14,17 +14,22 @@ class TextInput:
         self.text_color = (0, 0, 0)
         self.padding = 5
         self.text = ""
-        self.font = font
+        self.font_size = 20
 
         # read layout and override default values
         self.read_layout(layout_props)
+        self.font = pygame.font.SysFont(self.game_manager.game_font, self.font_size)
 
         # Render the text surface
         self.text_surface = self.font.render(self.text, True, self.text_color)
         self.text_rect = self.text_surface.get_rect()
 
+        # Create cursor surface
+        self.cursor_surface = pygame.Surface((2, self.rect.height - 2 * self.padding))
+        self.cursor_surface.fill(self.text_color)
+
         # Create the background surface
-        self.background_surface = pygame.Surface((self.text_rect.width + 2 * self.padding, self.text_rect.height + 2 * self.padding))
+        self.background_surface = pygame.Surface((self.rect.width, self.rect.height))
         self.background_surface.fill(self.background_color)
 
         self.background_rect = self.background_surface.get_rect()

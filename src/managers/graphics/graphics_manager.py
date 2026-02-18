@@ -1,14 +1,26 @@
 import pygame
 import numpy as np
 from typing import TYPE_CHECKING
+from src.managers.base_manager import BaseManager
 if TYPE_CHECKING:
-    from game_manager import GameManager
+    from src.managers.game.game_manager import GameManager
     from src.managers.input.input_manager import InputManager
-    from helper_manager import HelperManager
-    from player_manager import PlayerManager
-    from audio_manager import AudioManager
+    from src.managers.helper.helper_manager import HelperManager
+    from src.managers.player.player_manager import PlayerManager
+    from src.managers.audio.audio_manager import AudioManager
 
-class GraphicsManager:
+class GraphicsManager(BaseManager):
+    def __init__(self):
+        super().__init__()
+        
+    def initialize(self) -> None:
+        """Initialize manager after all dependencies are injected."""
+        self.game_manager = self.get_dependency('game_manager')
+        self.helper_manager = self.get_dependency('helper_manager')
+        self.input_manager = self.get_dependency('input_manager')
+        self.player_manager = self.get_dependency('player_manager')
+        self.audio_manager = self.get_dependency('audio_manager')
+        
     def init(self, time):
         self.menu_open = False
         self.time = time
@@ -26,21 +38,6 @@ class GraphicsManager:
             "toggles": self.input_manager.toggles,
             "scrollable_areas": self.input_manager.scrollable_areas
         }
-
-    def set_game_manager(self, game_manager: 'GameManager'):
-        self.game_manager = game_manager
-
-    def set_helper_manager(self, helper_manager: 'HelperManager'):
-        self.helper_manager = helper_manager
-
-    def set_input_manager(self, input_manager: 'InputManager'):
-        self.input_manager = input_manager
-
-    def set_player_manager(self, player_manager: 'PlayerManager'):
-        self.player_manager = player_manager
-
-    def set_audio_manager(self, audio_manager: 'AudioManager'):
-        self.audio_manager = audio_manager
 
     def draw_screen(self):
         assert self.game_manager is not None, "GraphicsManager: game_manager not set"

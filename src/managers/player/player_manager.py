@@ -1,14 +1,26 @@
 import pygame
+from src.managers.base_manager import BaseManager
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from src.managers.game_manager import GameManager
+    from src.managers.game.game_manager import GameManager
     from src.managers.input.input_manager import InputManager
-    from src.managers.helper_manager import HelperManager
-    from src.managers.audio_manager import AudioManager
-    from src.managers.graphics_manager import GraphicsManager
+    from src.managers.helper.helper_manager import HelperManager
+    from src.managers.audio.audio_manager import AudioManager
+    from src.managers.graphics.graphics_manager import GraphicsManager
 
-class PlayerManager:
+class PlayerManager(BaseManager):
+    def __init__(self):
+        super().__init__()
+        
+    def initialize(self) -> None:
+        """Initialize manager after all dependencies are injected."""
+        self.game_manager = self.get_dependency('game_manager')
+        self.input_manager = self.get_dependency('input_manager')
+        self.helper_manager = self.get_dependency('helper_manager')
+        self.audio_manager = self.get_dependency('audio_manager')
+        self.graphics_manager = self.get_dependency('graphics_manager')
+        
     def init(self, player_list: list):
         self.players = player_list
         self.current_turn = 0
@@ -34,18 +46,5 @@ class PlayerManager:
                 return player
 
         return None
-    
-    def set_game_manager(self, game_manager: 'GameManager'):
-        self.game_manager = game_manager
 
-    def set_input_manager(self, input_manager: 'InputManager'):
-        self.input_manager = input_manager
-
-    def set_helper_manager(self, helper_manager: 'HelperManager'):
-        self.helper_manager = helper_manager
-
-    def set_audio_manager(self, audio_manager: 'AudioManager'):
-        self.audio_manager = audio_manager
-
-    def set_graphics_manager(self, graphics_manager: 'GraphicsManager'):
         self.graphics_manager = graphics_manager

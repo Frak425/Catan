@@ -3,9 +3,9 @@ import math
 from typing import Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from game_manager import GameManager
-    from graphics_manager import GraphicsManager
-    from helper_manager import HelperManager
+    from src.managers.game.game_manager import GameManager
+    from src.managers.graphics.graphics_manager import GraphicsManager
+    from src.managers.helper.helper_manager import HelperManager
 
 from src.ui.elements.text_display import TextDisplay
 from src.ui.elements.button import Button

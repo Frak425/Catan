@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 import pygame
 
+from src.managers.base_manager import BaseManager
 from src.managers.animation.animation_manager import AnimationManager
 from src.ui.elements.button import Button
 from src.ui.elements.image import Image
@@ -11,12 +12,12 @@ from src.ui.elements.toggle import Toggle
 from src.entities.board import Board
 from src.ui.elements.menu import Menu
 from src.managers.input.input_manager import InputManager
-from src.managers.helper_manager import HelperManager
-from src.managers.graphics_manager import GraphicsManager
-from src.managers.player_manager import PlayerManager
-from src.managers.audio_manager import AudioManager
+from src.managers.helper.helper_manager import HelperManager
+from src.managers.graphics.graphics_manager import GraphicsManager
+from src.managers.player.player_manager import PlayerManager
+from src.managers.audio.audio_manager import AudioManager
 
-class GameManager:
+class GameManager(BaseManager):
     """
     Central manager for game state, configuration, and coordination between subsystems.
     
@@ -28,6 +29,19 @@ class GameManager:
     - Coordinate between other manager classes (input, graphics, audio, etc.)
     """
     
+    def __init__(self):
+        super().__init__()
+        
+    def initialize(self) -> None:
+        """Initialize manager after all dependencies are injected."""
+        self.input_manager = self.get_dependency('input_manager')
+        self.audio_manager = self.get_dependency('audio_manager')
+        self.graphics_manager = self.get_dependency('graphics_manager')
+        self.helper_manager = self.get_dependency('helper_manager')
+        self.player_manager = self.get_dependency('player_manager')
+        self.animation_manager = self.get_dependency('animation_manager')
+        self.driver_manager = self.get_dependency('driver_manager')
+        
     def init(self, screen: pygame.Surface) -> None:
         """
         Initialize the game manager with essential game state and configuration.
@@ -47,8 +61,6 @@ class GameManager:
         self.running = True
         self.edited = False  # Whether user has modified default layout/settings
 
-        self.animation_manager = AnimationManager()
-        
         # Configuration file paths
         self._init_config_paths()
         
@@ -84,7 +96,8 @@ class GameManager:
         self.screen_w = self.screen_size[0]
         self.screen_h = self.screen_size[1]
         self.font_size = 20
-        self.game_font = pygame.font.SysFont('Comic Sans', self.font_size)
+        self.game_font = 'Comic Sans'
+        self.font = pygame.font.SysFont(self.game_font, self.font_size)
     
     def _init_game_states(self) -> None:
         """
@@ -185,6 +198,10 @@ class GameManager:
     def set_player_manager(self, player_manager: PlayerManager):
         """Inject PlayerManager dependency. Used for circular dependency resolution."""
         self.player_manager = player_manager
+
+    def set_animation_manager(self, animation_manager: AnimationManager):
+        """Inject AnimationManager dependency. Used for circular dependency resolution."""
+        self.animation_manager = animation_manager
 
     def set_driver_manager(self, driver_manager) -> None:
         """Inject DriverManager dependency. Used for circular dependency resolution."""

@@ -2,9 +2,9 @@ import pygame
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from game_manager import GameManager
-    from graphics_manager import GraphicsManager
-    from src.managers.audio_manager import AudioManager
+    from src.managers.game.game_manager import GameManager
+    from src.managers.graphics.graphics_manager import GraphicsManager
+    from src.managers.audio.audio_manager import AudioManager
     from src.managers.input.helper.mouse_input_handler import MouseInputHandler
     from src.managers.input.helper.dev_mode_handler import DevModeHandler
 

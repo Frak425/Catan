@@ -2,7 +2,7 @@ import pygame
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from game_manager import GameManager
+    from src.managers.game.game_manager import GameManager
     from src.managers.input.helper.mouse_input_handler import MouseInputHandler
     from input_manager import InputManager
 
@@ -698,7 +698,7 @@ class DevModeHandler:
                 "color": [0, 100, 0],
                 "text": "new button",
             }
-            new_element = Button(layout_props, self.game_manager.game_font, self.game_manager, callback=None, shown=True)
+            new_element = Button(layout_props, self.game_manager.font, self.game_manager, callback=None, shown=True)
         
         elif element_type == "slider":
             layout_props = {
@@ -720,7 +720,7 @@ class DevModeHandler:
                 "color": [200, 200, 200],
                 "text": "new text display",
             }
-            new_element = TextDisplay(layout_props, self.game_manager, self.game_manager.game_font, shown=True)
+            new_element = TextDisplay(layout_props, self.game_manager, self.game_manager.font, shown=True)
         
         elif element_type == "image":
             layout_props = {

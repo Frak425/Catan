@@ -1,8 +1,16 @@
 import pygame
 from typing import Dict
 from src.ui.elements.button import Button
+from src.managers.base_manager import BaseManager
 
-class HelperManager:
+class HelperManager(BaseManager):
+    def __init__(self):
+        super().__init__()
+        
+    def initialize(self) -> None:
+        """Initialize manager after all dependencies are injected."""
+        pass
+        
     def init(self):
         pass
 

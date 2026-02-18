@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Callable, Optional
 from src.ui.ui_element import UIElement
 
 if TYPE_CHECKING:
-    from src.managers.game_manager import GameManager
+    from src.managers.game.game_manager import GameManager
 
 class TextDisplay(UIElement):
     """

@@ -9,7 +9,7 @@ from src.ui.elements.image import Image
 from src.ui.elements.text_display import TextDisplay
 
 if TYPE_CHECKING:
-    from src.managers.game_manager import GameManager
+    from src.managers.game.game_manager import GameManager
 
 #import pytweening as tween
 

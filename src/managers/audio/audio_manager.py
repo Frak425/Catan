@@ -1,16 +1,28 @@
 import pygame
 from pathlib import Path
+from src.managers.base_manager import BaseManager
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from src.managers.game_manager import GameManager
+    from src.managers.game.game_manager import GameManager
     from src.managers.input.input_manager import InputManager
-    from src.managers.helper_manager import HelperManager
-    from src.managers.player_manager import PlayerManager
-    from src.managers.graphics_manager import GraphicsManager
+    from src.managers.helper.helper_manager import HelperManager
+    from src.managers.player.player_manager import PlayerManager
+    from src.managers.graphics.graphics_manager import GraphicsManager
     
 
-class AudioManager:
+class AudioManager(BaseManager):
+    def __init__(self):
+        super().__init__()
+        
+    def initialize(self) -> None:
+        """Initialize manager after all dependencies are injected."""
+        self.game_manager = self.get_dependency('game_manager')
+        self.input_manager = self.get_dependency('input_manager')
+        self.helper_manager = self.get_dependency('helper_manager')
+        self.player_manager = self.get_dependency('player_manager')
+        self.graphics_manager = self.get_dependency('graphics_manager')
+        
     def init(self):
         pygame.mixer.init()
 

@@ -1,18 +1,20 @@
 import pygame
 import math
+from src.managers.base_manager import BaseManager
 
-from src.managers.game_manager import GameManager
-from src.managers.graphics_manager import GraphicsManager
+from src.managers.animation.animation_manager import AnimationManager
+from src.managers.audio.audio_manager import AudioManager
+from src.managers.game.game_manager import GameManager
+from src.managers.graphics.graphics_manager import GraphicsManager
+from src.managers.helper.helper_manager import HelperManager
 from src.managers.input.input_manager import InputManager
+from src.managers.player.player_manager import PlayerManager
 from src.ui.ui_element import UIElement
 from .driver import AnimationDriver
 
-class DriverManager:
-    def __init__(self, game_manager: 'GameManager', input_manager: 'InputManager', graphics_manager: 'GraphicsManager') -> None:
-        self.game_manager = game_manager
-        self.input_manager = input_manager
-        self.graphics_manager = graphics_manager
-        
+class DriverManager(BaseManager):
+    def __init__(self) -> None:
+        super().__init__()
         self.driver_registry: list[AnimationDriver] = []
         # Stores the original (baseline) value per (element_id, property_path)
         # so additive drivers do not accumulate over time.
@@ -22,6 +24,18 @@ class DriverManager:
         self._groups: dict[tuple[str, str], list[AnimationDriver]] = {}
         # Cached UI element registry; built on first use.
         self._element_registry: dict[str, UIElement] = {}
+        
+    def initialize(self) -> None:
+        """Initialize manager after all dependencies are injected."""
+        self.input_manager = self.get_dependency('input_manager')
+        self.audio_manager = self.get_dependency('audio_manager')
+        self.graphics_manager = self.get_dependency('graphics_manager')
+        self.helper_manager = self.get_dependency('helper_manager')
+        self.player_manager = self.get_dependency('player_manager')
+        self.animation_manager = self.get_dependency('animation_manager')
+        self.game_manager = self.get_dependency('game_manager')
+        """Inject GameManager dependency. Used for circular dependency resolution."""
+        self.game_manager = game_manager
 
     def create_driver_registry(self) -> None:
         # Clear any existing drivers/groups before creating test drivers
