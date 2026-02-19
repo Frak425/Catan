@@ -14,6 +14,7 @@ class TextInput:
         self.text_color = (0, 0, 0)
         self.padding = 5
         self.text = ""
+        self.prev_font_size = 20
         self.font_size = 20
 
         # read layout and override default values
@@ -43,6 +44,10 @@ class TextInput:
         self.text_rect = self.text_surface.get_rect()
 
     def draw(self, screen: pygame.Surface) -> None:
+        if self.font_size != self.prev_font_size:
+            self.font = pygame.font.SysFont(self.game_manager.game_font, self.font_size)
+            self.update_text(self.text)  # Re-render text with new font size
+            self.prev_font_size = self.font_size
         # Center the text on the background
         self.text_rect.center = self.background_rect.center
 

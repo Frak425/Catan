@@ -32,7 +32,6 @@ class AnimationManager(BaseManager):
         
     def initialize(self) -> None:
         """Initialize manager after all dependencies are injected."""
-        self.create_animation_drivers()
         self.create_sprite_animations()
 
     def create_sprite_animations(self):
@@ -41,20 +40,10 @@ class AnimationManager(BaseManager):
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         asset_path = os.path.join(project_root, "src", "assets", "Home Screen.png")
         self.home_screen = pygame.image.load(asset_path)
-        self.home_screen_animation = SpriteAnimation(self.home_screen, 3, 2, 1)
+        self.home_screen_animation = SpriteAnimation(self.home_screen, 3, 2, 1)  # Increased speed to 2 FPS
 
-        self.animations["sprite"] = {
+        self.animations = {
             "main_menu_background": self.home_screen_animation
-        }
-
-    def create_animation_drivers(self):
-        test_driver = AnimationDriver(tween_function="")
-        self.animations["driver"] = {
-            "target": [
-                {
-                    "play": test_driver
-                }
-            ]
         }
 
 

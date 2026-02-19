@@ -35,7 +35,62 @@ class DriverManager(BaseManager):
         self.animation_manager = self.get_dependency('animation_manager')
         self.game_manager = self.get_dependency('game_manager')
         """Inject GameManager dependency. Used for circular dependency resolution."""
-        self.game_manager = game_manager
+
+    @property
+    def drivers(self) -> dict:
+        """
+        Get drivers organized by element name for external access.
+        
+        Returns:
+            dict: Drivers organized as {element_name: [driver1, driver2, ...]}
+        """
+        drivers_by_element = {}
+        for driver in self.driver_registry:
+            if driver.target_element_id:
+                if driver.target_element_id not in drivers_by_element:
+                    drivers_by_element[driver.target_element_id] = []
+                drivers_by_element[driver.target_element_id].append(driver)
+        return drivers_by_element
+
+    def add_driver_for_element(self, element_name: str, driver) -> None:
+        """
+        Add a driver for a specific UI element from external code.
+        
+        Args:
+            element_name: Name of the target UI element
+            driver: AnimationDriver instance to add
+        """
+        driver.target_element_id = element_name
+        self.register_driver(driver)
+
+    def remove_drivers_for_element(self, element_name: str) -> None:
+        """
+        Remove all drivers targeting a specific UI element.
+        
+        Args:
+            element_name: Name of the target UI element
+        """
+        self.driver_registry = [d for d in self.driver_registry if d.target_element_id != element_name]
+        # Clear cached groups for this element
+        keys_to_remove = [key for key in self._groups.keys() if key[0] == element_name]
+        for key in keys_to_remove:
+            del self._groups[key]
+        # Clear cached baselines for this element
+        baseline_keys_to_remove = [key for key in self._baselines.keys() if key[0] == element_name]
+        for key in baseline_keys_to_remove:
+            del self._baselines[key]
+
+    def get_drivers_for_element(self, element_name: str) -> list:
+        """
+        Get all drivers targeting a specific UI element.
+        
+        Args:
+            element_name: Name of the target UI element
+            
+        Returns:
+            list: AnimationDriver instances targeting the element
+        """
+        return [d for d in self.driver_registry if d.target_element_id == element_name]
 
     def create_driver_registry(self) -> None:
         # Clear any existing drivers/groups before creating test drivers

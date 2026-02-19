@@ -32,17 +32,7 @@ class GameManager(BaseManager):
     def __init__(self):
         super().__init__()
         
-    def initialize(self) -> None:
-        """Initialize manager after all dependencies are injected."""
-        self.input_manager = self.get_dependency('input_manager')
-        self.audio_manager = self.get_dependency('audio_manager')
-        self.graphics_manager = self.get_dependency('graphics_manager')
-        self.helper_manager = self.get_dependency('helper_manager')
-        self.player_manager = self.get_dependency('player_manager')
-        self.animation_manager = self.get_dependency('animation_manager')
-        self.driver_manager = self.get_dependency('driver_manager')
-        
-    def init(self, screen: pygame.Surface) -> None:
+    def initialize(self, screen: pygame.Surface) -> None:
         """
         Initialize the game manager with essential game state and configuration.
         
@@ -57,6 +47,15 @@ class GameManager(BaseManager):
         - UI defaults for toggles, sliders, etc.
         - Game board initialization
         """
+       
+        self.input_manager = self.get_dependency('input_manager')
+        self.audio_manager = self.get_dependency('audio_manager')
+        self.graphics_manager = self.get_dependency('graphics_manager')
+        self.helper_manager = self.get_dependency('helper_manager')
+        self.player_manager = self.get_dependency('player_manager')
+        self.animation_manager = self.get_dependency('animation_manager')
+        self.driver_manager = self.get_dependency('driver_manager')
+
         # Core game state
         self.running = True
         self.edited = False  # Whether user has modified default layout/settings

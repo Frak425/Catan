@@ -30,7 +30,6 @@ clock = pygame.time.Clock()
 #managers act in a circular way, every one except game_manager calls every other one
 #dependencies are installed after initialization
 game_manager = GameManager()
-game_manager.init(screen)
 audio_manager = AudioManager()
 #TODO: create list of player in game manager
 player_manager = PlayerManager()
@@ -83,10 +82,10 @@ driver_manager.inject('audio_manager', audio_manager)
 driver_manager.inject('animation_manager', animation_manager)
 
 # Initialize all managers after dependencies are injected
-game_manager.initialize()
+game_manager.initialize(screen)
 graphics_manager.initialize()
 input_manager.initialize()
-audio_manager.initialize()
+audio_manager.initialize() 
 player_manager.initialize()
 helper_manager.initialize()
 animation_manager.initialize()
