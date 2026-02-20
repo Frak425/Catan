@@ -33,116 +33,21 @@ def create_element_from_layout(layout_props: dict, game_manager: 'GameManager') 
     if not element_type:
         raise ValueError("Layout props missing '_type' field")
     
-    # Create element based on type
-    if element_type == "Button":
-        return Button(
-            layout_props, 
-            game_manager.game_font, 
-            game_manager,
-            callback=None,  # Callbacks should be set separately
-            shown=layout_props.get("shown", True)
-        )
-    
-    elif element_type == "Toggle":
-        return Toggle(
-            layout_props,
-            pygame.time.get_ticks(),
-            game_manager,
-            on=layout_props.get("on", False),
-            callback=None,
-            shown=layout_props.get("shown", True)
-        )
-    
-    elif element_type == "Slider":
-        return Slider(
-            layout_props,
-            layout_props.get("value", 0),
-            game_manager,
-            callback=None,
-            shown=layout_props.get("shown", True)
-        )
-    
-    elif element_type == "Image":
-        return Image(
-            layout_props,
-            game_manager,
-            callback=None
-        )
-    
-    elif element_type == "TextDisplay":
-        return TextDisplay(
-            layout_props,
-            game_manager,
-            game_manager.game_font,
-            callback=None,
-            shown=layout_props.get("shown", True)
-        )
-    
-    elif element_type == "ScrollableArea":
-        # ScrollableArea needs a content surface
-        # Create a placeholder surface that will be replaced if needed
-        width = layout_props.get("viewable_content_width", 100)
-        height = layout_props.get("viewable_content_height", 100)
-        content_surface = pygame.Surface((width, height))
-        return ScrollableArea(
-            layout_props,
-            game_manager,
-            content_surface
-        )
-    
-    elif element_type == "Menu":
-        # Menu needs dictionaries of elements organized by tabs
-        # We'll create them from the serialized data
-        buttons_data = layout_props.get("buttons", {})
-        toggles_data = layout_props.get("toggles", {})
-        sliders_data = layout_props.get("sliders", {})
-        images_data = layout_props.get("images", {})
-        text_displays_data = layout_props.get("text_displays", {})
-        
-        # Recursively create elements for each tab
-        buttons = {}
-        for tab, tab_buttons in buttons_data.items():
-            buttons[tab] = {}
-            for name, button_layout in tab_buttons.items():
-                buttons[tab][name] = create_element_from_layout(button_layout, game_manager)
-        
-        toggles = {}
-        for tab, tab_toggles in toggles_data.items():
-            toggles[tab] = {}
-            for name, toggle_layout in tab_toggles.items():
-                toggles[tab][name] = create_element_from_layout(toggle_layout, game_manager)
-        
-        sliders = {}
-        for tab, tab_sliders in sliders_data.items():
-            sliders[tab] = {}
-            for name, slider_layout in tab_sliders.items():
-                sliders[tab][name] = create_element_from_layout(slider_layout, game_manager)
-        
-        images = {}
-        for tab, tab_images in images_data.items():
-            images[tab] = {}
-            for name, image_layout in tab_images.items():
-                images[tab][name] = create_element_from_layout(image_layout, game_manager)
-        
-        text_displays = {}
-        for tab, tab_text_displays in text_displays_data.items():
-            text_displays[tab] = {}
-            for name, text_display_layout in tab_text_displays.items():
-                text_displays[tab][name] = create_element_from_layout(text_display_layout, game_manager)
-        
-        return Menu(
-            layout_props,
-            game_manager,
-            buttons,
-            toggles,
-            sliders,
-            images,
-            text_displays,
-            time=pygame.time.get_ticks()
-        )
-    
-    else:
+    constructors = {
+        "Button": _create_button_from_layout,
+        "Toggle": _create_toggle_from_layout,
+        "Slider": _create_slider_from_layout,
+        "Image": _create_image_from_layout,
+        "TextDisplay": _create_text_display_from_layout,
+        "ScrollableArea": _create_scrollable_area_from_layout,
+        "Menu": _create_menu_from_layout,
+    }
+
+    constructor = constructors.get(element_type)
+    if constructor is None:
         raise ValueError(f"Unknown element type: {element_type}")
+
+    return constructor(layout_props, game_manager)
 
 def restore_ui_hierarchy(elements: list, game_manager: 'GameManager') -> Dict[str, UIElement]:
     """Restore a complete UI hierarchy from a list of element layouts.
@@ -160,7 +65,7 @@ def restore_ui_hierarchy(elements: list, game_manager: 'GameManager') -> Dict[st
     """
     # Phase 1: Create all elements
     element_registry = {}
-    created_elements = []
+    created_elements: list[UIElement] = []
     
     for element_layout in elements:
         try:
@@ -207,14 +112,6 @@ def reconnect_callbacks(element_registry: Dict[str, UIElement], callback_registr
             # Try to get callback name from the original layout
             # This requires storing it during creation, which we do via get_layout
             callback_name = None
-            
-            # For buttons, check if callback was saved
-            if isinstance(element, (Button, Toggle, Slider)):
-                # Callback names would have been stored during serialization
-                # We need to read it from the saved state
-                # Note: This is a simplified approach - in practice you might want
-                # to store callback_name as an attribute during element creation
-                pass
             
             # If we have a callback name, look it up and assign it
             if callback_name and callback_name in callback_registry:
@@ -292,3 +189,89 @@ def save_ui_hierarchy(root_elements: list) -> list:
         save_element_tree(root)
     
     return saved_elements
+
+# --- Helper functions for creating specific element types from layout --- #
+
+def _create_button_from_layout(layout_props: dict, game_manager: 'GameManager') -> UIElement:
+    return Button(
+        layout_props,
+        game_manager.font,
+        game_manager,
+        callback=None,
+        shown=layout_props.get("shown", True)
+    )
+
+def _create_toggle_from_layout(layout_props: dict, game_manager: 'GameManager') -> UIElement:
+    return Toggle(
+        layout_props,
+        pygame.time.get_ticks(),
+        game_manager,
+        on=layout_props.get("on", False),
+        callback=None,
+        shown=layout_props.get("shown", True)
+    )
+
+def _create_slider_from_layout(layout_props: dict, game_manager: 'GameManager') -> UIElement:
+    return Slider(
+        layout_props,
+        layout_props.get("value", 0),
+        game_manager,
+        callback=None,
+        shown=layout_props.get("shown", True)
+    )
+
+def _create_image_from_layout(layout_props: dict, game_manager: 'GameManager') -> UIElement:
+    return Image(
+        layout_props,
+        game_manager,
+        callback=None
+    )
+
+def _create_text_display_from_layout(layout_props: dict, game_manager: 'GameManager') -> UIElement:
+    return TextDisplay(
+        layout_props,
+        game_manager,
+        game_manager.font,
+        callback=None,
+        shown=layout_props.get("shown", True)
+    )
+
+def _create_scrollable_area_from_layout(layout_props: dict, game_manager: 'GameManager') -> UIElement:
+    width = layout_props.get("viewable_content_width", 100)
+    height = layout_props.get("viewable_content_height", 100)
+    content_surface = pygame.Surface((width, height))
+    return ScrollableArea(
+        layout_props,
+        game_manager,
+        content_surface
+    )
+
+def _create_menu_tab_elements(menu_layout: dict, key: str, game_manager: 'GameManager') -> dict:
+    tab_data = menu_layout.get(key, {})
+    result = {}
+
+    for tab, tab_elements in tab_data.items():
+        result[tab] = {}
+        for name, element_layout in tab_elements.items():
+            result[tab][name] = create_element_from_layout(element_layout, game_manager)
+
+    return result
+
+def _create_menu_from_layout(layout_props: dict, game_manager: 'GameManager') -> UIElement:
+    buttons = _create_menu_tab_elements(layout_props, "buttons", game_manager)
+    toggles = _create_menu_tab_elements(layout_props, "toggles", game_manager)
+    sliders = _create_menu_tab_elements(layout_props, "sliders", game_manager)
+    images = _create_menu_tab_elements(layout_props, "images", game_manager)
+    text_displays = _create_menu_tab_elements(layout_props, "text_displays", game_manager)
+
+    return Menu(
+        layout_props,
+        game_manager,
+        buttons,
+        toggles,
+        sliders,
+        images,
+        text_displays,
+        time=pygame.time.get_ticks()
+    )
+

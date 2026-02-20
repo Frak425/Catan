@@ -23,7 +23,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -53,7 +53,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -108,7 +108,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -138,7 +138,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -168,7 +168,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -186,10 +186,10 @@
                 ],
                 "color": [
                     100,
-                    0,
-                    0
+                    100,
+                    100
                 ],
-                "text": "image",
+                "text": "set.",
                 "text_color": [
                     0,
                     0,
@@ -198,7 +198,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -209,8 +209,8 @@
             {
                 "name": "player_choose_color_cycle",
                 "rect": [
-                    654,
-                    87,
+                    232,
+                    322,
                     20,
                     20
                 ],
@@ -228,7 +228,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -239,8 +239,8 @@
             {
                 "name": "game_start",
                 "rect": [
-                    949,
-                    576,
+                    1174,
+                    683,
                     150,
                     50
                 ],
@@ -258,7 +258,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -269,8 +269,8 @@
             {
                 "name": "game_setup_back",
                 "rect": [
-                    229,
-                    384,
+                    100,
+                    693,
                     50,
                     30
                 ],
@@ -288,7 +288,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -298,124 +298,10 @@
             }
         ],
         "images": [],
-        "sliders": [
-            {
-                "name": "player_num_slider",
-                "rect": [
-                    100,
-                    200,
-                    300,
-                    20
-                ],
-                "min_value": 1,
-                "max_value": 4,
-                "color": [
-                    0,
-                    100,
-                    0
-                ],
-                "handle_color": [
-                    100,
-                    0,
-                    0
-                ],
-                "handle_radius": 10
-            }
-        ],
+        "sliders": [],
         "toggles": [],
-        "text_displays": [
-            {
-                "name": "player_num_text",
-                "rect": [
-                    100,
-                    150,
-                    300,
-                    50
-                ],
-                "color": [
-                    255,
-                    255,
-                    255
-                ],
-                "text": "Number of Players: 1",
-                "text_color": [
-                    0,
-                    0,
-                    0
-                ],
-                "padding": 5
-            }
-        ],
-        "scrollable_areas": [
-            {
-                "name": "test_scrollable",
-                "rect": [
-                    549,
-                    223,
-                    300,
-                    400
-                ],
-                "guiding_line_color": [
-                    100,
-                    100,
-                    200
-                ],
-                "_type": "ScrollableArea",
-                "slider_layout_props": {
-                    "name": "slider",
-                    "rect": [
-                        266,
-                        5,
-                        29,
-                        390
-                    ],
-                    "guiding_line_color": [
-                        100,
-                        100,
-                        200
-                    ],
-                    "_type": "Slider",
-                    "value": 0,
-                    "min_value": 0,
-                    "max_value": 1,
-                    "color": [
-                        0,
-                        100,
-                        0
-                    ],
-                    "handle_color": [
-                        50,
-                        50,
-                        200
-                    ],
-                    "handle_radius": 12,
-                    "direction": "vertical",
-                    "handle_shape": "circle",
-                    "handle_length": 20,
-                    "shown": true
-                },
-                "exterior_padding": 5,
-                "interior_padding": 5,
-                "viewable_content_height": 390,
-                "viewable_content_width": 256,
-                "background_color": [
-                    200,
-                    200,
-                    200,
-                    255
-                ],
-                "content_background_color": [
-                    255,
-                    255,
-                    255,
-                    255
-                ],
-                "slider_side": "right",
-                "slider_handle_inset": 2,
-                "content_width_percentage": 0.9,
-                "shown": true
-            }
-        ],
+        "text_displays": [],
+        "scrollable_areas": [],
         "text_inputs": [],
         "multi_selects": [],
         "menus": [
@@ -446,7 +332,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -475,7 +361,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -504,7 +390,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -533,7 +419,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -562,7 +448,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -591,7 +477,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -621,7 +507,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": 10,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -749,7 +635,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,
@@ -784,7 +670,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,
@@ -821,7 +707,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,
@@ -858,7 +744,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,
@@ -895,7 +781,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,
@@ -932,7 +818,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,
@@ -969,7 +855,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,
@@ -1005,7 +891,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,
@@ -1041,7 +927,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,
@@ -1077,7 +963,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,
@@ -1113,7 +999,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,
@@ -1149,7 +1035,7 @@
                             0,
                             0
                         ],
-                        "border_radius": 10,
+                        "border_radius": 5,
                         "border_top_right_radius": -1,
                         "border_top_left_radius": -1,
                         "border_bottom_right_radius": -1,

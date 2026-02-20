@@ -398,6 +398,12 @@ class DevModeHandler:
 
     ## --- ATTRIBUTE SETTERS --- ##
 
+    def _invalidate_active_rect_cache(self) -> None:
+        """Invalidate active element absolute rect cache after dev-mode edits."""
+        active = getattr(self.mouse_handler, "active", None)
+        if active is not None and hasattr(active, "_invalidate_absolute_rect"):
+            active._invalidate_absolute_rect()
+
     def _set_attr(self, attr_name: str, value) -> None:
         """
         Dynamically set an attribute on the active element if it exists.
@@ -418,11 +424,16 @@ class DevModeHandler:
         - value: Numeric value for Slider
         - min_value/max_value: Slider range bounds
         """
+        changed = False
         if hasattr(self.mouse_handler.active, attr_name):
             setattr(self.mouse_handler.active, attr_name, value)
+            changed = True
             print(f"Set {attr_name} to {value}")
         else:
             print(f"Active element does not have attribute: {attr_name}")
+
+        if changed:
+            self._invalidate_active_rect_cache()
 
         if isinstance(self.mouse_handler.active, ScrollableArea):
             self.mouse_handler.active.calculate_dependent_properties()
@@ -459,11 +470,16 @@ class DevModeHandler:
         
         # Set the final attribute
         final_attr = parts[-1]
+        changed = False
         if hasattr(obj, final_attr):
             setattr(obj, final_attr, value)
+            changed = True
             print(f"Set {attr_path} to {value}")
         else:
             print(f"Attribute not found: {attr_path}")
+
+        if changed:
+            self._invalidate_active_rect_cache()
 
         if isinstance(self.mouse_handler.active, ScrollableArea):
             self.mouse_handler.active.calculate_dependent_properties()
@@ -623,6 +639,7 @@ class DevModeHandler:
             self.input_manager.sliders,
             self.input_manager.images,
             self.input_manager.text_displays,
+            self.input_manager.scrollable_areas,
         ]
         
         for collection in collections:
@@ -641,6 +658,128 @@ class DevModeHandler:
         
         self.mouse_handler.active = None
         self.update_ui()
+
+    def _get_elements_by_type(self) -> dict:
+        """Return input manager element collections keyed by dev-mode type name."""
+        return {
+            "button": self.input_manager.buttons,
+            "slider": self.input_manager.sliders,
+            "image": self.input_manager.images,
+            "text_display": self.input_manager.text_displays,
+            "toggle": self.input_manager.toggles,
+            "scrollable_area": self.input_manager.scrollable_areas
+        }
+
+    def _create_new_button(self, timestamp: int) -> Button:
+        layout_props = {
+            "name": f"new_button_{timestamp}",
+            "rect": [100, 100, 150, 50],
+            "color": [0, 100, 0],
+            "text": "new button",
+        }
+        return Button(layout_props, self.game_manager.font, self.game_manager, callback=None, shown=True)
+
+    def _create_new_slider(self, timestamp: int) -> Slider:
+        layout_props = {
+            "name": f"new_slider_{timestamp}",
+            "rect": [100, 100, 200, 40],
+            "color": [100, 0, 0],
+            "min_value": 0,
+            "max_value": 100,
+            "initial_value": 50,
+            "handle_color": [200, 200, 200],
+            "color": [100, 0, 0],
+        }
+        return Slider(layout_props, 50, self.game_manager)
+
+    def _create_new_text_display(self, timestamp: int) -> TextDisplay:
+        layout_props = {
+            "name": f"new_text_display_{timestamp}",
+            "rect": [100, 100, 200, 50],
+            "color": [200, 200, 200],
+            "text": "new text display",
+        }
+        return TextDisplay(layout_props, self.game_manager, self.game_manager.font, shown=True)
+
+    def _create_new_image(self, timestamp: int) -> Image:
+        layout_props = {
+            "name": f"new_image_{timestamp}",
+            "rect": [100, 100, 100, 100],
+            "image_path": "path/to/image.png",
+        }
+        return Image(layout_props, self.game_manager)
+
+    def _create_new_toggle(self, timestamp: int) -> Toggle:
+        layout_props = {
+            "name": f"new_toggle_{timestamp}",
+            "rect": [100, 100, 150, 50],
+            "guiding_lines": self.game_manager.default_guiding_lines,
+            "height": self.game_manager.default_height,
+            "center_width": self.game_manager.default_center_width,
+            "color": list(self.game_manager.default_fill_color),
+            "handle_color": list(self.game_manager.default_handle_color),
+            "toggle_gap": self.game_manager.default_toggle_gap,
+            "time_to_flip": self.game_manager.default_time_to_flip
+        }
+        return Toggle(layout_props, self.game_manager.graphics_manager.time, self.game_manager, on=False, callback=None, shown=True)
+
+    def _create_new_scrollable_area(self, timestamp: int) -> ScrollableArea:
+        layout_props = {
+            "name": f"new_scrollable_area_{timestamp}",
+            "rect": [100, 100, 400, 300],
+            "exterior_padding": 10,
+            "slider_side": "right"
+        }
+        content_surface = pygame.Surface((400, 600))
+        return ScrollableArea(layout_props, self.game_manager, content_surface)
+
+    def _create_new_element(self, element_type: str, timestamp: int):
+        """Create a new UI element instance for the requested type."""
+        creators = {
+            "button": self._create_new_button,
+            "slider": self._create_new_slider,
+            "text_display": self._create_new_text_display,
+            "image": self._create_new_image,
+            "toggle": self._create_new_toggle,
+            "scrollable_area": self._create_new_scrollable_area,
+        }
+
+        creator = creators.get(element_type)
+        if not creator:
+            return None
+        return creator(timestamp)
+
+    def _find_target_menu_for_new_element(self, element_type: str, elements_by_type: dict):
+        """Return first open target menu and ensure active tab collection exists."""
+        for menu in self.input_manager.get_open_menus():
+            tab = menu.active_tab
+            if tab not in elements_by_type[element_type]["menu"]:
+                elements_by_type[element_type]["menu"][tab] = {}
+            return menu
+        return None
+
+    def _add_new_element_to_menu(self, element_type: str, new_element, target_menu, elements_by_type: dict) -> None:
+        """Attach a newly created element to menu collections and hierarchy."""
+        tab = target_menu.active_tab
+        elements_by_type[element_type]["menu"][tab][new_element.name] = new_element
+        target_menu.add_child(new_element)
+        print(f"Added {new_element.name} to menu '{target_menu.name}' tab: {tab} and hierarchy")
+
+    def _add_new_element_to_state(self, element_type: str, new_element, elements_by_type: dict) -> None:
+        """Attach a newly created element to current state collections and optional parent."""
+        state = self.game_manager.game_state
+        if state not in elements_by_type[element_type]:
+            elements_by_type[element_type][state] = {}
+        elements_by_type[element_type][state][new_element.name] = new_element
+        print(f"Added {new_element.name} to state: {state}")
+
+        if self.mouse_handler.active and isinstance(self.mouse_handler.active, (Menu, ScrollableArea)):
+            if isinstance(self.mouse_handler.active, ScrollableArea):
+                self.mouse_handler.active.add_element(new_element)
+                print(f"Added {new_element.name} to scrollable area: {self.mouse_handler.active.name}")
+            else:
+                self.mouse_handler.active.add_child(new_element)
+                print(f"Added {new_element.name} as child of: {self.mouse_handler.active.name}")
         
     def _handle_add_element(self, text: str) -> None:
         """
@@ -678,119 +817,19 @@ class DevModeHandler:
         """
         import time
         element_type = text[3:]
-        
-        # Generate unique name with timestamp
         timestamp = int(time.time() * 1000) % 100000
 
-        elements_by_type = {
-            "button": self.input_manager.buttons,
-            "slider": self.input_manager.sliders,
-            "image": self.input_manager.images,
-            "text_display": self.input_manager.text_displays,
-            "toggle": self.input_manager.toggles,
-            "scrollable_area": self.input_manager.scrollable_areas
-        }
-        
-        if element_type == "button":
-            layout_props = {
-                "name": f"new_button_{timestamp}",
-                "rect": [100, 100, 150, 50],
-                "color": [0, 100, 0],
-                "text": "new button",
-            }
-            new_element = Button(layout_props, self.game_manager.font, self.game_manager, callback=None, shown=True)
-        
-        elif element_type == "slider":
-            layout_props = {
-                "name": f"new_slider_{timestamp}",
-                "rect": [100, 100, 200, 40],
-                "color": [100, 0, 0],
-                "min_value": 0,
-                "max_value": 100,
-                "initial_value": 50,
-                "handle_color": [200, 200, 200],
-                "color": [100, 0, 0],
-            }
-            new_element = Slider(layout_props, 50, self.game_manager)
-        
-        elif element_type == "text_display":
-            layout_props = {
-                "name": f"new_text_display_{timestamp}",
-                "rect": [100, 100, 200, 50],
-                "color": [200, 200, 200],
-                "text": "new text display",
-            }
-            new_element = TextDisplay(layout_props, self.game_manager, self.game_manager.font, shown=True)
-        
-        elif element_type == "image":
-            layout_props = {
-                "name": f"new_image_{timestamp}",
-                "rect": [100, 100, 100, 100],
-                "image_path": "path/to/image.png",
-            }
-            new_element = Image(layout_props, self.game_manager)
-        
-        elif element_type == "toggle":
-            layout_props = {
-                "name": f"new_toggle_{timestamp}",
-                "rect": [100, 100, 150, 50],
-                "guiding_lines": self.game_manager.default_guiding_lines,
-                "height": self.game_manager.default_height,
-                "center_width": self.game_manager.default_center_width,
-                "color": list(self.game_manager.default_fill_color),
-                "handle_color": list(self.game_manager.default_handle_color),
-                "toggle_gap": self.game_manager.default_toggle_gap,
-                "time_to_flip": self.game_manager.default_time_to_flip
-            }
-            new_element = Toggle(layout_props, self.game_manager.graphics_manager.time, self.game_manager, on=False, callback=None, shown=True)
-        
-        elif element_type == "scrollable_area":
-            layout_props = {
-                "name": f"new_scrollable_area_{timestamp}",
-                "rect": [100, 100, 400, 300],
-                "exterior_padding": 10,
-                "slider_side": "right"
-            }
-            content_surface = pygame.Surface((400, 600))
-            new_element = ScrollableArea(layout_props, self.game_manager, content_surface)
-            
-        else:
+        elements_by_type = self._get_elements_by_type()
+        new_element = self._create_new_element(element_type, timestamp)
+        if not new_element:
             print(f"Unknown element type: {element_type}")
             return
 
-        # Add to legacy dictionary structure
-        # Check if we're adding to a specific menu
-        target_menu = None
-        for menu in self.input_manager.get_open_menus():
-            tab = menu.active_tab
-            if tab not in elements_by_type[element_type]["menu"]:
-                elements_by_type[element_type]["menu"][tab] = {}
-            # Use first open menu for now (could be enhanced to detect which menu was clicked)
-            target_menu = menu
-            break
-        
+        target_menu = self._find_target_menu_for_new_element(element_type, elements_by_type)
         if target_menu:
-            tab = target_menu.active_tab
-            elements_by_type[element_type]["menu"][tab][new_element.name] = new_element
-            
-            # Add to menu hierarchy
-            target_menu.add_child(new_element)
-            print(f"Added {new_element.name} to menu '{target_menu.name}' tab: {tab} and hierarchy")
+            self._add_new_element_to_menu(element_type, new_element, target_menu, elements_by_type)
         else:
-            state = self.game_manager.game_state
-            if state not in elements_by_type[element_type]:
-                elements_by_type[element_type][state] = {}
-            elements_by_type[element_type][state][new_element.name] = new_element
-            print(f"Added {new_element.name} to state: {state}")
-            
-            # If there's an active parent element, add as child
-            if self.mouse_handler.active and isinstance(self.mouse_handler.active, (Menu, ScrollableArea)):
-                if isinstance(self.mouse_handler.active, ScrollableArea):
-                    self.mouse_handler.active.add_element(new_element)
-                    print(f"Added {new_element.name} to scrollable area: {self.mouse_handler.active.name}")
-                else:
-                    self.mouse_handler.active.add_child(new_element)
-                    print(f"Added {new_element.name} as child of: {self.mouse_handler.active.name}")
+            self._add_new_element_to_state(element_type, new_element, elements_by_type)
 
         self.update_ui()
         print(f"Added {new_element.__class__.__name__}: {new_element.name}")

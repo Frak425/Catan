@@ -214,6 +214,143 @@ class MouseInputHandler:
         elif event_type == pygame.MOUSEBUTTONUP:
             self._handle_mouse_button_up(x, y)
 
+    def _prepare_for_new_click(self, x: int, y: int) -> None:
+        """Deactivate current active element and initialize click tracking state."""
+        if self.active:
+            self.prev_active = self.active
+            self.active.is_active = False
+
+        self.start_x = x
+        self.start_y = y
+        self.clicked = True
+
+    def _get_menu_click_result(self, menu: Menu, x: int, y: int):
+        """Return click candidates for a specific open menu."""
+        menu_offset_x = menu.location[0]
+        menu_offset_y = menu.location[1]
+
+        temp_button = self.helper_manager.check_clickable_from_dict(
+            self.buttons["menu"][menu.active_tab],
+            (x, y),
+            menu_offset_x,
+            menu_offset_y
+        )
+        temp_toggle = self.helper_manager.check_clickable_from_dict(
+            self.toggles["menu"][menu.active_tab],
+            (x, y),
+            menu_offset_x,
+            menu_offset_y
+        )
+        temp_slider = self.helper_manager.check_clickable_from_dict(
+            self.sliders["menu"][menu.active_tab],
+            (x, y),
+            menu_offset_x,
+            menu_offset_y
+        )
+
+        if temp_slider and not self._check_slider_handle_collision(temp_slider, x, y, menu_offset_x, menu_offset_y):
+            temp_slider = None
+
+        temp_text_display = None
+        if self.game_manager.dev_mode:
+            temp_text_display = self.helper_manager.check_clickable_from_dict(
+                self.text_display["menu"][menu.active_tab],
+                (x, y),
+                menu_offset_x,
+                menu_offset_y
+            )
+
+        temp_scrollable_area = self.helper_manager.check_clickable_from_dict(
+            self.scrollable_areas["menu"][menu.active_tab],
+            (x, y),
+            menu_offset_x,
+            menu_offset_y
+        )
+        if temp_scrollable_area and not self._check_scrollable_handle_collision(temp_scrollable_area, x, y, menu_offset_x, menu_offset_y):
+            temp_scrollable_area = None
+
+        if not temp_button:
+            temp_button = self.helper_manager.check_clickable_from_dict(
+                self.buttons["menu"]["tabs"],
+                (x, y),
+                menu_offset_x,
+                menu_offset_y
+            )
+
+        temp_menu = None
+        if self.game_manager.dev_mode:
+            menu_rect = pygame.Rect(
+                menu.rect.x + menu_offset_x,
+                menu.rect.y + menu_offset_y,
+                menu.rect.width,
+                menu.rect.height
+            )
+            if menu_rect.collidepoint(x, y):
+                temp_menu = menu
+
+        return (temp_button, temp_toggle, temp_slider, temp_text_display, temp_scrollable_area, temp_menu)
+
+    def _get_open_menu_clicks(self, x: int, y: int, input_manager):
+        """Return click candidates from highest priority open menu, or all None."""
+        empty = (None, None, None, None, None, None)
+        open_menus_sorted = sorted(input_manager.get_open_menus(), key=lambda m: m.z_index)
+
+        for menu in open_menus_sorted:
+            result = self._get_menu_click_result(menu, x, y)
+            if any(result):
+                return result
+
+        return empty
+
+    def _get_game_state_clicks(self, state: str, x: int, y: int):
+        """Return click candidates from the current non-menu game state."""
+        button_clicked = self.helper_manager.check_clickable_from_dict(
+            self.buttons[state], (x, y)
+        )
+        toggle_clicked = self.helper_manager.check_clickable_from_dict(
+            self.toggles[state], (x, y)
+        )
+        slider_clicked = self.helper_manager.check_clickable_from_dict(
+            self.sliders[state], (x, y)
+        )
+
+        if slider_clicked and not self._check_slider_handle_collision(slider_clicked, x, y):
+            slider_clicked = None
+
+        text_display_clicked = None
+        if self.game_manager.dev_mode:
+            text_display_clicked = self.helper_manager.check_clickable_from_dict(
+                self.text_display[state], (x, y)
+            )
+
+        scrollable_area_clicked = self.helper_manager.check_clickable_from_dict(
+            self.scrollable_areas[state], (x, y)
+        )
+        if scrollable_area_clicked and not self._check_scrollable_handle_collision(scrollable_area_clicked, x, y):
+            scrollable_area_clicked = None
+
+        return (button_clicked, toggle_clicked, slider_clicked, text_display_clicked, scrollable_area_clicked, None)
+
+    def _apply_click_selection(self, button_clicked, toggle_clicked, slider_clicked, text_display_clicked, scrollable_area_clicked, menu_clicked) -> None:
+        """Apply click candidates to active selection using existing priority order."""
+        if menu_clicked:
+            self.active = menu_clicked
+        if button_clicked:
+            self.active = button_clicked
+        if toggle_clicked:
+            self.active = toggle_clicked
+        if slider_clicked:
+            self.active = slider_clicked
+        if text_display_clicked:
+            self.active = text_display_clicked
+        if scrollable_area_clicked:
+            self.active = scrollable_area_clicked
+
+        if self.prev_active and self.prev_active != self.active:
+            self.prev_active.is_active = False
+        if self.active:
+            self.active.is_active = True
+
     def _handle_mouse_button_down(self, x: int, y: int) -> None:
         """
         Handle mouse button down events - detect which UI element was clicked.
@@ -241,182 +378,28 @@ class MouseInputHandler:
         
         Note: In dev mode, TextDisplay and Menu backgrounds become clickable.
         """
-        # Deactivate previously active element
-        if self.active:
-            self.prev_active = self.active
-            self.active.is_active = False
-        
-        self.start_x = x
-        self.start_y = y
-        self.clicked = True
+        self._prepare_for_new_click(x, y)
         state = self.game_manager.game_state
 
         # Check if any menus are open - prioritize by z-index (lower = on top)
         from src.managers.input.input_manager import InputManager
         input_manager = self.game_manager.input_manager if hasattr(self.game_manager, 'input_manager') else None
-        
-        button_clicked = None
-        toggle_clicked = None
-        slider_clicked = None
-        text_display_clicked = None
-        #image_clicked = None
-        scrollable_area_clicked = None
-        menu_clicked = None
-        
+
         assert input_manager is not None, "input_manager not defined"
-        open_menus = input_manager.get_open_menus()
-        # Sort by z_index (lower = higher priority)
-        open_menus_sorted = sorted(open_menus, key=lambda m: m.z_index)
-        
-        # Check menus from top to bottom (lowest z_index first)
-        for menu in open_menus_sorted:
-            menu_offset_x = menu.location[0]
-            menu_offset_y = menu.location[1]
-            
-            # Check this menu's elements
-            temp_button = self.helper_manager.check_clickable_from_dict(
-                self.buttons["menu"][menu.active_tab], 
-                (x, y), 
-                menu_offset_x, 
-                menu_offset_y
-            )
-            temp_toggle = self.helper_manager.check_clickable_from_dict(
-                self.toggles["menu"][menu.active_tab], 
-                (x, y), 
-                menu_offset_x, 
-                menu_offset_y
-            )
-            temp_slider = self.helper_manager.check_clickable_from_dict(
-                self.sliders["menu"][menu.active_tab], 
-                (x, y), 
-                menu_offset_x, 
-                menu_offset_y
-            )
-            
-            # If slider was clicked, verify it was specifically on the handle (not track)
-            if temp_slider and not self._check_slider_handle_collision(temp_slider, x, y, menu_offset_x, menu_offset_y):
-                temp_slider = None
-            
-            # TextDisplay is display-only, but selectable in dev mode
-            temp_text_display = None
-            if self.game_manager.dev_mode:
-                temp_text_display = self.helper_manager.check_clickable_from_dict(
-                    self.text_display["menu"][menu.active_tab], 
-                    (x, y),
-                    menu_offset_x,
-                    menu_offset_y
-                )
-            
-            #temp_image = self.helper_manager.check_clickable_from_dict(
-            #    self.images["menu"][menu.active_tab], 
-            #    (x, y),
-            #    menu_offset_x,
-            #    menu_offset_y
-            #)
-            temp_scrollable_area = self.helper_manager.check_clickable_from_dict(
-                self.scrollable_areas["menu"][menu.active_tab],
-                (x, y),
-                menu_offset_x,
-                menu_offset_y
-            )
-            
-            # If scrollable area was clicked, verify click was on scrollbar handle
-            if temp_scrollable_area and not self._check_scrollable_handle_collision(temp_scrollable_area, x, y, menu_offset_x, menu_offset_y):
-                temp_scrollable_area = None
-            
-            # Check tab buttons
-            if not temp_button:
-                temp_button = self.helper_manager.check_clickable_from_dict(
-                    self.buttons["menu"]["tabs"], 
-                    (x, y), 
-                    menu_offset_x, 
-                    menu_offset_y
-                )
-            
-            # In dev mode, check if the menu background itself was clicked
-            temp_menu = None
-            if self.game_manager.dev_mode:
-                menu_rect = pygame.Rect(
-                    menu.rect.x + menu_offset_x,
-                    menu.rect.y + menu_offset_y,
-                    menu.rect.width,
-                    menu.rect.height
-                )
-                if menu_rect.collidepoint(x, y):
-                    temp_menu = menu
-            
-            # If we found any element in this menu, use it and stop checking lower menus
-            if temp_button or temp_toggle or temp_slider or temp_text_display or temp_scrollable_area or temp_menu: #or temp_image
-                button_clicked = temp_button
-                toggle_clicked = temp_toggle
-                slider_clicked = temp_slider
-                text_display_clicked = temp_text_display
-                #image_clicked = temp_image
-                scrollable_area_clicked = temp_scrollable_area
-                menu_clicked = temp_menu
-                break  # Stop checking lower priority menus
+        button_clicked, toggle_clicked, slider_clicked, text_display_clicked, scrollable_area_clicked, menu_clicked = self._get_open_menu_clicks(x, y, input_manager)
     
         # If no menu elements were clicked, check game state UI
         if not (button_clicked or toggle_clicked or slider_clicked or text_display_clicked or scrollable_area_clicked or menu_clicked): #or image_clicked
-            # Check the buttons for the current game state
-            button_clicked = self.helper_manager.check_clickable_from_dict(
-                self.buttons[state], (x, y)
-            )
-            toggle_clicked = self.helper_manager.check_clickable_from_dict(
-                self.toggles[state], (x, y)
-            )
-            slider_clicked = self.helper_manager.check_clickable_from_dict(
-                self.sliders[state], (x, y)
-            )
-            
-            # If slider was clicked, verify it was specifically on the handle (not track)
-            if slider_clicked and not self._check_slider_handle_collision(slider_clicked, x, y):
-                slider_clicked = None
-            
-            # TextDisplay is display-only, but selectable in dev mode
-            text_display_clicked = None
-            if self.game_manager.dev_mode:
-                text_display_clicked = self.helper_manager.check_clickable_from_dict(
-                    self.text_display[state], (x, y)
-                )
-            
-            #image_clicked = self.helper_manager.check_clickable_from_dict(
-            #    self.images[state], (x, y)
-            #)
-            scrollable_area_clicked = self.helper_manager.check_clickable_from_dict(
-                self.scrollable_areas[state], (x, y)
-            )
-            
-            # If scrollable area was clicked, verify click was on scrollbar handle
-            if scrollable_area_clicked and not self._check_scrollable_handle_collision(scrollable_area_clicked, x, y):
-                scrollable_area_clicked = None
+            button_clicked, toggle_clicked, slider_clicked, text_display_clicked, scrollable_area_clicked, menu_clicked = self._get_game_state_clicks(state, x, y)
 
-        # Set the active clickable object, check menu first because it has lowest priority
-        if menu_clicked:
-            self.active = menu_clicked
-
-        if button_clicked:
-            self.active = button_clicked
-
-        if toggle_clicked:
-            self.active = toggle_clicked
-
-        if slider_clicked:
-            self.active = slider_clicked
-
-        if text_display_clicked:
-            self.active = text_display_clicked
-
-        #if image_clicked:
-        #    self.active = image_clicked
-
-        if scrollable_area_clicked:
-            self.active = scrollable_area_clicked
-
-        if self.prev_active and self.prev_active != self.active:
-            self.prev_active.is_active = False
-        if self.active:
-            self.active.is_active = True
+        self._apply_click_selection(
+            button_clicked,
+            toggle_clicked,
+            slider_clicked,
+            text_display_clicked,
+            scrollable_area_clicked,
+            menu_clicked,
+        )
 
     def _handle_mouse_motion(self, x: int, y: int) -> None:
         """
