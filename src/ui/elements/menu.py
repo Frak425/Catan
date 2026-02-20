@@ -252,15 +252,12 @@ class Menu(UIElement):
         
         # Draw menu surface at absolute position
         surface.blit(self.menu_surface, abs_rect.topleft)
+        self.draw_inactive_overlay(surface, abs_rect)
         
         # Draw children (they handle their own absolute positioning)
         for child in self.children:
             if child.shown:
-                # Pass time to toggles if needed
-                if isinstance(child, Toggle) and time is not None:
-                    child.draw(surface, time)
-                else:
-                    child.draw(surface) # type: ignore
+                child.draw(surface, time) # type: ignore
         
         # Draw guiding lines in dev mode
         if self.game_manager.dev_mode and self.is_active:

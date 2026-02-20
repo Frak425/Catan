@@ -187,6 +187,7 @@ class Button(UIElement):
             text_rect.midright = (abs_rect.right - self.padding, abs_rect.centery)
         
         surface.blit(text, text_rect)
+        self.draw_inactive_overlay(surface, abs_rect)
 
         if self.is_active:
             self.draw_guiding_lines(surface)

@@ -279,6 +279,7 @@ class ScrollableArea(UIElement):
         self._draw_background(surface, actual_rect)
         self._draw_content(surface, actual_rect, time)
         self._draw_slider(surface, actual_rect, time)
+        self.draw_inactive_overlay(surface, actual_rect)
     
     def _draw_background(self, surface: pygame.Surface, actual_rect: pygame.Rect) -> None:
         """

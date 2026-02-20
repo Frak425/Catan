@@ -325,6 +325,7 @@ class Slider(UIElement):
 
         # Draw the bar and slider on the main surface using absolute rect
         surface.blit(self.draw_surface, abs_rect.topleft)
+        self.draw_inactive_overlay(surface, abs_rect)
 
         if self.is_active:
             self.draw_guiding_lines(surface)

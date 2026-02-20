@@ -135,6 +135,7 @@ class TextDisplay(UIElement):
         self.surface.fill(self.color)
         self.surface.blit(self.text_surface, self.text_rect)
         surface.blit(self.surface, abs_rect.topleft)
+        self.draw_inactive_overlay(surface, abs_rect)
 
         if self.is_active:
             self.draw_guiding_lines(surface)

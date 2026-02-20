@@ -4,8 +4,8 @@
             {
                 "name": "play",
                 "rect": [
-                    323,
-                    327,
+                    322,
+                    325,
                     200,
                     75
                 ],
@@ -71,7 +71,13 @@
                     1366,
                     768
                 ],
-                "image_path": ""
+                "image_path": "",
+                "default_color": [
+                    150,
+                    150,
+                    150
+                ],
+                "shown": true
             }
         ],
         "sliders": [],
@@ -207,7 +213,7 @@
                 "callback": "open_menu"
             },
             {
-                "name": "player_choose_color_cycle",
+                "name": "player_num_increase",
                 "rect": [
                     320,
                     328,
@@ -234,7 +240,7 @@
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
                 "shown": true,
-                "callback": "choose_player_color_cycle"
+                "callback": "player_num_increase"
             },
             {
                 "name": "game_start",
@@ -245,9 +251,9 @@
                     50
                 ],
                 "color": [
-                    100,
-                    0,
-                    0
+                    200,
+                    10,
+                    10
                 ],
                 "text": "Start",
                 "text_color": [
@@ -275,9 +281,9 @@
                     50
                 ],
                 "color": [
-                    100,
-                    0,
-                    0
+                    200,
+                    10,
+                    10
                 ],
                 "text": "Back",
                 "text_color": [
@@ -297,7 +303,7 @@
                 "callback": "set_game_state_home"
             },
             {
-                "name": "new_button_89463",
+                "name": " player_num_decrease",
                 "rect": [
                     167,
                     328,
@@ -318,15 +324,16 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
-                "shown": true
+                "shown": true,
+                "callback": "player_num_decrease"
             },
             {
-                "name": "new_button_33689",
+                "name": "player_num",
                 "rect": [
                     242,
                     328,
@@ -347,7 +354,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -355,7 +362,7 @@
                 "shown": true
             },
             {
-                "name": "new_button_6443",
+                "name": "players_text",
                 "rect": [
                     167,
                     267,
@@ -376,7 +383,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -384,10 +391,10 @@
                 "shown": true
             },
             {
-                "name": "new_button_24777",
+                "name": "diff_text",
                 "rect": [
-                    165,
-                    110,
+                    163,
+                    107,
                     150,
                     50
                 ],
@@ -405,7 +412,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -413,7 +420,7 @@
                 "shown": true
             },
             {
-                "name": "new_button_75455",
+                "name": "player_color_text",
                 "rect": [
                     167,
                     447,
@@ -434,7 +441,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -442,7 +449,7 @@
                 "shown": true
             },
             {
-                "name": "new_button_3137",
+                "name": "color_index_decrease",
                 "rect": [
                     167,
                     506,
@@ -463,15 +470,16 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
-                "shown": true
+                "shown": true,
+                "callback": "player_color_index_decrease"
             },
             {
-                "name": "new_button_38344",
+                "name": "color_index_increase",
                 "rect": [
                     316,
                     508,
@@ -492,44 +500,16 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
-                "shown": true
+                "shown": true,
+                "callback": "player_color_index_increase"
             },
             {
-                "name": "new_button_75260",
-                "rect": [
-                    237,
-                    506,
-                    50,
-                    50
-                ],
-                "color": [
-                    0,
-                    100,
-                    0
-                ],
-                "text": "",
-                "text_color": [
-                    0,
-                    0,
-                    0
-                ],
-                "padding": 5,
-                "text_align": "center",
-                "disabled": false,
-                "border_radius": -1,
-                "border_top_right_radius": -1,
-                "border_top_left_radius": -1,
-                "border_bottom_right_radius": -1,
-                "border_bottom_left_radius": -1,
-                "shown": true
-            },
-            {
-                "name": "new_button_76001",
+                "name": "points_to_win_text",
                 "rect": [
                     618,
                     451,
@@ -550,7 +530,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -579,7 +559,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -608,7 +588,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -637,7 +617,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -645,7 +625,7 @@
                 "shown": true
             },
             {
-                "name": "new_button_5586",
+                "name": "dice_mode_text",
                 "rect": [
                     616,
                     108,
@@ -666,7 +646,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -695,7 +675,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -724,7 +704,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -732,7 +712,7 @@
                 "shown": true
             },
             {
-                "name": "new_button_17254",
+                "name": "robber_mode_text",
                 "rect": [
                     613,
                     256,
@@ -753,7 +733,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -782,7 +762,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -811,7 +791,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -819,7 +799,7 @@
                 "shown": true
             },
             {
-                "name": "new_button_34990",
+                "name": "turn_order_text",
                 "rect": [
                     992,
                     255,
@@ -840,7 +820,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -869,7 +849,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -898,7 +878,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -927,7 +907,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -935,7 +915,7 @@
                 "shown": true
             },
             {
-                "name": "new_button_50638",
+                "name": "time_limit_text",
                 "rect": [
                     989,
                     451,
@@ -956,7 +936,7 @@
                 "padding": 5,
                 "text_align": "center",
                 "disabled": false,
-                "border_radius": -1,
+                "border_radius": 5,
                 "border_top_right_radius": -1,
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
@@ -964,7 +944,72 @@
                 "shown": true
             }
         ],
-        "images": [],
+        "images": [
+            {
+                "name": "player_color_red",
+                "rect": [
+                    237,
+                    506,
+                    50,
+                    50
+                ],
+                "image_path": null,
+                "default_color": [
+                    200,
+                    10,
+                    10
+                ],
+                "shown": false
+            },
+            {
+                "name": "player_color_green",
+                "rect": [
+                    237,
+                    507,
+                    50,
+                    50
+                ],
+                "image_path": null,
+                "default_color": [
+                    10,
+                    200,
+                    10
+                ],
+                "shown": false
+            },
+            {
+                "name": "player_color_blue",
+                "rect": [
+                    238,
+                    507,
+                    50,
+                    50
+                ],
+                "image_path": null,
+                "default_color": [
+                    10,
+                    10,
+                    200
+                ],
+                "shown": false
+            },
+            {
+                "name": "player_color_yellow",
+                "rect": [
+                    235,
+                    507,
+                    50,
+                    50
+                ],
+                "image_path": null,
+                "default_color": [
+                    200,
+                    200,
+                    10
+                ],
+                "shown": true
+            }
+        ],
         "sliders": [
             {
                 "name": "new_slider_87615",
@@ -1256,6 +1301,7 @@
                 100,
                 200
             ],
+            "active": true,
             "children": [
                 "input",
                 "accessibility",
@@ -1334,6 +1380,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             200,
@@ -1369,6 +1416,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             0,
@@ -1406,6 +1454,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             200,
@@ -1443,6 +1492,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             200,
@@ -1480,6 +1530,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             200,
@@ -1517,6 +1568,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             200,
@@ -1554,6 +1606,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             0,
@@ -1590,6 +1643,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             100,
@@ -1626,6 +1680,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             100,
@@ -1662,6 +1717,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             100,
@@ -1698,6 +1754,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             100,
@@ -1734,6 +1791,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Button",
                         "color": [
                             100,
@@ -1774,6 +1832,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -1806,6 +1865,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -1838,6 +1898,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -1870,6 +1931,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -1904,6 +1966,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -1936,6 +1999,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -1968,6 +2032,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -2002,6 +2067,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -2034,6 +2100,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -2066,6 +2133,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -2100,6 +2168,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -2132,6 +2201,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -2164,6 +2234,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -2198,6 +2269,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -2230,6 +2302,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -2262,6 +2335,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Toggle",
                         "on": false,
                         "guiding_lines": true,
@@ -2299,6 +2373,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Slider",
                         "value": 0,
                         "min_value": 0,
@@ -2332,6 +2407,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Slider",
                         "value": 0,
                         "min_value": 0,
@@ -2367,6 +2443,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Slider",
                         "value": 0,
                         "min_value": 0,
@@ -2402,6 +2479,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Slider",
                         "value": 0,
                         "min_value": 0,
@@ -2437,6 +2515,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Slider",
                         "value": 0,
                         "min_value": 0,
@@ -2472,6 +2551,7 @@
                             100,
                             200
                         ],
+                        "active": true,
                         "_type": "Slider",
                         "value": 0,
                         "min_value": 0,

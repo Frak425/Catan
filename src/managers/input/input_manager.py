@@ -2,6 +2,7 @@ import pygame
 from typing import Dict
 from typing import TYPE_CHECKING
 from src.managers.base_manager import BaseManager
+from src.ui.ui_element import UIElement
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
     from src.managers.graphics.graphics_manager import GraphicsManager
@@ -101,12 +102,11 @@ class InputManager(BaseManager):
         self.text_displays = self.ui_factory.create_all_text_displays(callbacks, animations, drivers)
         self.scrollable_areas = self.ui_factory.create_all_scrollable_areas(callbacks, animations, drivers)
         self.menus = self.ui_factory.create_all_menus(
-            #TODO: update for newer implemtation
-            self.buttons["menu"], 
-            self.toggles["menu"], 
-            self.sliders["menu"], 
-            self.images["menu"], 
-            self.text_displays["menu"]
+            self.buttons,
+            self.toggles,
+            self.sliders,
+            self.images,
+            self.text_displays
         )
         
         # Update graphics_manager's UI references for rendering
@@ -186,7 +186,7 @@ class InputManager(BaseManager):
         - Navigation: set_game_state_*, change_tab_*
         - Game setup: start_game, set_player_num, set_diff_level_*
         - Menu control: open_menu, close_menu
-        - Player config: choose_player_color_cycle
+        - Player config: player_color_index_*, choose_player_color_cycle
         - System: quit
         """
         return {
@@ -197,7 +197,12 @@ class InputManager(BaseManager):
             
             # Setup screen callbacks
             'start_game': self.start_game,
-            'choose_player_color_cycle': self.choose_player_color_cycle,
+            'player_num_increase': self.player_num_increase,
+            'player_num_decrease': self.player_num_decrease,
+            'player_color_index_increase': self.player_color_index_increase,
+            'player_color_index_decrease': self.player_color_index_decrease,
+            'color_index_increase': self.player_color_index_increase,
+            'color_index_decrease': self.player_color_index_decrease,
             'set_diff_level_easy': lambda: self.set_diff_level("easy"),
             'set_diff_level_medium': lambda: self.set_diff_level("medium"),
             'set_diff_level_hard': lambda: self.set_diff_level("hard"),
@@ -235,10 +240,117 @@ class InputManager(BaseManager):
         self.game_manager.players_num = num
         self.text_displays["setup"]["player_num_text"].update_text(f"Number of Players: {num}")
 
-    def choose_player_color_cycle(self):
-        """Cycle through available player colors."""
-        self.game_manager.player_color_chosen_index += 1
-        self.game_manager.player_color_chosen_index %= len(self.game_manager.player_colors)
+    def player_color_index_increase(self):
+        if self.game_manager.player_color_chosen_index < len(self.game_manager.player_colors) - 1:
+            self.game_manager.player_color_chosen_index += 1
+
+        self._update_player_color_ui()
+    
+    def player_color_index_decrease(self):
+        if self.game_manager.player_color_chosen_index > 0:
+            self.game_manager.player_color_chosen_index -= 1
+
+        self._update_player_color_ui()
+
+    def _update_player_color_ui(self) -> None:
+        """Sync selected player color visibility and control active states."""
+        colors = list(getattr(self.game_manager, 'player_colors', []))
+        if not colors:
+            return
+
+        max_index = len(colors) - 1
+        index = max(0, min(self.game_manager.player_color_chosen_index, max_index))
+        self.game_manager.player_color_chosen_index = index
+        selected_color = colors[index]
+
+        for color in colors:
+            element_name = f"player_color_{color}"
+            element = self._find_ui_element(element_name)
+            if not element:
+                continue
+            if color == selected_color:
+                element.show()
+            else:
+                element.hide()
+
+        increase_targets = ['player_color_index_increase', 'color_index_increase', 'player_choose_color_cycle']
+        decrease_targets = ['player_color_index_decrease', 'color_index_decrease', 'player_num_decrease', ' player_num_decrease']
+
+        for target in decrease_targets:
+            element = self._find_ui_element(target)
+            if not element:
+                continue
+            if index > 0:
+                self.activate_ui_element(target)
+            else:
+                self.deactivate_ui_element(target)
+
+        for target in increase_targets:
+            element = self._find_ui_element(target)
+            if not element:
+                continue
+            if index < max_index:
+                self.activate_ui_element(target)
+            else:
+                self.deactivate_ui_element(target)
+
+    def deactivate_ui_element(self, target: str):
+        element = self._find_ui_element(target)
+        if element:
+            element.deactivate()
+
+    def activate_ui_element(self, target: str):
+        element = self._find_ui_element(target)
+        if element:
+            element.activate()
+
+    def hide_ui_element(self, target: str):
+        element = self._find_ui_element(target)
+        if element:
+            element.hide()
+
+    def show_ui_element(self, target: str):
+        element = self._find_ui_element(target)
+        if element:
+            element.show()
+
+    def _iter_ui_elements(self):
+        """Yield all UI elements from state collections, menu collections, and menus."""
+        seen = set()
+
+        def walk(value):
+            if isinstance(value, dict):
+                for nested in value.values():
+                    yield from walk(nested)
+                return
+
+            if isinstance(value, UIElement):
+                obj_id = id(value)
+                if obj_id in seen:
+                    return
+                seen.add(obj_id)
+                yield value
+
+        collections = [
+            self.buttons,
+            self.toggles,
+            self.sliders,
+            self.images,
+            self.text_displays,
+            self.scrollable_areas,
+            self.menus,
+        ]
+
+        for collection in collections:
+            if isinstance(collection, dict):
+                yield from walk(collection)
+
+    def _find_ui_element(self, target: str):
+        """Find first UI element where key name or element.name matches target."""
+        for element in self._iter_ui_elements():
+            if getattr(element, 'name', None) == target:
+                return element
+        return None
 
     def set_diff_level(self, level: str):
         """
@@ -386,32 +498,47 @@ class InputManager(BaseManager):
 
     def change_tab(self, new_tab):
         """
-        Change active tab in settings menu.
+        Change active tab across open menus that support the tab.
         
-        Updates the menu's active_tab and highlights the corresponding tab button.
+        Updates each matching menu's `active_tab` and highlights the corresponding
+        tab button for that specific menu.
         
         Args:
             new_tab: Tab identifier ("input", "accessibility", "gameplay", "audio", "graphics")
             
-        TODO: Generalize to support multiple menus with tabs, not just settings
+        Note: This supports multi-menu layouts by iterating open menus.
         """
-        settings_menu = self.get_menu("settings")
-        if not settings_menu:
-            print("Warning: 'settings' menu not found")
+        open_menus = self.get_open_menus()
+        if not open_menus:
+            print("Warning: No open menus found")
             return
-        
-        settings_menu.active_tab = new_tab
-        
-        # Check if tab buttons exist before trying to update them
-        if ("menu" in self.buttons and 
-            "tabs" in self.buttons["menu"] and 
-            new_tab in self.buttons["menu"]["tabs"]):
-            self.buttons["menu"]["tabs"][new_tab].color = (0, 100, 0)  # Highlight the active tab
-            for tab_name, button in self.buttons["menu"]["tabs"].items():
+
+        menus_collection = {}
+        if isinstance(self.buttons, dict):
+            possible_collection = self.buttons.get("menus", {})
+            if isinstance(possible_collection, dict):
+                menus_collection = possible_collection
+
+        updated_any = False
+        for menu in open_menus:
+            menu_button_tabs = {}
+            if isinstance(menus_collection, dict):
+                menu_button_tabs = menus_collection.get(menu.name, {}).get("tabs", {})
+
+            if not isinstance(menu_button_tabs, dict) or new_tab not in menu_button_tabs:
+                continue
+
+            menu.active_tab = new_tab
+            menu_button_tabs[new_tab].color = (0, 100, 0)  # Highlight active tab
+            for tab_name, button in menu_button_tabs.items():
                 if tab_name != new_tab:
                     button.color = (100, 0, 0)
-        
-        settings_menu.update_menu(0)
+
+            menu.update_menu(0)
+            updated_any = True
+
+        if not updated_any:
+            print(f"Warning: No open menu contains tab '{new_tab}'")
 
     def quit(self):
         """Signal the game to shut down by setting running flag to False."""
@@ -456,5 +583,7 @@ class InputManager(BaseManager):
             player_num_slider = self.sliders["setup"]["player_num_slider"]
             if hasattr(player_num_slider, 'callback') and player_num_slider.callback:
                 player_num_slider.callback()
+
+        self._update_player_color_ui()
 
         self.change_tab("input")  # Set the initial active tab

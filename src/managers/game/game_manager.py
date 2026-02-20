@@ -113,7 +113,7 @@ class GameManager(BaseManager):
         self.players_num = 2
         self.players_list = []
         self.players_list_index = 0
-        self.player_colors = ["yellow", "blue", "green", "red"]
+        self.player_colors = ["red", "green", "blue", "yellow"]
         self.player_color_chosen_index = 0
         self.game_difficulty = "easy"
         self.points_to_win = 10
@@ -175,36 +175,6 @@ class GameManager(BaseManager):
         board.assign_tile_classes()
         
         return board
-
-    ## --- DEPENDENCY INJECTION (TODO: Replace with constructor injection) --- ##
-    
-    def set_input_manager(self, input_manager: InputManager):
-        """Inject InputManager dependency. Used for circular dependency resolution."""
-        self.input_manager = input_manager
-
-    def set_audio_manager(self, audio_manager: AudioManager):
-        """Inject AudioManager dependency. Used for circular dependency resolution."""
-        self.audio_manager = audio_manager
-
-    def set_graphics_manager(self, graphics_manager: GraphicsManager):
-        """Inject GraphicsManager dependency. Used for circular dependency resolution."""
-        self.graphics_manager = graphics_manager
-
-    def set_helper_manager(self, helper_manager: HelperManager):
-        """Inject HelperManager dependency. Used for circular dependency resolution."""
-        self.helper_manager = helper_manager
-
-    def set_player_manager(self, player_manager: PlayerManager):
-        """Inject PlayerManager dependency. Used for circular dependency resolution."""
-        self.player_manager = player_manager
-
-    def set_animation_manager(self, animation_manager: AnimationManager):
-        """Inject AnimationManager dependency. Used for circular dependency resolution."""
-        self.animation_manager = animation_manager
-
-    def set_driver_manager(self, driver_manager) -> None:
-        """Inject DriverManager dependency. Used for circular dependency resolution."""
-        self.driver_manager = driver_manager
 
     ## --- LAYOUT/SETTINGS GENERATION --- ##
     
@@ -410,7 +380,27 @@ class GameManager(BaseManager):
                 "name": image.name,
                 "rect": [image.rect[0], image.rect[1], image.rect[2], image.rect[3]],
                 "image_path": image.image_path,
+                "default_color": [image.default_color[0], image.default_color[1], image.default_color[2]],
+                "shown": image.shown,
             }
+
+            # Store callback name if it exists
+            if hasattr(image, 'callback') and image.callback:
+                callback_name = None
+                if hasattr(self.input_manager, 'ui_factory') and hasattr(self.input_manager.ui_factory, 'callback_registry'):
+                    for name, func in self.input_manager.ui_factory.callback_registry.items():
+                        if func == image.callback:
+                            callback_name = name
+                            break
+
+                if not callback_name:
+                    callback_name = getattr(image.callback, '__name__', None)
+                    if callback_name == "<lambda>":
+                        callback_name = None
+
+                if callback_name:
+                    layout_object["callback"] = callback_name
+
             layout_object_list.append(layout_object)
         return layout_object_list
 

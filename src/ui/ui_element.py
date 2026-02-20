@@ -82,6 +82,7 @@ class UIElement(ABC):
         self.offset = (0, 0)
         self.guiding_line_color = (100, 100, 200)
         self.is_active = False
+        self.active = True
         
         # Hierarchical relationship management
         self.parent: Optional['UIElement'] = None
@@ -323,7 +324,7 @@ class UIElement(ABC):
         Note: Most elements delegate to InputManager instead of using this.
               This provides alternative event handling path for custom elements.
         """
-        if not self.shown:
+        if not self.shown or not self.active:
             return False
         
         # Let children handle first (reverse order for top-to-bottom)
@@ -537,6 +538,7 @@ class UIElement(ABC):
         print(f"Name: {self.name}")
         print(f"Rect: {self.rect}")
         print(f"Shown: {self.shown}")
+        print(f"Active: {self.active}")
         print(f"Guiding Line Color: {self.guiding_line_color}")
 
     def read_settings(self, settings: dict) -> None:
@@ -610,6 +612,14 @@ class UIElement(ABC):
         Note: Does not affect position or other properties, only visibility.
         """
         self.shown = True
+
+    def deactivate(self) -> None:
+        """Deactivate element interaction while keeping it visible."""
+        self.active = False
+
+    def activate(self) -> None:
+        """Activate element interaction."""
+        self.active = True
     
     ## --- ANIMATION HANDLING --- ##
 
@@ -723,6 +733,19 @@ class UIElement(ABC):
             pygame.draw.line(surface, self.guiding_line_color, 
                            (abs_rect.x, abs_rect.y + abs_rect.height), 
                            (abs_rect.x + abs_rect.width, abs_rect.y + abs_rect.height), 1)
+
+    def draw_inactive_overlay(self, surface: pygame.Surface, abs_rect: Optional[pygame.Rect] = None) -> None:
+        """Draw translucent gray overlay to indicate deactivated state."""
+        if self.active:
+            return
+
+        target_rect = abs_rect if abs_rect is not None else self.get_absolute_rect()
+        if target_rect.width <= 0 or target_rect.height <= 0:
+            return
+
+        overlay = pygame.Surface((target_rect.width, target_rect.height), pygame.SRCALPHA)
+        overlay.fill((120, 120, 120, 120))
+        surface.blit(overlay, target_rect.topleft)
     
     ## --- SERIALIZATION HELPERS --- ##
     
@@ -761,6 +784,7 @@ class UIElement(ABC):
         self.guiding_line_color = (guiding_line_color_data[0], 
                                    guiding_line_color_data[1], 
                                    guiding_line_color_data[2])
+        self.active = layout_props.get("active", self.active)
         
         # Store pending children names for deferred loading
         # (children must be created before they can be added)
@@ -832,7 +856,8 @@ class UIElement(ABC):
             "rect": [self.rect.x, self.rect.y, self.rect.width, self.rect.height],
             "guiding_line_color": [self.guiding_line_color[0], 
                                   self.guiding_line_color[1], 
-                                  self.guiding_line_color[2]]
+                                  self.guiding_line_color[2]],
+            "active": self.active,
         }
         
         # Serialize children by name (if they have names)

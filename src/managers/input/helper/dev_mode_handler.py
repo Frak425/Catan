@@ -705,7 +705,7 @@ class DevModeHandler:
         layout_props = {
             "name": f"new_image_{timestamp}",
             "rect": [100, 100, 100, 100],
-            "image_path": "path/to/image.png",
+            "image_path": None,
         }
         return Image(layout_props, self.game_manager)
 
@@ -753,15 +753,19 @@ class DevModeHandler:
         """Return first open target menu and ensure active tab collection exists."""
         for menu in self.input_manager.get_open_menus():
             tab = menu.active_tab
-            if tab not in elements_by_type[element_type]["menu"]:
-                elements_by_type[element_type]["menu"][tab] = {}
+            if "menus" not in elements_by_type[element_type]:
+                elements_by_type[element_type]["menus"] = {}
+            if menu.name not in elements_by_type[element_type]["menus"]:
+                elements_by_type[element_type]["menus"][menu.name] = {}
+            if tab not in elements_by_type[element_type]["menus"][menu.name]:
+                elements_by_type[element_type]["menus"][menu.name][tab] = {}
             return menu
         return None
 
     def _add_new_element_to_menu(self, element_type: str, new_element, target_menu, elements_by_type: dict) -> None:
         """Attach a newly created element to menu collections and hierarchy."""
         tab = target_menu.active_tab
-        elements_by_type[element_type]["menu"][tab][new_element.name] = new_element
+        elements_by_type[element_type]["menus"][target_menu.name][tab][new_element.name] = new_element
         target_menu.add_child(new_element)
         print(f"Added {new_element.name} to menu '{target_menu.name}' tab: {tab} and hierarchy")
 

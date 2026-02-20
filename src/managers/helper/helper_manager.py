@@ -62,6 +62,10 @@ class HelperManager(BaseManager):
     #TODO: proper type annotations for clickables
     def check_clickable_from_dict(self, clickables, mouse_location: tuple[int, int], offset_x = 0, offset_y = 0):
         for name, class_instance in clickables.items():
+            if hasattr(class_instance, 'shown') and not class_instance.shown:
+                continue
+            if hasattr(class_instance, 'active') and not class_instance.active:
+                continue
             if class_instance.rect.collidepoint(mouse_location[0] - offset_x, mouse_location[1] - offset_y):
                 return class_instance
                 

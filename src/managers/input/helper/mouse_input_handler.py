@@ -224,25 +224,54 @@ class MouseInputHandler:
         self.start_y = y
         self.clicked = True
 
+    def _get_menu_tab_collection(self, collection: Dict, menu: Menu, tab: str) -> Dict:
+        """Get per-menu tab elements with fallback to legacy single-menu structure."""
+        if not isinstance(collection, dict):
+            return {}
+
+        menus_collection = collection.get("menus", {})
+        if isinstance(menus_collection, dict):
+            menu_collection = menus_collection.get(menu.name, {})
+            if isinstance(menu_collection, dict):
+                tab_collection = menu_collection.get(tab, {})
+                if isinstance(tab_collection, dict):
+                    return tab_collection
+
+        legacy_menu_collection = collection.get("menu", {})
+        if isinstance(legacy_menu_collection, dict):
+            tab_collection = legacy_menu_collection.get(tab, {})
+            if isinstance(tab_collection, dict):
+                return tab_collection
+
+        return {}
+
     def _get_menu_click_result(self, menu: Menu, x: int, y: int):
         """Return click candidates for a specific open menu."""
         menu_offset_x = menu.location[0]
         menu_offset_y = menu.location[1]
 
+        button_tab_collection = self._get_menu_tab_collection(self.buttons, menu, menu.active_tab)
+        toggle_tab_collection = self._get_menu_tab_collection(self.toggles, menu, menu.active_tab)
+        slider_tab_collection = self._get_menu_tab_collection(self.sliders, menu, menu.active_tab)
+        text_tab_collection = self._get_menu_tab_collection(self.text_display, menu, menu.active_tab)
+        image_tab_collection = self._get_menu_tab_collection(self.images, menu, menu.active_tab)
+        scrollable_tab_collection = self._get_menu_tab_collection(self.scrollable_areas, menu, menu.active_tab)
+        tabs_button_collection = self._get_menu_tab_collection(self.buttons, menu, "tabs")
+
         temp_button = self.helper_manager.check_clickable_from_dict(
-            self.buttons["menu"][menu.active_tab],
+            button_tab_collection,
             (x, y),
             menu_offset_x,
             menu_offset_y
         )
         temp_toggle = self.helper_manager.check_clickable_from_dict(
-            self.toggles["menu"][menu.active_tab],
+            toggle_tab_collection,
             (x, y),
             menu_offset_x,
             menu_offset_y
         )
         temp_slider = self.helper_manager.check_clickable_from_dict(
-            self.sliders["menu"][menu.active_tab],
+            slider_tab_collection,
             (x, y),
             menu_offset_x,
             menu_offset_y
@@ -254,14 +283,23 @@ class MouseInputHandler:
         temp_text_display = None
         if self.game_manager.dev_mode:
             temp_text_display = self.helper_manager.check_clickable_from_dict(
-                self.text_display["menu"][menu.active_tab],
+                text_tab_collection,
+                (x, y),
+                menu_offset_x,
+                menu_offset_y
+            )
+
+        temp_image = None
+        if self.game_manager.dev_mode:
+            temp_image = self.helper_manager.check_clickable_from_dict(
+                image_tab_collection,
                 (x, y),
                 menu_offset_x,
                 menu_offset_y
             )
 
         temp_scrollable_area = self.helper_manager.check_clickable_from_dict(
-            self.scrollable_areas["menu"][menu.active_tab],
+            scrollable_tab_collection,
             (x, y),
             menu_offset_x,
             menu_offset_y
@@ -271,7 +309,7 @@ class MouseInputHandler:
 
         if not temp_button:
             temp_button = self.helper_manager.check_clickable_from_dict(
-                self.buttons["menu"]["tabs"],
+                tabs_button_collection,
                 (x, y),
                 menu_offset_x,
                 menu_offset_y
@@ -288,11 +326,11 @@ class MouseInputHandler:
             if menu_rect.collidepoint(x, y):
                 temp_menu = menu
 
-        return (temp_button, temp_toggle, temp_slider, temp_text_display, temp_scrollable_area, temp_menu)
+        return (temp_button, temp_toggle, temp_slider, temp_text_display, temp_image, temp_scrollable_area, temp_menu)
 
     def _get_open_menu_clicks(self, x: int, y: int, input_manager):
         """Return click candidates from highest priority open menu, or all None."""
-        empty = (None, None, None, None, None, None)
+        empty = (None, None, None, None, None, None, None)
         open_menus_sorted = sorted(input_manager.get_open_menus(), key=lambda m: m.z_index)
 
         for menu in open_menus_sorted:
@@ -323,15 +361,21 @@ class MouseInputHandler:
                 self.text_display[state], (x, y)
             )
 
+        image_clicked = None
+        if self.game_manager.dev_mode:
+            image_clicked = self.helper_manager.check_clickable_from_dict(
+                self.images[state], (x, y)
+            )
+
         scrollable_area_clicked = self.helper_manager.check_clickable_from_dict(
             self.scrollable_areas[state], (x, y)
         )
         if scrollable_area_clicked and not self._check_scrollable_handle_collision(scrollable_area_clicked, x, y):
             scrollable_area_clicked = None
 
-        return (button_clicked, toggle_clicked, slider_clicked, text_display_clicked, scrollable_area_clicked, None)
+        return (button_clicked, toggle_clicked, slider_clicked, text_display_clicked, image_clicked, scrollable_area_clicked, None)
 
-    def _apply_click_selection(self, button_clicked, toggle_clicked, slider_clicked, text_display_clicked, scrollable_area_clicked, menu_clicked) -> None:
+    def _apply_click_selection(self, button_clicked, toggle_clicked, slider_clicked, text_display_clicked, image_clicked, scrollable_area_clicked, menu_clicked) -> None:
         """Apply click candidates to active selection using existing priority order."""
         if menu_clicked:
             self.active = menu_clicked
@@ -343,6 +387,8 @@ class MouseInputHandler:
             self.active = slider_clicked
         if text_display_clicked:
             self.active = text_display_clicked
+        if image_clicked:
+            self.active = image_clicked
         if scrollable_area_clicked:
             self.active = scrollable_area_clicked
 
@@ -386,17 +432,18 @@ class MouseInputHandler:
         input_manager = self.game_manager.input_manager if hasattr(self.game_manager, 'input_manager') else None
 
         assert input_manager is not None, "input_manager not defined"
-        button_clicked, toggle_clicked, slider_clicked, text_display_clicked, scrollable_area_clicked, menu_clicked = self._get_open_menu_clicks(x, y, input_manager)
+        button_clicked, toggle_clicked, slider_clicked, text_display_clicked, image_clicked, scrollable_area_clicked, menu_clicked = self._get_open_menu_clicks(x, y, input_manager)
     
         # If no menu elements were clicked, check game state UI
-        if not (button_clicked or toggle_clicked or slider_clicked or text_display_clicked or scrollable_area_clicked or menu_clicked): #or image_clicked
-            button_clicked, toggle_clicked, slider_clicked, text_display_clicked, scrollable_area_clicked, menu_clicked = self._get_game_state_clicks(state, x, y)
+        if not (button_clicked or toggle_clicked or slider_clicked or text_display_clicked or image_clicked or scrollable_area_clicked or menu_clicked):
+            button_clicked, toggle_clicked, slider_clicked, text_display_clicked, image_clicked, scrollable_area_clicked, menu_clicked = self._get_game_state_clicks(state, x, y)
 
         self._apply_click_selection(
             button_clicked,
             toggle_clicked,
             slider_clicked,
             text_display_clicked,
+            image_clicked,
             scrollable_area_clicked,
             menu_clicked,
         )

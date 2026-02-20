@@ -211,6 +211,7 @@ class Toggle(UIElement):
             pygame.draw.line(self.surface, (100, 100, 200), ((self.height + self.center_width) / 2, 0), ((self.height + self.center_width) / 2, self.height), 1)
         self.surface.blit(self.toggle_circle, (self.toggle_center_location[0] - self.toggle_circle.get_size()[0] / 2, self.toggle_center_location[1] - self.toggle_circle.get_size()[1] / 2))
         surface.blit(self.surface, abs_rect.topleft)
+        self.draw_inactive_overlay(surface, abs_rect)
 
         if self.is_active:
             self.draw_guiding_lines(surface)

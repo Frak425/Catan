@@ -1,5 +1,4 @@
 import pygame
-import pygame
 from typing import Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -75,6 +74,34 @@ class UIFactory:
             Callable or None: The registered callback function, or None if not found
         """
         return self.callback_registry.get(callback_name, None)
+
+    def _resolve_callback(self, props: dict, fallback_name: str | None = None):
+        """
+        Resolve callback using registry-first priority.
+
+        Priority order:
+        1) Element name (registry key) - overrides JSON callback field
+        2) JSON callback field
+        3) Optional fallback callback name
+        """
+        element_name = str(props.get('name', '')).strip()
+        callback_name = props.get('callback')
+        callback_name = str(callback_name).strip() if callback_name else None
+
+        if element_name:
+            callback = self._get_callback(element_name)
+            if callback:
+                return callback
+
+        if callback_name:
+            callback = self._get_callback(callback_name)
+            if callback:
+                return callback
+
+        if fallback_name:
+            return self._get_callback(fallback_name)
+
+        return None
 
     def _attach_sprite_animation(self, element, props: dict, animations: dict) -> None:
         """
@@ -171,12 +198,6 @@ class UIFactory:
                                 if element:
                                     result["menus"][menu_name][tab][name] = element
 
-        if result["menus"]:
-            first_menu_name = next(iter(result["menus"]))
-            result["menu"] = result["menus"][first_menu_name]
-        else:
-            result["menu"] = {tab: {} for tab in default_tabs}
-
         return result
 
     def _create_elements_from_layout(self, element_type: str, factory_func, callbacks: dict) -> Dict[str, Dict]:
@@ -195,13 +216,15 @@ class UIFactory:
                     "home": {name: element, ...},
                     "setup": {name: element, ...},
                     "game": {name: element, ...},
-                    "menu": {
-                        "tabs": {name: element, ...},
-                        "input": {name: element, ...},
-                        "accessibility": {name: element, ...},
-                        "graphics": {name: element, ...},
-                        "audio": {name: element, ...},
-                        "gameplay": {name: element, ...}
+                    "menus": {
+                        "settings": {
+                            "tabs": {name: element, ...},
+                            "input": {name: element, ...},
+                            "accessibility": {name: element, ...},
+                            "graphics": {name: element, ...},
+                            "audio": {name: element, ...},
+                            "gameplay": {name: element, ...}
+                        }
                     }
                 }
         
@@ -216,33 +239,13 @@ class UIFactory:
         """
         layout = getattr(self.game_manager, 'layout', None)
         if not layout:
-            return {"home": {}, "setup": {}, "game": {}, "menus": {}, "menu": {}}
+            return {"home": {}, "setup": {}, "game": {}, "menus": {}}
 
         result = self._create_state_elements(layout, element_type, factory_func, callbacks)
         menu_result = self._create_menu_elements(layout, element_type, factory_func, callbacks)
 
         result.update(menu_result)
         return result
-
-    def _get_default_button_callbacks(self) -> dict:
-        """
-        Get default button name -> callback name mapping for fallback.
-        
-        Returns:
-            dict: Mapping of button names to callback names
-        
-        Note: Used when layout.json doesn't specify callback for a button.
-              Primarily for tab navigation buttons in menu system.
-        """
-        return {
-            # Tab navigation buttons
-            'input': 'change_tab_input',
-            'accessibility': 'change_tab_accessibility',
-            'gameplay': 'change_tab_gameplay',
-            'audio': 'change_tab_audio',
-            'graphics': 'change_tab_graphics',
-            'close_menu': 'close_menu'
-        }
     
     def create_all_buttons(self, callbacks, animations: dict, drivers: dict):
         """
@@ -263,21 +266,13 @@ class UIFactory:
         
         Button Callback Resolution:
         - First check element config for 'callback' property
-        - If missing, use _get_default_button_callbacks() mapping
         - If still no callback, button is created without callback (visual only)
         """
         self.register_callbacks(callbacks)
-        button_name_to_callback = self._get_default_button_callbacks()
         
         def button_factory(props, cbs, state, tab):
-            callback_name = props.get('callback')
-            
-            # If no callback in JSON, try to infer from button name
-            if not callback_name:
-                button_name = props.get('name')
-                callback_name = button_name_to_callback.get(button_name)
-            
-            callback = self._get_callback(callback_name) if callback_name else None
+            button_name = str(props.get('name', '')).strip()
+            callback = self._resolve_callback(props)
 
             button = Button(props, self.game_manager.font, self.game_manager, callback=callback)
             
@@ -291,7 +286,17 @@ class UIFactory:
         
         # Note: Tab buttons should always be loaded from layout.json
         # If no tabs found in config, the layout.json is incomplete
-        menu_tabs = result.get("menu", {}).get("tabs", {})
+        menu_tabs = {}
+        menus_result = result.get("menus", {})
+        if isinstance(menus_result, dict):
+            settings_menu_tabs = menus_result.get("settings", {}).get("tabs", {})
+            if isinstance(settings_menu_tabs, dict):
+                menu_tabs = settings_menu_tabs
+            elif menus_result:
+                first_menu = next(iter(menus_result.values()))
+                if isinstance(first_menu, dict):
+                    menu_tabs = first_menu.get("tabs", {}) if isinstance(first_menu.get("tabs", {}), dict) else {}
+
         if not menu_tabs:
             print("Warning: No tab buttons found in layout.json. Menu tabs will not work.")
         
@@ -316,15 +321,18 @@ class UIFactory:
         """
         def slider_factory(props, cbs, state, tab):
             initial_value = props.get('initial_value', props.get('min_value', 0))
-            callback_name = props.get('callback')
             
             slider = Slider(props, initial_value, self.game_manager, None)
             
-            # Handle special callbacks like player_num_slider that need the value parameter
-            if callback_name == 'set_player_num':
+            callback_name = props.get('callback')
+            callback_name = str(callback_name).strip() if callback_name else None
+            element_name = str(props.get('name', '')).strip()
+
+            # Handle special callbacks that need the slider value parameter
+            if callback_name == 'set_player_num' or element_name == 'player_num_slider':
                 slider.callback = lambda s=slider: cbs['set_player_num'](int(s.value))
-            elif callback_name:
-                slider.callback = self._get_callback(callback_name)
+            else:
+                slider.callback = self._resolve_callback(props)
             
             # Attach sprite animation and drivers
             self._attach_sprite_animation(slider, props, animations)
@@ -351,8 +359,7 @@ class UIFactory:
         """
         def toggle_factory(props, cbs, state, tab):
             initial_on = props.get('on', self.game_manager.default_on)
-            callback_name = props.get('callback')
-            callback = self._get_callback(callback_name) if callback_name else None
+            callback = self._resolve_callback(props)
             toggle = Toggle(props, self.game_manager.graphics_manager.time, self.game_manager, on=initial_on, callback=callback)
             
             # Attach sprite animation and drivers
@@ -378,8 +385,7 @@ class UIFactory:
         - Can be used for decorative images (no callback) or interactive images (with callback)
         """
         def image_factory(props, cbs, state, tab):
-            callback_name = props.get('callback')
-            callback = self._get_callback(callback_name) if callback_name else None
+            callback = self._resolve_callback(props)
             image = Image(props, self.game_manager, callback=callback)
             
             # Attach sprite animation and drivers
@@ -406,8 +412,7 @@ class UIFactory:
         - Can display static text or dynamic text (updated via callback)
         """
         def text_display_factory(props, cbs, state, tab):
-            callback_name = props.get('callback')
-            callback = self._get_callback(callback_name) if callback_name else None
+            callback = self._resolve_callback(props)
             text_display = TextDisplay(props, self.game_manager, self.game_manager.font, callback=callback)
             
             # Attach sprite animation and drivers
