@@ -143,7 +143,7 @@ class Button(UIElement):
     ## --- RENDERING --- ##
 
     #TODO: absract all draw functions into parent class, leaving room for custom functionality
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: pygame.Surface, time: int) -> None:
         """
         Draw button with text and visual state effects.
         

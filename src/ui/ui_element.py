@@ -359,7 +359,7 @@ class UIElement(ABC):
     ## --- ABSTRACT INTERFACE (MUST IMPLEMENT IN SUBCLASSES) --- ##
     
     @abstractmethod
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: pygame.Surface, time: int) -> None:
         """
         Draw the UI element to the surface. Must be implemented by subclasses.
         

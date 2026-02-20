@@ -258,7 +258,7 @@ class ScrollableArea(UIElement):
 
     ## --- RENDERING --- ##
 
-    def draw(self, surface: pygame.Surface):
+    def draw(self, surface: pygame.Surface, time: int):
         """
         Draw scrollable area with viewport clipping.
         
@@ -277,8 +277,8 @@ class ScrollableArea(UIElement):
         
         # Draw each component
         self._draw_background(surface, actual_rect)
-        self._draw_content(surface, actual_rect)
-        self._draw_slider(surface, actual_rect)
+        self._draw_content(surface, actual_rect, time)
+        self._draw_slider(surface, actual_rect, time)
     
     def _draw_background(self, surface: pygame.Surface, actual_rect: pygame.Rect) -> None:
         """
@@ -301,7 +301,7 @@ class ScrollableArea(UIElement):
                 # Draw the visible portion of the background
                 surface.blit(self.background_surface, (clipped_bg_rect.x, clipped_bg_rect.y), bg_source_rect)
     
-    def _draw_content(self, surface: pygame.Surface, actual_rect: pygame.Rect) -> None:
+    def _draw_content(self, surface: pygame.Surface, actual_rect: pygame.Rect, time: int) -> None:
         """
         Draw content surface and child elements with viewport clipping.
         
@@ -326,7 +326,7 @@ class ScrollableArea(UIElement):
                     self._draw_content_surface(content_area, content_abs_rect, clipped_content_rect)
                 
                 # Draw child elements with clipping
-                self._draw_child_elements(content_area, clipped_content_rect)
+                self._draw_child_elements(content_area, clipped_content_rect, time)
                 
             except ValueError:
                 # Subsurface creation failed - skip drawing content
@@ -368,7 +368,7 @@ class ScrollableArea(UIElement):
                 content_source_rect
             )
     
-    def _draw_child_elements(self, content_area: pygame.Surface, clipped_content_rect: pygame.Rect) -> None:
+    def _draw_child_elements(self, content_area: pygame.Surface, clipped_content_rect: pygame.Rect, time: int) -> None:
         """
         Draw child UI elements within the clipped content area.
         
@@ -383,9 +383,9 @@ class ScrollableArea(UIElement):
                 elem_abs_rect = element.get_absolute_rect()
                 if (elem_abs_rect.y + elem_abs_rect.height > clipped_content_rect.y and 
                     elem_abs_rect.y < clipped_content_rect.y + clipped_content_rect.height):
-                    element.draw(content_area)
+                    element.draw(content_area, time)
     
-    def _draw_slider(self, surface: pygame.Surface, actual_rect: pygame.Rect) -> None:
+    def _draw_slider(self, surface: pygame.Surface, actual_rect: pygame.Rect, time: int) -> None:
         """
         Draw slider on top of content area.
         
@@ -400,7 +400,7 @@ class ScrollableArea(UIElement):
             original_slider_pos = (self.slider.rect.x, self.slider.rect.y)
             self.slider.rect.x = slider_abs_x
             self.slider.rect.y = slider_abs_y
-            self.slider.draw(surface)
+            self.slider.draw(surface, time)
             # Restore slider position
             self.slider.rect.x, self.slider.rect.y = original_slider_pos
 

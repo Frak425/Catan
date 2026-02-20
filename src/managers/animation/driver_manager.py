@@ -229,7 +229,7 @@ class DriverManager(BaseManager):
                 driver_value = driver.evaluate(context)
                 if driver_value is None:
                     continue
-                current_value = driver.blend(current_value, driver_value)
+                current_value = driver.blend(current_value, driver_value) # type: ignore
 
             if current_value != base_value:
                 self._set_property(target, property_path, current_value)

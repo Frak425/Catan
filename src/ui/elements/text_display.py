@@ -114,7 +114,7 @@ class TextDisplay(UIElement):
 
     ## --- RENDERING --- ##
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: pygame.Surface, time: int) -> None:
         """
         Draw background and text at absolute position.
         

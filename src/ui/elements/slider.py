@@ -292,7 +292,7 @@ class Slider(UIElement):
 
     ## --- RENDERING --- ##
 
-    def draw(self, surface: pygame.Surface):
+    def draw(self, surface: pygame.Surface, time: int):
         """
         Draw slider by compositing bar and handle surfaces.
         

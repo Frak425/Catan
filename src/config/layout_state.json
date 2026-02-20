@@ -89,15 +89,15 @@
             {
                 "name": "difficulty_level_easy",
                 "rect": [
-                    282,
-                    71,
+                    164,
+                    175,
                     75,
                     30
                 ],
                 "color": [
-                    0,
-                    0,
-                    0
+                    100,
+                    100,
+                    100
                 ],
                 "text": "easy",
                 "text_color": [
@@ -119,15 +119,15 @@
             {
                 "name": "difficulty_level_medium",
                 "rect": [
-                    382,
-                    71,
+                    250,
+                    175,
                     75,
                     30
                 ],
                 "color": [
-                    0,
-                    0,
-                    0
+                    100,
+                    100,
+                    100
                 ],
                 "text": "medium",
                 "text_color": [
@@ -149,15 +149,15 @@
             {
                 "name": "difficulty_level_hard",
                 "rect": [
-                    490,
-                    69,
+                    336,
+                    175,
                     70,
                     30
                 ],
                 "color": [
-                    0,
-                    0,
-                    0
+                    100,
+                    100,
+                    100
                 ],
                 "text": "hard",
                 "text_color": [
@@ -209,17 +209,17 @@
             {
                 "name": "player_choose_color_cycle",
                 "rect": [
-                    232,
-                    322,
-                    20,
-                    20
+                    320,
+                    328,
+                    50,
+                    50
                 ],
                 "color": [
-                    0,
-                    0,
-                    0
+                    100,
+                    100,
+                    100
                 ],
-                "text": "->",
+                "text": "r",
                 "text_color": [
                     0,
                     0,
@@ -239,9 +239,9 @@
             {
                 "name": "game_start",
                 "rect": [
-                    1174,
-                    683,
-                    150,
+                    1186,
+                    679,
+                    125,
                     50
                 ],
                 "color": [
@@ -269,10 +269,10 @@
             {
                 "name": "game_setup_back",
                 "rect": [
-                    100,
-                    693,
-                    50,
-                    30
+                    62,
+                    681,
+                    125,
+                    50
                 ],
                 "color": [
                     100,
@@ -295,6 +295,238 @@
                 "border_bottom_left_radius": -1,
                 "shown": true,
                 "callback": "set_game_state_home"
+            },
+            {
+                "name": "new_button_89463",
+                "rect": [
+                    167,
+                    328,
+                    50,
+                    50
+                ],
+                "color": [
+                    100,
+                    100,
+                    100
+                ],
+                "text": "l",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_33689",
+                "rect": [
+                    242,
+                    328,
+                    50,
+                    50
+                ],
+                "color": [
+                    0,
+                    100,
+                    0
+                ],
+                "text": "2",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_6443",
+                "rect": [
+                    167,
+                    267,
+                    150,
+                    50
+                ],
+                "color": [
+                    150,
+                    150,
+                    10
+                ],
+                "text": "players",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_24777",
+                "rect": [
+                    164,
+                    115,
+                    150,
+                    50
+                ],
+                "color": [
+                    150,
+                    150,
+                    10
+                ],
+                "text": "diff",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_75455",
+                "rect": [
+                    164,
+                    420,
+                    150,
+                    50
+                ],
+                "color": [
+                    150,
+                    150,
+                    10
+                ],
+                "text": "color",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_3137",
+                "rect": [
+                    167,
+                    506,
+                    50,
+                    50
+                ],
+                "color": [
+                    100,
+                    100,
+                    100
+                ],
+                "text": "l",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_38344",
+                "rect": [
+                    316,
+                    508,
+                    50,
+                    50
+                ],
+                "color": [
+                    100,
+                    100,
+                    100
+                ],
+                "text": "r",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_75260",
+                "rect": [
+                    237,
+                    506,
+                    50,
+                    50
+                ],
+                "color": [
+                    0,
+                    100,
+                    0
+                ],
+                "text": "",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
             }
         ],
         "images": [],

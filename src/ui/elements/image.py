@@ -47,7 +47,7 @@ class Image(UIElement):
 
     ## --- RENDERING --- ##
 
-    def draw(self, surface: pygame.surface.Surface):
+    def draw(self, surface: pygame.surface.Surface, time: int):
         """Draw image surface at absolute position."""
         if not self.shown:
             return

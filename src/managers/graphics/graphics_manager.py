@@ -87,4 +87,4 @@ class GraphicsManager(BaseManager):
 
     def draw_ui(self, type: str, layer: str):
         for element_name, element in self.ui_by_type[type][layer].items():
-            element.draw(self.game_manager.screen)
+            element.draw(self.game_manager.screen, self.time)

@@ -216,7 +216,7 @@ class Menu(UIElement):
 
     ## --- RENDERING --- ##
 
-    def draw(self, surface: pygame.Surface, time: int | None= None):
+    def draw(self, surface: pygame.Surface, time: int):
         """
         Draw menu background and all visible children.
         
