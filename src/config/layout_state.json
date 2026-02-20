@@ -386,8 +386,8 @@
             {
                 "name": "new_button_24777",
                 "rect": [
-                    164,
-                    115,
+                    165,
+                    110,
                     150,
                     50
                 ],
@@ -415,8 +415,8 @@
             {
                 "name": "new_button_75455",
                 "rect": [
-                    164,
-                    420,
+                    167,
+                    447,
                     150,
                     50
                 ],
@@ -527,11 +527,494 @@
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
                 "shown": true
+            },
+            {
+                "name": "new_button_76001",
+                "rect": [
+                    618,
+                    451,
+                    150,
+                    50
+                ],
+                "color": [
+                    150,
+                    150,
+                    10
+                ],
+                "text": "points to win",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_99959",
+                "rect": [
+                    620,
+                    507,
+                    50,
+                    50
+                ],
+                "color": [
+                    100,
+                    100,
+                    100
+                ],
+                "text": "l",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_27876",
+                "rect": [
+                    745,
+                    507,
+                    50,
+                    50
+                ],
+                "color": [
+                    100,
+                    100,
+                    100
+                ],
+                "text": "r",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_48969",
+                "rect": [
+                    680,
+                    506,
+                    50,
+                    50
+                ],
+                "color": [
+                    0,
+                    100,
+                    0
+                ],
+                "text": "10",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_5586",
+                "rect": [
+                    616,
+                    108,
+                    150,
+                    50
+                ],
+                "color": [
+                    150,
+                    150,
+                    10
+                ],
+                "text": "dice mode",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_29687",
+                "rect": [
+                    618,
+                    170,
+                    100,
+                    50
+                ],
+                "color": [
+                    0,
+                    100,
+                    0
+                ],
+                "text": "random",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_60630",
+                "rect": [
+                    735,
+                    170,
+                    100,
+                    50
+                ],
+                "color": [
+                    0,
+                    100,
+                    0
+                ],
+                "text": "balanced",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_17254",
+                "rect": [
+                    613,
+                    256,
+                    150,
+                    50
+                ],
+                "color": [
+                    150,
+                    150,
+                    10
+                ],
+                "text": "robber mode",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_29684",
+                "rect": [
+                    615,
+                    326,
+                    100,
+                    50
+                ],
+                "color": [
+                    0,
+                    100,
+                    0
+                ],
+                "text": "friendly",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_41271",
+                "rect": [
+                    731,
+                    325,
+                    100,
+                    50
+                ],
+                "color": [
+                    0,
+                    100,
+                    0
+                ],
+                "text": "standard",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_34990",
+                "rect": [
+                    992,
+                    255,
+                    150,
+                    50
+                ],
+                "color": [
+                    150,
+                    150,
+                    10
+                ],
+                "text": "turn order",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_54367",
+                "rect": [
+                    991,
+                    331,
+                    50,
+                    50
+                ],
+                "color": [
+                    100,
+                    100,
+                    100
+                ],
+                "text": "l",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_69124",
+                "rect": [
+                    1126,
+                    330,
+                    50,
+                    50
+                ],
+                "color": [
+                    100,
+                    100,
+                    100
+                ],
+                "text": "r",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_83627",
+                "rect": [
+                    1057,
+                    331,
+                    50,
+                    50
+                ],
+                "color": [
+                    0,
+                    100,
+                    0
+                ],
+                "text": "1",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
+            },
+            {
+                "name": "new_button_50638",
+                "rect": [
+                    989,
+                    451,
+                    150,
+                    50
+                ],
+                "color": [
+                    150,
+                    150,
+                    10
+                ],
+                "text": "time limit",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
             }
         ],
         "images": [],
-        "sliders": [],
-        "toggles": [],
+        "sliders": [
+            {
+                "name": "new_slider_87615",
+                "rect": [
+                    1044,
+                    582,
+                    200,
+                    40
+                ],
+                "min_value": 0,
+                "max_value": 100,
+                "color": [
+                    100,
+                    0,
+                    0
+                ],
+                "handle_color": [
+                    200,
+                    200,
+                    200
+                ],
+                "handle_radius": 10
+            }
+        ],
+        "toggles": [
+            {
+                "name": "new_toggle_44676",
+                "rect": [
+                    989,
+                    512,
+                    150,
+                    50
+                ],
+                "guiding_lines": true,
+                "height": 50,
+                "center_width": 100,
+                "color": [
+                    0,
+                    100,
+                    0
+                ],
+                "handle_color": [
+                    100,
+                    0,
+                    0
+                ],
+                "toggle_gap": 7,
+                "time_to_flip": 0.25
+            }
+        ],
         "text_displays": [],
         "scrollable_areas": [],
         "text_inputs": [],
