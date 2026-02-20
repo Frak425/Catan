@@ -363,7 +363,15 @@ class GameManager(BaseManager):
                 "color": [button.color[0], button.color[1], button.color[2]],
                 "text": button.text,
                 "text_color": [button.text_color[0], button.text_color[1], button.text_color[2]],
-                "padding": button.padding
+                "padding": button.padding,
+                "text_align": button.text_align,
+                "disabled": button.disabled,
+                "border_radius": button.border_radius,
+                "border_top_right_radius": button.border_top_right_radius,
+                "border_top_left_radius": button.border_top_left_radius,
+                "border_bottom_right_radius": button.border_bottom_right_radius,
+                "border_bottom_left_radius": button.border_bottom_left_radius,
+                "shown": button.shown
             }
             # Store callback name if it exists (for config-driven loading)
             if hasattr(button, 'callback') and button.callback:

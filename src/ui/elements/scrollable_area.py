@@ -266,57 +266,133 @@ class ScrollableArea(UIElement):
         1. Background (at actual_rect position, unaffected by scroll)
         2. Content surface and child elements (clipped to viewport, offset by scroll)
         3. Slider (at actual_rect position, on top of everything)
-        
-        Clipping Strategy:
-        - Create subsurface for content viewport
-        - Draw content_surface at (0, -content_scroll) within subsurface
-        - Children draw themselves with scroll offset (via get_absolute_rect)
-        - Only visible children are drawn (viewport intersection check)
-        
-        Coordinate Spaces:
-        - actual_rect: Container position on screen (unscrolled)
-        - content_abs_rect: Viewport position on screen (clipping region)
-        - Child positions: Include scroll offset (move with content)
         """
         if not self.shown:
             return
         
         self.update()
-
+        
         # Get actual screen position (not offset by scroll)
         actual_rect = super().get_absolute_rect()
         
-        # Draw background
-        surface.blit(self.background_surface, (actual_rect.x, actual_rect.y))
-
+        # Draw each component
+        self._draw_background(surface, actual_rect)
+        self._draw_content(surface, actual_rect)
+        self._draw_slider(surface, actual_rect)
+    
+    def _draw_background(self, surface: pygame.Surface, actual_rect: pygame.Rect) -> None:
+        """
+        Draw background with clipping for off-screen positioning.
+        
+        Args:
+            surface: Target surface to draw on
+            actual_rect: Container's screen position (unscrolled)
+        """
+        surface_rect = surface.get_rect()
+        if actual_rect.colliderect(surface_rect):
+            # Clip background to visible area
+            clipped_bg_rect = actual_rect.clip(surface_rect)
+            if clipped_bg_rect.width > 0 and clipped_bg_rect.height > 0:
+                # Calculate which part of the background to draw
+                bg_offset_x = clipped_bg_rect.x - actual_rect.x
+                bg_offset_y = clipped_bg_rect.y - actual_rect.y
+                bg_source_rect = pygame.Rect(bg_offset_x, bg_offset_y, clipped_bg_rect.width, clipped_bg_rect.height)
+                
+                # Draw the visible portion of the background
+                surface.blit(self.background_surface, (clipped_bg_rect.x, clipped_bg_rect.y), bg_source_rect)
+    
+    def _draw_content(self, surface: pygame.Surface, actual_rect: pygame.Rect) -> None:
+        """
+        Draw content surface and child elements with viewport clipping.
+        
+        Args:
+            surface: Target surface to draw on
+            actual_rect: Container's screen position (unscrolled)
+        """
         # Get content area for clipping
         content_abs_rect = self.get_absolute_content_rect()
         
-        # Create a subsurface for clipping content
-        try:
-            content_area = surface.subsurface(content_abs_rect)
-            
-            # Draw content surface if present
-            if self.content_surface:
-                content_area.blit(
-                    self.content_surface, 
-                    (0, -self.content_scroll)
-                )
-            
-            # Draw child elements with clipping
-            # Children use get_absolute_rect which includes scroll offset
-            for element in self.content_elements:
-                if element.shown:
-                    # Check if element is visible in viewport
-                    elem_abs_rect = element.get_absolute_rect()
-                    if (elem_abs_rect.y + elem_abs_rect.height > content_abs_rect.y and 
-                        elem_abs_rect.y < content_abs_rect.y + content_abs_rect.height):
-                        element.draw(content_area)
-        except ValueError:
-            # Clip rect is outside surface bounds
-            pass
+        # Clip content rect to surface bounds to handle off-screen positioning
+        surface_rect = surface.get_rect()
+        clipped_content_rect = content_abs_rect.clip(surface_rect)
         
-        # Draw slider on top (outside content area)
+        # Only draw content if there's a visible area
+        if clipped_content_rect.width > 0 and clipped_content_rect.height > 0:
+            try:
+                content_area = surface.subsurface(clipped_content_rect)
+                
+                # Draw content surface if present
+                if self.content_surface:
+                    self._draw_content_surface(content_area, content_abs_rect, clipped_content_rect)
+                
+                # Draw child elements with clipping
+                self._draw_child_elements(content_area, clipped_content_rect)
+                
+            except ValueError:
+                # Subsurface creation failed - skip drawing content
+                pass
+    
+    def _draw_content_surface(self, content_area: pygame.Surface, content_abs_rect: pygame.Rect, clipped_content_rect: pygame.Rect) -> None:
+        """
+        Draw the content surface within the clipped content area.
+        
+        Args:
+            content_area: Subsurface to draw within (clipped viewport)
+            content_abs_rect: Full content area rect (before clipping)
+            clipped_content_rect: Visible portion of content area
+        """
+        # Calculate offset for drawing within the clipped area
+        offset_x = clipped_content_rect.x - content_abs_rect.x
+        offset_y = clipped_content_rect.y - content_abs_rect.y
+        
+        # Calculate source rectangle from content surface
+        # When clipped, we need to skip the portion that's off-screen
+        content_source_x = offset_x
+        content_source_y = offset_y + self.content_scroll  # Add scroll offset to source
+        content_source_rect = pygame.Rect(
+            content_source_x,
+            content_source_y,
+            clipped_content_rect.width,
+            clipped_content_rect.height
+        )
+        
+        # Ensure source rect is within content surface bounds
+        content_surface_rect = self.content_surface.get_rect()
+        content_source_rect = content_source_rect.clip(content_surface_rect)
+        
+        # Draw the visible portion of content surface at (0,0) in subsurface
+        if content_source_rect.width > 0 and content_source_rect.height > 0:
+            content_area.blit(
+                self.content_surface,
+                (0, 0),  # Always draw at origin of subsurface
+                content_source_rect
+            )
+    
+    def _draw_child_elements(self, content_area: pygame.Surface, clipped_content_rect: pygame.Rect) -> None:
+        """
+        Draw child UI elements within the clipped content area.
+        
+        Args:
+            content_area: Subsurface to draw within (clipped viewport)
+            clipped_content_rect: Visible portion of content area
+        """
+        # Children use get_absolute_rect which includes scroll offset
+        for element in self.content_elements:
+            if element.shown:
+                # Check if element is visible in viewport
+                elem_abs_rect = element.get_absolute_rect()
+                if (elem_abs_rect.y + elem_abs_rect.height > clipped_content_rect.y and 
+                    elem_abs_rect.y < clipped_content_rect.y + clipped_content_rect.height):
+                    element.draw(content_area)
+    
+    def _draw_slider(self, surface: pygame.Surface, actual_rect: pygame.Rect) -> None:
+        """
+        Draw slider on top of content area.
+        
+        Args:
+            surface: Target surface to draw on
+            actual_rect: Container's screen position (unscrolled)
+        """
         if hasattr(self, 'slider') and self.slider:
             slider_abs_x = actual_rect.x + self.slider.rect.x
             slider_abs_y = actual_rect.y + self.slider.rect.y
@@ -358,6 +434,36 @@ class ScrollableArea(UIElement):
             handle_image=self.slider_handle_image,
             callback=self.set_content_scroll
         )
+
+    def _invalidate_absolute_rect(self) -> None:
+        """Override to update slider position when scrollable area moves."""
+        super()._invalidate_absolute_rect()
+        
+        # Only update slider if we actually have one
+        if hasattr(self, 'slider') and self.slider:
+            # Recalculate slider dimensions based on current rect
+            self.viewable_content_height = self.rect.height - 2 * self.exterior_padding
+            usable_width = self.rect.width - 2 * self.exterior_padding - self.interior_padding
+            self.viewable_content_width = int(usable_width * self.content_width_percentage)
+            
+            self.slider_width = usable_width - self.viewable_content_width
+            self.slider_height = self.viewable_content_height
+            self.slider_x = self.rect.width - self.exterior_padding - self.slider_width if self.slider_side == "right" else self.exterior_padding
+            self.slider_y = self.exterior_padding
+            
+            # Update the actual slider rect directly
+            self.slider.rect.x = self.slider_x
+            self.slider.rect.y = self.slider_y  
+            self.slider.rect.width = self.slider_width
+            self.slider.rect.height = self.slider_height
+            
+            # Update slider's handle radius based on new width
+            if hasattr(self.slider, 'handle_radius'):
+                self.slider.handle_radius = int(self.slider_width / 2) - self.slider_handle_inset
+            
+            # Invalidate only the slider's absolute rect
+            if hasattr(self.slider, '_invalidate_absolute_rect'):
+                self.slider._invalidate_absolute_rect()
 
     def calculate_dependent_properties(self):
         """
