@@ -86,6 +86,7 @@ class Button(UIElement):
 
         # read layout after setting defaults
         self.read_layout(layout_props)
+        self.update_text(self.text)
 
     ## --- TEXT MANAGEMENT --- ##
 
@@ -94,6 +95,23 @@ class Button(UIElement):
         self.text = new_text
         self.text_surface = self.font.render(self.text, True, self.text_color)
         self.text_rect = self.text_surface.get_rect()
+
+        if self.background_image:
+            self.surface = self.background_image
+        else:
+            desired_width = self.text_rect.width + 2 * self.padding
+            desired_height = self.text_rect.height + 2 * self.padding
+            surface_width = max(self.rect.width, desired_width)
+            surface_height = max(self.rect.height, desired_height)
+            self.surface = pygame.Surface((surface_width, surface_height))
+            self.surface.fill(self.color)
+
+            # If the button was created with a zero-sized rect, adopt computed size.
+            if self.rect.width <= 0 or self.rect.height <= 0:
+                self.rect.width = surface_width
+                self.rect.height = surface_height
+
+        self._invalidate_absolute_rect()
         self.set_text_align(self.text_align)
 
     def update_text_color(self, new_color: tuple[int, int, int]) -> None:

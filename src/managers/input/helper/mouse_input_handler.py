@@ -448,6 +448,13 @@ class MouseInputHandler:
             menu_clicked,
         )
 
+        # Toggles should behave like buttons: update immediately on press.
+        if self.active and not self.game_manager.dev_mode and isinstance(self.active, Toggle):
+            self.active.set_animating(self.graphics_manager.time)
+            handler = getattr(self.active, 'callback', None)
+            if handler:
+                handler()
+
     def _handle_mouse_motion(self, x: int, y: int) -> None:
         """
         Handle mouse motion events - detect dragging and update element positions.
@@ -592,9 +599,6 @@ class MouseInputHandler:
         if not clicked_in_menu:
             if pygame.rect.Rect.collidepoint(self.active.rect, (x, y)):
                 handler = getattr(self.active, 'callback', None)
-
-        if isinstance(self.active, Toggle):
-            self.active.set_animating(self.graphics_manager.time)
 
         if handler:
             handler()

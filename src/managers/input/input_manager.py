@@ -19,6 +19,11 @@ from src.managers.input.helper.ui_factory import UIFactory
 from src.managers.animation.animation_manager import AnimationManager
 from src.ui.elements.scrollable_area import ScrollableArea
 
+#import ui classes for type completion
+from src.ui.elements.button import Button
+from src.ui.elements.toggle import Toggle
+from src.ui.elements.slider import Slider
+
 
 class InputManager(BaseManager):
     """
@@ -42,11 +47,11 @@ class InputManager(BaseManager):
         
     def initialize(self) -> None:
         """Initialize manager after all dependencies are injected."""
-        self.game_manager = self.get_dependency('game_manager')
-        self.graphics_manager = self.get_dependency('graphics_manager')
-        self.helper_manager = self.get_dependency('helper_manager')
-        self.audio_manager = self.get_dependency('audio_manager')
-        self.player_manager = self.get_dependency('player_manager')
+        self.game_manager: GameManager = self.get_dependency('game_manager')
+        self.graphics_manager: GraphicsManager = self.get_dependency('graphics_manager')
+        self.helper_manager: HelperManager = self.get_dependency('helper_manager')
+        self.audio_manager: AudioManager = self.get_dependency('audio_manager')
+        self.player_manager: PlayerManager = self.get_dependency('player_manager')
         
     def init(self):
         """
@@ -203,12 +208,22 @@ class InputManager(BaseManager):
             'player_color_index_decrease': self.player_color_index_decrease,
             'color_index_increase': self.player_color_index_increase,
             'color_index_decrease': self.player_color_index_decrease,
-            'set_diff_level_easy': lambda: self.set_diff_level("easy"),
-            'set_diff_level_medium': lambda: self.set_diff_level("medium"),
-            'set_diff_level_hard': lambda: self.set_diff_level("hard"),
-            'open_menu': self.open_menu,
-            'close_menu': self.close_menu,
-            'set_player_num': self.set_player_num,
+            'points_to_win_increase': self.points_to_win_increase,
+            'points_to_win_decrease': self.points_to_win_decrease,
+            'set_diff_level_easy': lambda: self._update_diff_level_ui("set_diff_level_easy", "set_diff_level_medium", "set_diff_level_hard"),
+            'set_diff_level_medium': lambda: self._update_diff_level_ui("set_diff_level_medium", "set_diff_level_easy", "set_diff_level_hard"),
+            'set_diff_level_hard': lambda: self._update_diff_level_ui("set_diff_level_hard", "set_diff_level_easy", "set_diff_level_medium"),
+            'set_robber_mode_friendly': lambda: self._update_robber_mode_ui("set_robber_mode_friendly", "set_robber_mode_standard"),
+            'set_robber_mode_standard': lambda: self._update_robber_mode_ui("set_robber_mode_standard", "set_robber_mode_friendly"),
+            # Backward compatibility with older layout naming.
+            'set_robber_mode_normal': lambda: self._update_robber_mode_ui("set_robber_mode_standard", "set_robber_mode_friendly"),
+            'set_dice_mode_random': lambda: self._update_dice_mode_ui("set_dice_mode_random", "set_dice_mode_balanced"),
+            'set_dice_mode_balanced': lambda: self._update_dice_mode_ui("set_dice_mode_balanced", "set_dice_mode_random"),
+            'turn_order_increase': self.turn_order_increase,
+            'turn_order_decrease': self.turn_order_decrease,
+            'time_limit_toggle': lambda: self._update_time_limit_ui(),
+            'open_menu': lambda: self.open_menu('settings'),
+            'close_menu': lambda: self.close_menu('settings'),
             
             # Menu tab callbacks
             'change_tab_input': lambda: self.change_tab("input"),
@@ -225,11 +240,15 @@ class InputManager(BaseManager):
         if (self.game_manager.players_num < 4):
             self.game_manager.players_num += 1
 
+            self._update_player_num_ui()
+
     def player_num_decrease(self):
         """Decrement number of players (min 2)."""
         if (self.game_manager.players_num > 2):
             self.game_manager.players_num -= 1
 
+            self._update_player_num_ui()
+    
     def set_player_num(self, num: int) -> None:
         """
         Set number of players and update UI display.
@@ -241,16 +260,65 @@ class InputManager(BaseManager):
         self.text_displays["setup"]["player_num_text"].update_text(f"Number of Players: {num}")
 
     def player_color_index_increase(self):
-        if self.game_manager.player_color_chosen_index < len(self.game_manager.player_colors) - 1:
-            self.game_manager.player_color_chosen_index += 1
+        self.game_manager.player_color_chosen_index = (self.game_manager.player_color_chosen_index + 1) % len(self.game_manager.player_colors)
 
         self._update_player_color_ui()
     
     def player_color_index_decrease(self):
-        if self.game_manager.player_color_chosen_index > 0:
-            self.game_manager.player_color_chosen_index -= 1
+        self.game_manager.player_color_chosen_index = (self.game_manager.player_color_chosen_index - 1) % len(self.game_manager.player_colors)
 
         self._update_player_color_ui()
+
+    def points_to_win_increase(self):
+        if self.game_manager.points_to_win < 13:
+            self.game_manager.points_to_win += 1
+            self._update_points_to_win_ui()
+
+    def points_to_win_decrease(self):
+        if self.game_manager.points_to_win > 8:
+            self.game_manager.points_to_win -= 1
+            self._update_points_to_win_ui()
+
+    def turn_order_increase(self):
+        self.game_manager.turn_order = (self.game_manager.turn_order % 4) + 1
+        self._update_turn_order_ui()
+
+    def turn_order_decrease(self):
+        self.game_manager.turn_order = ((self.game_manager.turn_order - 2) % 4) + 1
+        self._update_turn_order_ui()
+
+    def _update_points_to_win_ui(self) -> None:
+        min_points = 8
+        max_points = 13
+        increase_target = 'points_to_win_increase'
+        decrease_target = 'points_to_win_decrease'
+        value_target = 'points_to_win'
+
+        points = getattr(self.game_manager, 'points_to_win', min_points)
+        points = max(min_points, min(points, max_points))
+        self.game_manager.points_to_win = points
+
+        value_element = self._find_ui_element(value_target)
+        if value_element:
+            update_text = getattr(value_element, 'update_text', None)
+            if callable(update_text):
+                update_text(f"{points}")
+
+        decrease_element = self._find_ui_element(decrease_target)
+        if not decrease_element:
+            return
+        if points <= min_points:
+            self.deactivate_ui_element(decrease_target)
+        else:
+            self.activate_ui_element(decrease_target)
+
+        increase_element = self._find_ui_element(increase_target)
+        if not increase_element:
+            return
+        if points >= max_points:
+            self.deactivate_ui_element(increase_target)
+        else:
+            self.activate_ui_element(increase_target)
 
     def _update_player_color_ui(self) -> None:
         """Sync selected player color visibility and control active states."""
@@ -273,26 +341,74 @@ class InputManager(BaseManager):
             else:
                 element.hide()
 
-        increase_targets = ['player_color_index_increase', 'color_index_increase', 'player_choose_color_cycle']
-        decrease_targets = ['player_color_index_decrease', 'color_index_decrease', 'player_num_decrease', ' player_num_decrease']
+    def _update_player_num_ui(self) -> None:
+        """Sync player number display text and control active states."""
+        num = getattr(self.game_manager, 'players_num', 2)
+        self.buttons["setup"]["player_num"].update_text(f"{num}")
 
-        for target in decrease_targets:
-            element = self._find_ui_element(target)
-            if not element:
-                continue
-            if index > 0:
-                self.activate_ui_element(target)
-            else:
-                self.deactivate_ui_element(target)
+        decrease_target = 'player_num_decrease'
+        increase_target = 'player_num_increase'
 
-        for target in increase_targets:
-            element = self._find_ui_element(target)
-            if not element:
-                continue
-            if index < max_index:
-                self.activate_ui_element(target)
+        decrease_element = self._find_ui_element(decrease_target)
+        increase_element = self._find_ui_element(increase_target)
+
+        if decrease_element:
+            if num > 2:
+                self.activate_ui_element(decrease_target)
             else:
-                self.deactivate_ui_element(target)
+                self.deactivate_ui_element(decrease_target)
+
+        if increase_element:
+            if num < 4:
+                self.activate_ui_element(increase_target)
+            else:
+                self.deactivate_ui_element(increase_target)
+
+    def _update_diff_level_ui(self, target: str, other1: str, other2: str) -> None:
+        #if target is clicked, deactivate target and activate the other two
+        #change later to use a different state (e.g. mouse_button_down instead of deactivated)
+        target_element = self._find_ui_element(target)
+        other1_element = self._find_ui_element(other1)
+        other2_element = self._find_ui_element(other2)
+
+        if target_element and other1_element and other2_element:
+            target_element.deactivate()
+            other1_element.activate()
+            other2_element.activate()
+
+    def _update_robber_mode_ui(self, target: str, other: str) -> None:
+        # mutually exclusive buttons for robber mode
+        # consider switching to toggle for better UX
+        target_element = self._find_ui_element(target)
+        other_element = self._find_ui_element(other)
+
+        if target_element and other_element:
+            target_element.deactivate()
+            other_element.activate()
+
+    def _update_dice_mode_ui(self, target: str, other: str) -> None:
+        #mutually exclusive buttons for dice mode
+        #consider switching to toggle for better UX
+        target_element = self._find_ui_element(target)
+        other_element = self._find_ui_element(other)
+
+        if target_element and other_element:
+            target_element.deactivate()
+            other_element.activate()
+
+    def _update_turn_order_ui(self) -> None:
+        target_element: Button = self._find_ui_element("turn_order_text") # type: ignore
+        if target_element:
+            target_element.update_text(f"{self.game_manager.turn_order}")
+
+    def _update_time_limit_ui(self) -> None:
+        toggle_element: Toggle = self._find_ui_element("time_limit_toggle") # type: ignore
+        slider_element: Slider = self._find_ui_element("time_limit_slider") # type: ignore
+        if toggle_element and slider_element:
+            if toggle_element.on:
+                slider_element.activate()
+            else:
+                slider_element.deactivate()
 
     def deactivate_ui_element(self, target: str):
         element = self._find_ui_element(target)
@@ -543,29 +659,7 @@ class InputManager(BaseManager):
     def quit(self):
         """Signal the game to shut down by setting running flag to False."""
         self.game_manager.running = False
-
-    ## --- DEPENDENCY INJECTION (TODO: Replace with constructor injection) --- ##
-
-    def set_game_manager(self, game_manager: 'GameManager') -> None:
-        """Inject GameManager dependency. Used for circular dependency resolution."""
-        self.game_manager = game_manager
-
-    def set_graphics_manager(self, graphics_manager: 'GraphicsManager') -> None:
-        """Inject GraphicsManager dependency. Used for circular dependency resolution."""
-        self.graphics_manager = graphics_manager
-        
-    def set_helper_manager(self, helper_manager: 'HelperManager') -> None:
-        """Inject HelperManager dependency. Used for circular dependency resolution."""
-        self.helper_manager = helper_manager
-
-    def set_player_manager(self, player_manager: 'PlayerManager') -> None:
-        """Inject PlayerManager dependency. Used for circular dependency resolution."""
-        self.player_manager = player_manager 
-
-    def set_audio_manager(self, audio_manager: 'AudioManager') -> None:
-        """Inject AudioManager dependency. Used for circular dependency resolution."""
-        self.audio_manager = audio_manager
-    
+  
     ## --- UI ELEMENT INITIALIZATION --- ##
     
     def initialize_ui_elements(self) -> None:
@@ -584,6 +678,13 @@ class InputManager(BaseManager):
             if hasattr(player_num_slider, 'callback') and player_num_slider.callback:
                 player_num_slider.callback()
 
+        self._update_player_num_ui()
         self._update_player_color_ui()
+        self._update_points_to_win_ui()
+        self._update_robber_mode_ui('set_robber_mode_friendly', 'set_robber_mode_standard')
+        self._update_diff_level_ui('set_diff_level_easy', 'set_diff_level_medium', 'set_diff_level_hard')
+        self._update_dice_mode_ui('set_dice_mode_random', 'set_dice_mode_balanced')
+        self._update_turn_order_ui()
+        self._update_time_limit_ui()
 
         self.change_tab("input")  # Set the initial active tab

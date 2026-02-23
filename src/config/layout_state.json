@@ -93,7 +93,7 @@
     "setup": {
         "buttons": [
             {
-                "name": "difficulty_level_easy",
+                "name": "set_diff_level_easy",
                 "rect": [
                     164,
                     175,
@@ -123,7 +123,7 @@
                 "callback": "set_diff_level_easy"
             },
             {
-                "name": "difficulty_level_medium",
+                "name": "set_diff_level_medium",
                 "rect": [
                     250,
                     175,
@@ -153,7 +153,7 @@
                 "callback": "set_diff_level_medium"
             },
             {
-                "name": "difficulty_level_hard",
+                "name": "set_diff_level_hard",
                 "rect": [
                     336,
                     175,
@@ -225,7 +225,7 @@
                     100,
                     100
                 ],
-                "text": "r",
+                "text": ">",
                 "text_color": [
                     0,
                     0,
@@ -303,7 +303,7 @@
                 "callback": "set_game_state_home"
             },
             {
-                "name": " player_num_decrease",
+                "name": "player_num_decrease",
                 "rect": [
                     167,
                     328,
@@ -315,7 +315,7 @@
                     100,
                     100
                 ],
-                "text": "l",
+                "text": "<",
                 "text_color": [
                     0,
                     0,
@@ -461,7 +461,7 @@
                     100,
                     100
                 ],
-                "text": "l",
+                "text": "<",
                 "text_color": [
                     0,
                     0,
@@ -491,7 +491,7 @@
                     100,
                     100
                 ],
-                "text": "r",
+                "text": ">",
                 "text_color": [
                     0,
                     0,
@@ -538,7 +538,7 @@
                 "shown": true
             },
             {
-                "name": "new_button_99959",
+                "name": "points_to_win_decrease",
                 "rect": [
                     620,
                     507,
@@ -550,7 +550,7 @@
                     100,
                     100
                 ],
-                "text": "l",
+                "text": "<",
                 "text_color": [
                     0,
                     0,
@@ -564,10 +564,11 @@
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
-                "shown": true
+                "shown": true,
+                "callback": "points_to_win_decrease"
             },
             {
-                "name": "new_button_27876",
+                "name": "points_to_win_increase",
                 "rect": [
                     745,
                     507,
@@ -579,7 +580,7 @@
                     100,
                     100
                 ],
-                "text": "r",
+                "text": ">",
                 "text_color": [
                     0,
                     0,
@@ -593,10 +594,11 @@
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
-                "shown": true
+                "shown": true,
+                "callback": "points_to_win_increase"
             },
             {
-                "name": "new_button_48969",
+                "name": "points_to_win",
                 "rect": [
                     680,
                     506,
@@ -654,7 +656,7 @@
                 "shown": true
             },
             {
-                "name": "new_button_29687",
+                "name": "set_dice_mode_random",
                 "rect": [
                     618,
                     170,
@@ -680,10 +682,11 @@
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
-                "shown": true
+                "shown": true,
+                "callback": "set_dice_mode_random"
             },
             {
-                "name": "new_button_60630",
+                "name": "set_dice_mode_balanced",
                 "rect": [
                     735,
                     170,
@@ -709,7 +712,8 @@
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
-                "shown": true
+                "shown": true,
+                "callback": "set_dice_mode_balanced"
             },
             {
                 "name": "robber_mode_text",
@@ -741,7 +745,7 @@
                 "shown": true
             },
             {
-                "name": "new_button_29684",
+                "name": "set_robber_mode_friendly",
                 "rect": [
                     615,
                     326,
@@ -767,10 +771,11 @@
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
-                "shown": true
+                "shown": true,
+                "callback": "set_robber_mode_friendly"
             },
             {
-                "name": "new_button_41271",
+                "name": "set_robber_mode_standard",
                 "rect": [
                     731,
                     325,
@@ -796,97 +801,11 @@
                 "border_top_left_radius": -1,
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
-                "shown": true
+                "shown": true,
+                "callback": "set_robber_mode_standard"
             },
             {
                 "name": "turn_order_text",
-                "rect": [
-                    992,
-                    255,
-                    150,
-                    50
-                ],
-                "color": [
-                    150,
-                    150,
-                    10
-                ],
-                "text": "turn order",
-                "text_color": [
-                    0,
-                    0,
-                    0
-                ],
-                "padding": 5,
-                "text_align": "center",
-                "disabled": false,
-                "border_radius": 5,
-                "border_top_right_radius": -1,
-                "border_top_left_radius": -1,
-                "border_bottom_right_radius": -1,
-                "border_bottom_left_radius": -1,
-                "shown": true
-            },
-            {
-                "name": "new_button_54367",
-                "rect": [
-                    991,
-                    331,
-                    50,
-                    50
-                ],
-                "color": [
-                    100,
-                    100,
-                    100
-                ],
-                "text": "l",
-                "text_color": [
-                    0,
-                    0,
-                    0
-                ],
-                "padding": 5,
-                "text_align": "center",
-                "disabled": false,
-                "border_radius": 5,
-                "border_top_right_radius": -1,
-                "border_top_left_radius": -1,
-                "border_bottom_right_radius": -1,
-                "border_bottom_left_radius": -1,
-                "shown": true
-            },
-            {
-                "name": "new_button_69124",
-                "rect": [
-                    1126,
-                    330,
-                    50,
-                    50
-                ],
-                "color": [
-                    100,
-                    100,
-                    100
-                ],
-                "text": "r",
-                "text_color": [
-                    0,
-                    0,
-                    0
-                ],
-                "padding": 5,
-                "text_align": "center",
-                "disabled": false,
-                "border_radius": 5,
-                "border_top_right_radius": -1,
-                "border_top_left_radius": -1,
-                "border_bottom_right_radius": -1,
-                "border_bottom_left_radius": -1,
-                "shown": true
-            },
-            {
-                "name": "new_button_83627",
                 "rect": [
                     1057,
                     331,
@@ -913,6 +832,66 @@
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
                 "shown": true
+            },
+            {
+                "name": "turn_order_decrease",
+                "rect": [
+                    991,
+                    331,
+                    50,
+                    50
+                ],
+                "color": [
+                    100,
+                    100,
+                    100
+                ],
+                "text": "<",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": 5,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true,
+                "callback": "turn_order_decrease"
+            },
+            {
+                "name": "turn_order_increase",
+                "rect": [
+                    1126,
+                    330,
+                    50,
+                    50
+                ],
+                "color": [
+                    100,
+                    100,
+                    100
+                ],
+                "text": ">",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": 5,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true,
+                "callback": "turn_order_increase"
             },
             {
                 "name": "time_limit_text",
@@ -942,6 +921,35 @@
                 "border_bottom_right_radius": -1,
                 "border_bottom_left_radius": -1,
                 "shown": true
+            },
+            {
+                "name": "new_button_55504",
+                "rect": [
+                    990,
+                    262,
+                    150,
+                    50
+                ],
+                "color": [
+                    150,
+                    150,
+                    10
+                ],
+                "text": "turn order",
+                "text_color": [
+                    0,
+                    0,
+                    0
+                ],
+                "padding": 5,
+                "text_align": "center",
+                "disabled": false,
+                "border_radius": -1,
+                "border_top_right_radius": -1,
+                "border_top_left_radius": -1,
+                "border_bottom_right_radius": -1,
+                "border_bottom_left_radius": -1,
+                "shown": true
             }
         ],
         "images": [
@@ -959,7 +967,7 @@
                     10,
                     10
                 ],
-                "shown": false
+                "shown": true
             },
             {
                 "name": "player_color_green",
@@ -1007,12 +1015,12 @@
                     200,
                     10
                 ],
-                "shown": true
+                "shown": false
             }
         ],
         "sliders": [
             {
-                "name": "new_slider_87615",
+                "name": "time_limit_slider",
                 "rect": [
                     1044,
                     582,
@@ -1036,7 +1044,7 @@
         ],
         "toggles": [
             {
-                "name": "new_toggle_44676",
+                "name": "time_limit_toggle",
                 "rect": [
                     989,
                     512,
@@ -1057,7 +1065,8 @@
                     0
                 ],
                 "toggle_gap": 7,
-                "time_to_flip": 0.25
+                "time_to_flip": 0.25,
+                "callback": "time_limit_toggle"
             }
         ],
         "text_displays": [],

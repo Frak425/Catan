@@ -118,6 +118,7 @@ class GameManager(BaseManager):
         self.game_difficulty = "easy"
         self.points_to_win = 10
         self.num_tiles = 19
+        self.turn_order = 1
     
     def _init_ui_defaults(self) -> None:
         """Set default values for UI elements (sliders, toggles, etc.)."""

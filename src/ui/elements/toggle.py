@@ -81,6 +81,8 @@ class Toggle(UIElement):
         
         self.on = on
         self.animating = False
+        self._anim_from_on = self.on
+        self._anim_to_on = self.on
         if not self.on:
             self.toggle_center_location = (self.height // 2, self.height // 2) 
         else:
@@ -133,12 +135,16 @@ class Toggle(UIElement):
     ## --- ANIMATION --- ##
     
     def set_animating(self, time: int):
-        """Start animation with timestamp (only if not already animating)."""
+        """Start animation with timestamp and flip logical state immediately."""
         if not self.animating:
             self.animating = True
             self.time = time
             self.start_time = time
             self.end_time = time + int(self.time_to_flip * 1000)
+            self._anim_from_on = self.on
+            self._anim_to_on = not self.on
+            # Flip logical state immediately so callbacks can read the new value.
+            self.on = self._anim_to_on
     
     def update(self, new_time: int):
         """
@@ -161,12 +167,15 @@ class Toggle(UIElement):
         """
         if self.animating:
             if new_time >= self.end_time:
-                    self.animating = False
-                    self.on = not self.on
-                    return
+                self.animating = False
+                if self.on:
+                    self.toggle_center_location = (self.center_width + self.height // 2, self.height // 2)
+                else:
+                    self.toggle_center_location = (self.height // 2, self.height // 2)
+                return
             progress = (new_time - self.start_time) / (self.end_time - self.start_time)
             progress = tween.easeInOutCubic(progress)
-            if not self.on:
+            if not self._anim_from_on and self._anim_to_on:
                 self.toggle_center_location = (self.height // 2 + int((self.center_width) * progress), self.height // 2)
             else:
                 self.toggle_center_location = (self.center_width + self.height // 2 - int((self.center_width) * progress), self.height // 2)
