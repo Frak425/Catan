@@ -302,25 +302,3 @@ class KeyboardInputHandler:
             self.dev_mode_handler.add_letter_key(key)
             self.dev_mode_handler.add_number_key(key)
             self.dev_mode_handler.add_special_key(key)
-
-    ## --- MENU MANAGEMENT --- ##
-
-    def _close_menu(self) -> None:
-        """
-        Close the currently open menu (called from ESC handler).
-        
-        TODO: This is currently a stub. Menu closing is handled by InputManager directly.
-              This method may be deprecated and could be removed if InputManager handles
-              ESC key menu closing through a different path.
-        
-        Expected Implementation:
-        - Get top menu from InputManager.get_open_menus()
-        - Call InputManager.close_menu() or menu.close()
-        - Handle menu state cleanup
-        
-        Note: ESC handler checks for open menus and calls this, but actual closing
-              may happen elsewhere in the codebase.
-        """
-        # This will be delegated from input_manager
-        # We need access to the menu and buttons to properly close
-        pass

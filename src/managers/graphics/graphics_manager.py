@@ -27,7 +27,7 @@ class GraphicsManager(BaseManager):
 
         self.home_ui_draw_funcs = [lambda: self.draw_ui("images", "home"), lambda: self.draw_ui("text_displays", "home"), lambda: self.draw_ui("buttons", "home"), lambda: self.draw_ui("sliders", "home"), lambda: self.draw_ui("toggles", "home"), lambda: self.draw_ui("scrollable_areas", "home")]
         self.setup_ui_draw_funcs = [lambda: self.draw_ui("images", "setup"), lambda: self.draw_ui("text_displays", "setup"), lambda: self.draw_ui("buttons", "setup"), lambda: self.draw_ui("sliders", "setup"), lambda: self.draw_ui("toggles", "setup"), lambda: self.draw_ui("scrollable_areas", "setup")]
-        self.game_ui_draw_funcs = [lambda: self.draw_ui("images", "game"), lambda: self.draw_ui("text_displays", "game"), lambda: self.draw_ui("buttons", "game"), lambda: self.draw_ui("sliders", "game"), lambda: self.draw_ui("toggles", "game"), lambda: self.draw_ui("scrollable_areas", "game")]
+        self.game_ui_draw_funcs = [lambda: self.draw_ui("tiles", "game"), lambda: self.draw_ui("images", "game"), lambda: self.draw_ui("text_displays", "game"), lambda: self.draw_ui("buttons", "game"), lambda: self.draw_ui("sliders", "game"), lambda: self.draw_ui("toggles", "game"), lambda: self.draw_ui("scrollable_areas", "game")]
 
     def set_ui_by_type(self):
         self.ui_by_type = {
@@ -36,7 +36,8 @@ class GraphicsManager(BaseManager):
             "text_displays": self.input_manager.text_displays,
             "sliders": self.input_manager.sliders,
             "toggles": self.input_manager.toggles,
-            "scrollable_areas": self.input_manager.scrollable_areas
+            "scrollable_areas": self.input_manager.scrollable_areas,
+            "tiles": self.input_manager.tiles
         }
 
     def draw_screen(self):
@@ -55,12 +56,10 @@ class GraphicsManager(BaseManager):
                 func()
 
         elif (self.game_manager.game_state == "init"):
-            self.game_manager.init_board()
-            self.game_manager.game_state = "game"
+            for func in self.game_ui_draw_funcs:
+                func()
 
         elif (self.game_manager.game_state == "game"):
-            self.game_manager.board.draw_board()
-
             for func in self.game_ui_draw_funcs:
                 func()
 

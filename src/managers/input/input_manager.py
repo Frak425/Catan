@@ -106,6 +106,7 @@ class InputManager(BaseManager):
         self.images = self.ui_factory.create_all_images(callbacks, animations, drivers)
         self.text_displays = self.ui_factory.create_all_text_displays(callbacks, animations, drivers)
         self.scrollable_areas = self.ui_factory.create_all_scrollable_areas(callbacks, animations, drivers)
+        self.tiles = self.ui_factory.create_all_tiles(callbacks, animations, drivers)
         self.menus = self.ui_factory.create_all_menus(
             self.buttons,
             self.toggles,

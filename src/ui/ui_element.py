@@ -858,6 +858,7 @@ class UIElement(ABC):
                                   self.guiding_line_color[1], 
                                   self.guiding_line_color[2]],
             "active": self.active,
+            "shown": self.shown
         }
         
         # Serialize children by name (if they have names)

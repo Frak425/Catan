@@ -582,7 +582,7 @@ class ScrollableArea(UIElement):
             "slider_side": self.slider_side,
             "slider_handle_inset": self.slider_handle_inset,
             "content_width_percentage": self.content_width_percentage,
-            "shown": self.shown
+            
         })
         
         # Serialize content_elements (child UI elements)

@@ -260,7 +260,6 @@ class Button(UIElement):
             "color": [self.color[0], self.color[1], self.color[2]],
             "text_align": self.text_align,
             "text": self.text,
-            "shown": self.shown,
             "padding": self.padding,
             "disabled": self.disabled,
             "text_color": [self.text_color[0], self.text_color[1], self.text_color[2]],

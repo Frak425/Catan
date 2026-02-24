@@ -273,7 +273,7 @@ class DevModeHandler:
         print(f"Dev Mode Command: {text}")
         
         # Commands that don't require an active element
-        if text.startswith("add"):
+        if text.startswith("add "):
             self._handle_add_element(text)
             return
         elif text == "overridel":
@@ -820,7 +820,7 @@ class DevModeHandler:
         - If active element is Menu/ScrollableArea: Add as child
         """
         import time
-        element_type = text[3:]
+        element_type = text[4:]
         timestamp = int(time.time() * 1000) % 100000
 
         elements_by_type = self._get_elements_by_type()

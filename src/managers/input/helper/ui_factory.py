@@ -1,6 +1,8 @@
 import pygame
 from typing import Dict, TYPE_CHECKING
 
+from src.ui.elements.tile import Tile
+
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
     from input_manager import InputManager
@@ -395,6 +397,32 @@ class UIFactory:
             return image
         
         return self._create_elements_from_layout('images', image_factory, callbacks)
+
+    def create_all_tiles(self, callbacks, animations: dict, drivers: dict) -> Dict[str, Dict]:
+        """
+        Create all tile elements dynamically from layout config.
+        
+        Args:
+            callbacks: Dict of callback functions from InputManager
+        
+        Returns:
+            Dict[str, Dict]: Tile instances organized by state and tab
+        
+        Tile Configuration:
+        - color: RGB color of the tile (default: white)
+        - callback: Optional function called when tile is clicked (for interactive tiles)
+        """
+        def tile_factory(props, cbs, state, tab):
+            callback = self._resolve_callback(props)
+            tile = Tile(self.game_manager, props, callback=callback)
+            
+            # Attach sprite animation and drivers
+            self._attach_sprite_animation(tile, props, animations)
+            self._attach_drivers(tile, props, drivers)
+            
+            return tile
+        
+        return self._create_elements_from_layout('tiles', tile_factory, callbacks)
 
     def create_all_text_displays(self, callbacks, animations: dict, drivers: dict) -> Dict[str, Dict]:
         """

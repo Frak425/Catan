@@ -9,7 +9,6 @@ from src.ui.elements.image import Image
 from src.ui.elements.slider import Slider
 from src.ui.elements.text_display import TextDisplay
 from src.ui.elements.toggle import Toggle
-from src.entities.board import Board
 from src.ui.elements.menu import Menu
 from src.managers.input.input_manager import InputManager
 from src.managers.helper.helper_manager import HelperManager
@@ -77,9 +76,6 @@ class GameManager(BaseManager):
         
         # Development/debug flags
         self._init_debug_settings()
-        
-        # Initialize game board with players
-        self.board = self.init_board()
     
     def _init_config_paths(self) -> None:
         """Set up paths to configuration files for layout and settings."""
@@ -146,36 +142,6 @@ class GameManager(BaseManager):
         self.dev_mode_typing = False
         self.dev_mode_text = ""
         self.debugging = False
-
-    def init_board(self) -> Board:
-        """
-        Create and initialize the game board with tiles and players.
-        
-        Creates Player objects based on players_num, then initializes the Board
-        with proper sizing, tile placement, and resource assignment.
-        
-        Returns:
-            Board: Initialized game board ready for play
-        """
-
-        # Calculate board sizing (screen_w / 27.32 determines tile size)
-        global board
-        board = Board(
-            self.screen_w / 27.32,  # Tile size based on screen width
-            self.screen_h, 
-            self.screen_w, 
-            self.num_tiles, 
-            self.screen, 
-            self.game_font, 
-            self.font_size
-        )
-        
-        # Set up board layout and assign resources
-        board.assign_tile_locations()
-        board.assign_tiles()
-        board.assign_tile_classes()
-        
-        return board
 
     ## --- LAYOUT/SETTINGS GENERATION --- ##
     
@@ -326,44 +292,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing button properties (name, rect, color, etc.)
         """
-        layout_object_list = []
-        for button_name, button in buttons.items():
-            layout_object = {
-                "name": button.name,
-                "rect": [button.rect[0], button.rect[1], button.rect[2], button.rect[3]],
-                "color": [button.color[0], button.color[1], button.color[2]],
-                "text": button.text,
-                "text_color": [button.text_color[0], button.text_color[1], button.text_color[2]],
-                "padding": button.padding,
-                "text_align": button.text_align,
-                "disabled": button.disabled,
-                "border_radius": button.border_radius,
-                "border_top_right_radius": button.border_top_right_radius,
-                "border_top_left_radius": button.border_top_left_radius,
-                "border_bottom_right_radius": button.border_bottom_right_radius,
-                "border_bottom_left_radius": button.border_bottom_left_radius,
-                "shown": button.shown
-            }
-            # Store callback name if it exists (for config-driven loading)
-            if hasattr(button, 'callback') and button.callback:
-                # Do reverse lookup in callback registry to find the name
-                callback_name = None
-                if hasattr(self.input_manager, 'ui_factory') and hasattr(self.input_manager.ui_factory, 'callback_registry'):
-                    for name, func in self.input_manager.ui_factory.callback_registry.items():
-                        if func == button.callback:
-                            callback_name = name
-                            break
-                
-                # Fallback to __name__ if reverse lookup fails (but skip if it's "<lambda>")
-                if not callback_name:
-                    callback_name = getattr(button.callback, '__name__', None)
-                    if callback_name == "<lambda>":
-                        callback_name = None
-                
-                if callback_name:
-                    layout_object["callback"] = callback_name
-            layout_object_list.append(layout_object)
-        return layout_object_list
+        return [button.get_layout() for button in buttons.values()]
 
     def convert_images_to_list(self, images: dict[str, Image]) -> list:
         """
@@ -375,35 +304,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing image properties (name, rect, file_path)
         """
-        layout_object_list = []
-        for image_name, image in images.items():
-            layout_object = {
-                "name": image.name,
-                "rect": [image.rect[0], image.rect[1], image.rect[2], image.rect[3]],
-                "image_path": image.image_path,
-                "default_color": [image.default_color[0], image.default_color[1], image.default_color[2]],
-                "shown": image.shown,
-            }
-
-            # Store callback name if it exists
-            if hasattr(image, 'callback') and image.callback:
-                callback_name = None
-                if hasattr(self.input_manager, 'ui_factory') and hasattr(self.input_manager.ui_factory, 'callback_registry'):
-                    for name, func in self.input_manager.ui_factory.callback_registry.items():
-                        if func == image.callback:
-                            callback_name = name
-                            break
-
-                if not callback_name:
-                    callback_name = getattr(image.callback, '__name__', None)
-                    if callback_name == "<lambda>":
-                        callback_name = None
-
-                if callback_name:
-                    layout_object["callback"] = callback_name
-
-            layout_object_list.append(layout_object)
-        return layout_object_list
+        return [image.get_layout() for image in images.values()]
 
     def convert_sliders_to_list(self, sliders: dict[str, Slider]) -> list:
         """
@@ -415,33 +316,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing slider properties (name, rect, min/max values, colors)
         """
-        layout_object_list = []
-        for slider_name, slider in sliders.items():
-            layout_object = {
-                "name": slider.name,
-                "rect": [slider.rect[0], slider.rect[1], slider.rect[2], slider.rect[3]],
-                "min_value": slider.min_value,
-                "max_value": slider.max_value,
-                "color": [slider.color[0], slider.color[1], slider.color[2]],
-                "handle_color": [slider.handle_color[0], slider.handle_color[1], slider.handle_color[2]],
-                "handle_radius": slider.handle_radius
-            }
-            # Store callback name if it exists
-            if hasattr(slider, 'callback') and slider.callback:
-                callback_name = None
-                if hasattr(self.input_manager, 'ui_factory') and hasattr(self.input_manager.ui_factory, 'callback_registry'):
-                    for name, func in self.input_manager.ui_factory.callback_registry.items():
-                        if func == slider.callback:
-                            callback_name = name
-                            break
-                if not callback_name:
-                    callback_name = getattr(slider.callback, '__name__', None)
-                    if callback_name == "<lambda>":
-                        callback_name = None
-                if callback_name:
-                    layout_object["callback"] = callback_name
-            layout_object_list.append(layout_object)
-        return layout_object_list
+        return [slider.get_layout() for slider in sliders.values()]
 
     def convert_toggles_to_list(self, toggles: dict[str, Toggle]) -> list:
         """
@@ -453,35 +328,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing toggle properties (name, rect, animation settings)
         """
-        layout_object_list = []
-        for toggle_name, toggle in toggles.items():
-            layout_object = {
-                "name": toggle.name,
-                "rect": [toggle.rect[0], toggle.rect[1], toggle.rect[2], toggle.rect[3]],
-                "guiding_lines": toggle.guiding_lines,
-                "height": toggle.height,
-                "center_width": toggle.center_width,
-                "color": [toggle.color[0], toggle.color[1], toggle.color[2]],
-                "handle_color": [toggle.handle_color[0], toggle.handle_color[1], toggle.handle_color[2]],
-                "toggle_gap": toggle.toggle_gap,
-                "time_to_flip": toggle.time_to_flip
-            }
-            # Store callback name if it exists
-            if hasattr(toggle, 'callback') and toggle.callback:
-                callback_name = None
-                if hasattr(self.input_manager, 'ui_factory') and hasattr(self.input_manager.ui_factory, 'callback_registry'):
-                    for name, func in self.input_manager.ui_factory.callback_registry.items():
-                        if func == toggle.callback:
-                            callback_name = name
-                            break
-                if not callback_name:
-                    callback_name = getattr(toggle.callback, '__name__', None)
-                    if callback_name == "<lambda>":
-                        callback_name = None
-                if callback_name:
-                    layout_object["callback"] = callback_name
-            layout_object_list.append(layout_object)
-        return layout_object_list
+        return [toggle.get_layout() for toggle in toggles.values()]
 
     def convert_text_displays_to_list(self, text_displays: dict[str, TextDisplay]) -> list:
         """
@@ -493,28 +340,14 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing text display properties (name, rect, text, colors)
         """
-        layout_object_list = []
-        for text_display_name, text_display in text_displays.items():
-            layout_object = {
-                "name": text_display.name,
-                "rect": [text_display.rect[0], text_display.rect[1], text_display.rect[2], text_display.rect[3]],
-                "color": [text_display.color[0], text_display.color[1], text_display.color[2]],
-                "text": text_display.text,
-                "text_color": [text_display.text_color[0], text_display.text_color[1], text_display.text_color[2]],
-                "padding": text_display.padding
-            }
-            layout_object_list.append(layout_object)
-        return layout_object_list
+        return [text_display.get_layout() for text_display in text_displays.values()]
 
     def convert_scrollable_areas_to_list(self, scrollable_areas: dict) -> list:
         """Convert scrollable area dictionary to list format for JSON serialization."""
-        from src.ui.elements.scrollable_area import ScrollableArea
-        layout_object_list = []
-        for area_name, area in scrollable_areas.items():
-            if isinstance(area, ScrollableArea):
-                layout_object = area.get_layout()
-                layout_object_list.append(layout_object)
-        return layout_object_list
+        return [area.get_layout() for area in scrollable_areas.values()]
+
+    def convert_tiles_to_list(self, tiles: dict) -> list:
+        return [tile.get_layout() for tile in tiles.values()]
 
     #TODO: Implement after creating TextInput and MultiSelect classes
     def convert_text_inputs_to_list(self, text_inputs: list) -> list:

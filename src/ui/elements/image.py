@@ -128,7 +128,7 @@ class Image(UIElement):
             "_type": "Image",
             "image_path": self.image_path,
             "default_color": [self.default_color[0], self.default_color[1], self.default_color[2]],
-            "shown": self.shown
+            
         })
         return layout
     

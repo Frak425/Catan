@@ -265,7 +265,7 @@ class Toggle(UIElement):
             "handle_color": [self.handle_color[0], self.handle_color[1], self.handle_color[2]],
             "toggle_gap": self.toggle_gap,
             "time_to_flip": self.time_to_flip,
-            "shown": self.shown
+            
         })
         return layout
     

@@ -170,7 +170,6 @@ class TextDisplay(UIElement):
             "text_color": [self.text_color[0], self.text_color[1], self.text_color[2]],
             "padding": self.padding,
             "text_align": self.text_align,
-            "shown": self.shown,
             "border_radius": self.border_radius,
             "border_top_right_radius": self.border_top_right_radius,
             "border_top_left_radius": self.border_top_left_radius,
