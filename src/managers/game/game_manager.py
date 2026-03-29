@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 import pygame
+from typing import Any
 
 from src.managers.base_manager import BaseManager
 from src.managers.animation.animation_manager import AnimationManager
@@ -115,6 +116,103 @@ class GameManager(BaseManager):
         self.points_to_win = 10
         self.num_tiles = 19
         self.turn_order = 1
+
+    def _selected_choice_from_setup_buttons(self, choices: dict[str, str], default: str) -> str:
+        """
+        Resolve the selected value from setup-page mutually exclusive buttons.
+
+        Current setup UI convention marks the selected option as deactivated
+        (`button.active == False`) while non-selected options stay active.
+
+        Args:
+            choices: Mapping of setup button names to semantic values.
+            default: Fallback value if setup buttons are unavailable/ambiguous.
+
+        Returns:
+            str: Selected semantic value.
+        """
+        setup_buttons = getattr(getattr(self, "input_manager", None), "buttons", {}).get("setup", {})
+
+        if not isinstance(setup_buttons, dict):
+            return default
+
+        selected_values = []
+        for button_name, value in choices.items():
+            button = setup_buttons.get(button_name)
+            if button is not None and hasattr(button, "active") and button.active is False:
+                selected_values.append(value)
+
+        if len(selected_values) == 1:
+            return selected_values[0]
+
+        return default
+
+    def collect_setup_game_settings(self) -> dict[str, Any]:
+        """
+        Collect current setup-page selections and return new game settings.
+
+        Data sources:
+        - Setup buttons/toggles/sliders in `input_manager`
+        - Existing `game_manager` state as fallback/default values
+
+        Returns:
+            dict[str, Any]: New game settings snapshot.
+        """
+        setup_toggles = getattr(getattr(self, "input_manager", None), "toggles", {}).get("setup", {})
+        setup_sliders = getattr(getattr(self, "input_manager", None), "sliders", {}).get("setup", {})
+
+        difficulty = self._selected_choice_from_setup_buttons(
+            {
+                "set_diff_level_easy": "easy",
+                "set_diff_level_medium": "medium",
+                "set_diff_level_hard": "hard",
+            },
+            default=self.game_difficulty,
+        )
+
+        robber_mode = self._selected_choice_from_setup_buttons(
+            {
+                "set_robber_mode_friendly": "friendly",
+                "set_robber_mode_standard": "standard",
+            },
+            default="friendly",
+        )
+
+        dice_mode = self._selected_choice_from_setup_buttons(
+            {
+                "set_dice_mode_random": "random",
+                "set_dice_mode_balanced": "balanced",
+            },
+            default="random",
+        )
+
+        time_limit_toggle = setup_toggles.get("time_limit_toggle") if isinstance(setup_toggles, dict) else None
+        time_limit_slider = setup_sliders.get("time_limit_slider") if isinstance(setup_sliders, dict) else None
+
+        time_limit_enabled = bool(getattr(time_limit_toggle, "on", False))
+        time_limit_value = None
+        if time_limit_enabled and time_limit_slider is not None:
+            time_limit_value = int(round(getattr(time_limit_slider, "value", 0)))
+
+        player_colors = list(getattr(self, "player_colors", []))
+        selected_color = None
+        if player_colors:
+            selected_color = player_colors[self.player_color_chosen_index % len(player_colors)]
+
+        settings = {
+            "players_num": int(self.players_num),
+            "player_color": selected_color,
+            "player_color_index": int(self.player_color_chosen_index),
+            "difficulty": difficulty,
+            "points_to_win": int(self.points_to_win),
+            "dice_mode": dice_mode,
+            "robber_mode": robber_mode,
+            "turn_order": int(self.turn_order),
+            "time_limit_enabled": time_limit_enabled,
+            "time_limit_seconds": time_limit_value,
+        }
+
+        return settings
     
     def _init_ui_defaults(self) -> None:
         """Set default values for UI elements (sliders, toggles, etc.)."""

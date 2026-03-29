@@ -377,6 +377,11 @@ class MouseInputHandler:
 
     def _apply_click_selection(self, button_clicked, toggle_clicked, slider_clicked, text_display_clicked, image_clicked, scrollable_area_clicked, menu_clicked) -> None:
         """Apply click candidates to active selection using existing priority order."""
+        # Always reset active selection for a new click.
+        # If no element is clicked this keeps active as None, preventing stale
+        # callbacks from previously active elements (e.g., toggles).
+        self.active = None
+
         if menu_clicked:
             self.active = menu_clicked
         if button_clicked:

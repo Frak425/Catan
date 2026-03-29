@@ -12,6 +12,24 @@ from src.managers.input.input_manager import InputManager
 from src.managers.player.player_manager import PlayerManager
 from src.managers.animation.driver_manager import DriverManager
 
+"""
+Thinking about the game logic order
+-Setup:
+    -First player is randomly selected
+    -Players place 1 settlement/road clockwise
+    -Players place 1 settlement/road counter-clockwise (reverse order)
+    -Collect starting resources for second settlement
+-Game:
+    -Roll dice
+    -Collect resources
+    -Trade (with bank or other players)
+    -Build (roads, settlements, cities)
+    -Play development cards
+    -End turn
+-End:
+    -At any point during game, check for VP and if at or above, go to finish screen
+"""
+
 #initialize game
 pygame.init()
 #set resolution

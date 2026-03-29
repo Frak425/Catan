@@ -481,7 +481,13 @@ class InputManager(BaseManager):
         pass
 
     def start_game(self):
-        """Transition from setup screen to game initialization."""
+        """Collect setup choices, initialize players, and transition to game initialization."""
+        setup_settings = self.game_manager.collect_setup_game_settings()
+
+        # Initialize player roster and persist setup snapshot for the upcoming game.
+        if hasattr(self.player_manager, 'begin_new_game'):
+            self.player_manager.begin_new_game(setup_settings)
+
         self.game_manager.game_state = "init"
 
     ## --- MENU MANAGEMENT --- ##
