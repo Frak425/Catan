@@ -13,7 +13,7 @@ class GraphicsManager(BaseManager):
     def __init__(self):
         super().__init__()
         
-    def initialize(self) -> None:
+    def import_dependencies(self) -> None:
         """Initialize manager after all dependencies are injected."""
         self.game_manager = self.get_dependency('game_manager')
         self.helper_manager = self.get_dependency('helper_manager')
@@ -28,17 +28,6 @@ class GraphicsManager(BaseManager):
         self.home_ui_draw_funcs = [lambda: self.draw_ui("images", "home"), lambda: self.draw_ui("text_displays", "home"), lambda: self.draw_ui("buttons", "home"), lambda: self.draw_ui("sliders", "home"), lambda: self.draw_ui("toggles", "home"), lambda: self.draw_ui("scrollable_areas", "home")]
         self.setup_ui_draw_funcs = [lambda: self.draw_ui("images", "setup"), lambda: self.draw_ui("text_displays", "setup"), lambda: self.draw_ui("buttons", "setup"), lambda: self.draw_ui("sliders", "setup"), lambda: self.draw_ui("toggles", "setup"), lambda: self.draw_ui("scrollable_areas", "setup")]
         self.game_ui_draw_funcs = [lambda: self.draw_ui("tiles", "game"), lambda: self.draw_ui("images", "game"), lambda: self.draw_ui("text_displays", "game"), lambda: self.draw_ui("buttons", "game"), lambda: self.draw_ui("sliders", "game"), lambda: self.draw_ui("toggles", "game"), lambda: self.draw_ui("scrollable_areas", "game")]
-
-    def set_ui_by_type(self):
-        self.ui_by_type = {
-            "buttons": self.input_manager.buttons,
-            "images": self.input_manager.images,
-            "text_displays": self.input_manager.text_displays,
-            "sliders": self.input_manager.sliders,
-            "toggles": self.input_manager.toggles,
-            "scrollable_areas": self.input_manager.scrollable_areas,
-            "tiles": self.input_manager.tiles
-        }
 
     def draw_screen(self):
         assert self.game_manager is not None, "GraphicsManager: game_manager not set"
@@ -85,5 +74,5 @@ class GraphicsManager(BaseManager):
             menu.draw(self.game_manager.screen, self.time)
 
     def draw_ui(self, type: str, layer: str):
-        for element_name, element in self.ui_by_type[type][layer].items():
+        for element_name, element in self.input_manager.ui_by_type[type][layer].items():
             element.draw(self.game_manager.screen, self.time)

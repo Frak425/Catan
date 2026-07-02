@@ -15,7 +15,7 @@ class BaseManager(ABC):
         return self._dependencies.get(name)
     
     @abstractmethod
-    def initialize(self) -> None:
+    def import_dependencies(self) -> None:
         """Initialize manager after all dependencies are injected."""
         pass
     

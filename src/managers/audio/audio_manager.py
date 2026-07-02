@@ -15,7 +15,7 @@ class AudioManager(BaseManager):
     def __init__(self):
         super().__init__()
         
-    def initialize(self) -> None:
+    def import_dependencies(self) -> None:
         """Initialize manager after all dependencies are injected."""
         self.game_manager = self.get_dependency('game_manager')
         self.input_manager = self.get_dependency('input_manager')

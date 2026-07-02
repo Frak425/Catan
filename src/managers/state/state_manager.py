@@ -7,7 +7,7 @@ class StateManager(BaseManager):
         super().__init__()
         self.state = None
 
-    def initialize(self) -> None:
+    def import_dependencies(self) -> None:
         """Initialize manager after all dependencies are injected."""
         self.game_manager = self.get_dependency('game_manager')
         self.input_manager = self.get_dependency('input_manager')

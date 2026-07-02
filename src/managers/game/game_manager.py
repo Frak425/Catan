@@ -32,7 +32,7 @@ class GameManager(BaseManager):
     def __init__(self):
         super().__init__()
         
-    def initialize(self, screen: pygame.Surface) -> None:
+    def import_dependencies(self, screen: pygame.Surface) -> None:
         """
         Initialize the game manager with essential game state and configuration.
         

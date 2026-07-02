@@ -7,7 +7,7 @@ class HelperManager(BaseManager):
     def __init__(self):
         super().__init__()
         
-    def initialize(self) -> None:
+    def import_dependencies(self) -> None:
         """Initialize manager after all dependencies are injected."""
         pass
         

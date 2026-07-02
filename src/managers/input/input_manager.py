@@ -45,7 +45,7 @@ class InputManager(BaseManager):
     def __init__(self):
         super().__init__()
         
-    def initialize(self) -> None:
+    def import_dependencies(self) -> None:
         """Initialize manager after all dependencies are injected."""
         self.game_manager: GameManager = self.get_dependency('game_manager')
         self.graphics_manager: GraphicsManager = self.get_dependency('graphics_manager')
@@ -116,7 +116,7 @@ class InputManager(BaseManager):
         )
         
         # Update graphics_manager's UI references for rendering
-        self.graphics_manager.set_ui_by_type()
+        self.set_ui_by_type()
         
         # Update mouse_handler with new UI elements (if it exists)
         if hasattr(self, 'mouse_handler'):
@@ -127,8 +127,8 @@ class InputManager(BaseManager):
             )
         
         # Update graphics_manager's UI type dictionary (if it exists)
-        if hasattr(self, 'graphics_manager') and hasattr(self.graphics_manager, 'ui_by_type'):
-            self.graphics_manager.ui_by_type = {
+        if hasattr(self.graphics_manager, 'ui_by_type'):
+            self.ui_by_type = {
                 "buttons": self.buttons,
                 "images": self.images,
                 "text_displays": self.text_displays,
@@ -139,6 +139,17 @@ class InputManager(BaseManager):
         
         # Perform post-creation initialization for special UI elements
         self.initialize_ui_elements()
+
+    def set_ui_by_type(self):
+        self.ui_by_type = {
+            "buttons": self.buttons,
+            "images": self.images,
+            "text_displays": self.text_displays,
+            "sliders": self.sliders,
+            "toggles": self.toggles,
+            "scrollable_areas": self.scrollable_areas,
+            "tiles": self.tiles
+        }
 
     ## --- INPUT DELEGATION --- ##
 

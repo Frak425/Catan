@@ -30,7 +30,7 @@ class AnimationManager(BaseManager):
         super().__init__()
         self.animations = {}
         
-    def initialize(self) -> None:
+    def import_dependencies(self) -> None:
         """Initialize manager after all dependencies are injected."""
         self.create_sprite_animations()
 

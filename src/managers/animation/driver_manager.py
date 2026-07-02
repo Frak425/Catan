@@ -25,7 +25,7 @@ class DriverManager(BaseManager):
         # Cached UI element registry; built on first use.
         self._element_registry: dict[str, UIElement] = {}
         
-    def initialize(self) -> None:
+    def import_dependencies(self) -> None:
         """Initialize manager after all dependencies are injected."""
         self.input_manager = self.get_dependency('input_manager')
         self.audio_manager = self.get_dependency('audio_manager')
