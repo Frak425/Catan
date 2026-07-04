@@ -77,6 +77,9 @@ class Toggle(UIElement):
         
         # read layout and override default values
         self.read_layout(layout_props)
+
+        for name, value in vars(self.layout).items():
+            setattr(self, name, value)
         
         #Animation properties
         self.start_time = time
@@ -241,7 +244,7 @@ class Toggle(UIElement):
         self._read_common_layout(layout_props)
 
         field_names = {f.name for f in fields(ToggleInfo)}
-        self.layout_props = ToggleInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        self.layout = ToggleInfo(**{k: v for k, v in layout_props.items() if k in field_names})
 
         # Recalculate dependent properties
         self.radius = self.height / 2

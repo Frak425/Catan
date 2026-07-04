@@ -2,23 +2,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from src.managers.dataclasses import PlayerConfig
-
 
 @dataclass
 class Player:
     """Represents a single player and their core game state."""
 
-    player_id: int
-    player_config: PlayerConfig
-    resources: dict[str, int] = field(default_factory=dict)
-    victory_points: int = 0
-    roads_built: int = 0
-    settlements_built: int = 0
-    cities_built: int = 0
-    development_cards: int = 0
+    def __init__(self, player_id: int, player_config: PlayerInfo):
+        field_names = {f.name for f in fields(PlayerInfo)}
+        self.layout = PlayerInfo(**{k: v for k, v in layout.items() if k in field_names})
 
     def __post_init__(self) -> None:
+        #TODO: Does this need to be here?
         default_resources = {
             "wood": 0,
             "brick": 0,

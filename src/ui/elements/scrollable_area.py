@@ -104,6 +104,9 @@ class ScrollableArea(UIElement):
 
         self.read_layout(layout_props)
 
+        for name, value in vars(self.layout).items():
+            setattr(self, name, value)
+
     ## --- CHILD ELEMENT MANAGEMENT --- ##
 
     def add_element(self, element: UIElement) -> None:
@@ -526,7 +529,7 @@ class ScrollableArea(UIElement):
         self._read_common_layout(layout_props)
 
         field_names = {f.name for f in fields(ScrollableAreaInfo)}
-        self.layout_props = ScrollableAreaInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        self.layout = ScrollableAreaInfo(**{k: v for k, v in layout_props.items() if k in field_names})
         
         # Store pending content elements for deferred loading
         # (elements must be created separately before being added)

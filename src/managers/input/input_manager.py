@@ -253,15 +253,15 @@ class InputManager(BaseManager):
     
     def player_num_increase(self):
         """Increment number of players (max 4)."""
-        if (self.game_manager.players_num < 4):
-            self.game_manager.players_num += 1
+        if (self.game_manager.num_players < 4):
+            self.game_manager.num_players += 1
 
             self._update_player_num_ui()
 
     def player_num_decrease(self):
         """Decrement number of players (min 2)."""
-        if (self.game_manager.players_num > 2):
-            self.game_manager.players_num -= 1
+        if (self.game_manager.num_players > 2):
+            self.game_manager.num_players -= 1
 
             self._update_player_num_ui()
     
@@ -272,7 +272,7 @@ class InputManager(BaseManager):
         Args:
             num: Number of players (2-4)
         """
-        self.game_manager.players_num = num
+        self.game_manager.num_players = num
         self.text_displays["setup"]["player_num_text"].update_text(f"Number of Players: {num}")
 
     def player_color_index_increase(self):
@@ -359,7 +359,7 @@ class InputManager(BaseManager):
 
     def _update_player_num_ui(self) -> None:
         """Sync player number display text and control active states."""
-        num = getattr(self.game_manager, 'players_num', 2)
+        num = getattr(self.game_manager, 'num_players', 2)
         self.buttons["setup"]["player_num"].update_text(f"{num}")
 
         decrease_target = 'player_num_decrease'
@@ -502,7 +502,7 @@ class InputManager(BaseManager):
         #TODO: add collecting colors and players, random names from ai/player class?
         #TODO: currently no accounts, so name is randomized
         #temp
-        names = self.player_manager.create_random_names(setup_settings.players_num)
+        names = self.player_manager.create_random_names(setup_settings.num_players)
         colors = self.player_manager.get_available_colors(setup_settings.player_color)
 
         if len(names) != len(colors):

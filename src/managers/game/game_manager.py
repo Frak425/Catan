@@ -109,7 +109,7 @@ class GameManager(BaseManager):
     
     def _init_player_settings(self) -> None:
         """Set up default player configuration and game rules."""
-        self.players_num = 2
+        self.num_players = 2
         self.players_list = []
         self.players_list_index = 0
         self.player_colors = ["red", "green", "blue", "yellow"]
@@ -164,52 +164,19 @@ class GameManager(BaseManager):
         setup_toggles = getattr(getattr(self, "input_manager", None), "toggles", {}).get("setup", {})
         setup_sliders = getattr(getattr(self, "input_manager", None), "sliders", {}).get("setup", {})
 
-        difficulty = self._selected_choice_from_setup_buttons(
-            {
-                "set_diff_level_easy": "easy",
-                "set_diff_level_medium": "medium",
-                "set_diff_level_hard": "hard",
-            },
-            default=self.game_difficulty,
-        )
-
-        robber_mode = self._selected_choice_from_setup_buttons(
-            {
-                "set_robber_mode_friendly": "friendly",
-                "set_robber_mode_standard": "standard",
-            },
-            default="friendly",
-        )
-
-        dice_mode = self._selected_choice_from_setup_buttons(
-            {
-                "set_dice_mode_random": "random",
-                "set_dice_mode_balanced": "balanced",
-            },
-            default="random",
-        )
-
         time_limit_toggle = setup_toggles.get("time_limit_toggle") if isinstance(setup_toggles, dict) else None
         time_limit_slider = setup_sliders.get("time_limit_slider") if isinstance(setup_sliders, dict) else None
 
-        time_limit_enabled = bool(getattr(time_limit_toggle, "on", False))
-
-        time_limit_value = None
-        time_limit_value = int(round(getattr(time_limit_slider, "value", 0)))
-
-        if self.player_colors:
-            selected_color= self.player_colors[self.player_color_chosen_index % len(self.player_colors)]
-
         settings = GameConfig(
-            players_num=int(self.players_num),
-            player_color=selected_color,
-            difficulty=difficulty,
-            points_to_win=int(self.points_to_win),
-            dice_mode=dice_mode,
-            robber_mode=robber_mode,
-            turn_order=int(self.turn_order),
-            time_limit_enabled=time_limit_enabled,
-            time_limit_seconds=time_limit_value,
+            num_players= self.num_players,
+            player_color= self.player_colors[self.player_color_chosen_index % len(self.player_colors)],
+            difficulty= self._selected_choice_from_setup_buttons({"set_diff_level_easy": "easy", "set_diff_level_medium": "medium", "set_diff_level_hard": "hard",}, default=self.game_difficulty),
+            points_to_win= int(self.points_to_win),
+            dice_mode= self._selected_choice_from_setup_buttons({"set_dice_mode_random": "random", "set_dice_mode_balanced": "balanced",}, default="random"),
+            robber_mode= self._selected_choice_from_setup_buttons({"set_robber_mode_friendly": "friendly", "set_robber_mode_standard": "standard",}, default="friendly"),
+            turn_order= int(self.turn_order),
+            time_limit_enabled= bool(getattr(time_limit_toggle, "on", False))
+            time_limit_seconds= int(round(getattr(time_limit_slider, "value", 0)))
         )
 
         return settings
@@ -580,3 +547,14 @@ class GameManager(BaseManager):
 
         self.input_manager.reset_ui()
 
+@dataclass
+class GameConfig:
+    num_players: int = 4
+    player_color: str = ""
+    difficulty: str = ""
+    points_to_win: int = 10
+    dice_mode: str = ""
+    robber_mode: str = "friendly"
+    turn_order: int = 1
+    time_limit_enabled: bool = False
+    time_limit_seconds: int = 60

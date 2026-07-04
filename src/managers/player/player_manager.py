@@ -2,7 +2,7 @@ import random
 
 from src.managers.base_manager import BaseManager
 from src.managers.game.game_manager import GameConfig
-from src.managers.player.player import Player
+from src.managers.player.player import Player, PlayerInfo
 
 from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
@@ -23,33 +23,16 @@ class PlayerManager(BaseManager):
         self.helper_manager = self.get_dependency('helper_manager')
         self.audio_manager = self.get_dependency('audio_manager')
         self.graphics_manager = self.get_dependency('graphics_manager')
-        
-    def init(self, player_list: list):
-        self.players: list[Player] = []
-        for idx, maybe_player in enumerate(player_list):
-            if isinstance(maybe_player, Player):
-                self.players.append(maybe_player)
-            elif isinstance(maybe_player, dict):
-                self.players.append(
-                    Player(
-                        player_id=maybe_player.get("player_id", idx + 1),
-                        name=maybe_player.get("name", f"Player {idx + 1}"),
-                        color=maybe_player.get("color", "red"),
-                        resources=maybe_player.get("resources", {}),
-                        victory_points=int(maybe_player.get("victory_points", maybe_player.get("points", 0))),
-                    )
-                )
-        self.current_turn = 0
-        self.new_game_settings: dict[str, Any] = {}
 
-    def create_players(self, player_configs: list[PlayerConfig]) -> list[Player]:
+    def create_players(self, player_configs: list[PlayerInfo]) -> list[Player]:
         """Create a fresh player list from setup values or provided overrides."""
         players: list[Player] = []
         for i in range(len(player_configs)):
             players.append(
                 Player(
                     player_id=i + 1,
-                    player_configs[i]
+                    player_config=player_configs[i]
+                    resources
                 )
             )
 
@@ -222,3 +205,4 @@ class PlayerManager(BaseManager):
                 return player
 
         return None
+    

@@ -116,6 +116,9 @@ class Menu(UIElement):
         
         # Read layout properties to update locations from config
         self.read_layout(layout_props)
+
+        for name, value in vars(self.layout).items():
+            setattr(self, name, value)
         
         # Set initial location AFTER reading layout so init_location has the correct value
         self.location = self.init_location
@@ -337,7 +340,7 @@ class Menu(UIElement):
         self._read_common_layout(layout_props)
 
         field_names = {f.name for f in fields(MenuInfo)}
-        self.layout_props = MenuInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        self.layout = MenuInfo(**{k: v for k, v in layout_props.items() if k in field_names})
         
         #TODO: commented out because, at least for buttons, read_layout is being called twice, delete after testing
         """

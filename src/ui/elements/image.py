@@ -42,6 +42,9 @@ class Image(UIElement):
         # read layout after setting defaults
         self.read_layout(layout_props)
 
+        for name, value in vars(self.layout).items():
+            setattr(self, name, value)
+
         self.surface = pygame.Surface(self.rect.size, pygame.SRCALPHA)
         self._rebuild_surface()
 

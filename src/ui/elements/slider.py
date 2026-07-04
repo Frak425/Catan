@@ -68,6 +68,9 @@ class Slider(UIElement):
         # read layout and override default values
         self.read_layout(layout_props)
 
+        for name, value in vars(self.layout).items():
+            setattr(self, name, value)
+
         self.value = initial_value
         self.bar_image = bar_image
 
@@ -345,7 +348,7 @@ class Slider(UIElement):
         self._read_common_layout(layout_props)
 
         field_names = {f.name for f in fields(SliderInfo)}
-        self.layout_props = SliderInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        self.layout = SliderInfo(**{k: v for k, v in layout_props.items() if k in field_names})
     
     def get_layout(self) -> SliderInfo:
         """Serialize slider properties to config dict."""

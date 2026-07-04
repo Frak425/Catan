@@ -68,6 +68,9 @@ class TextDisplay(UIElement):
         # read layout after setting defaults
         self.read_layout(layout_props)
 
+        for name, value in vars(self.layout).items():
+            setattr(self, name, value)
+
         # Render the text surface
         self.text_surface = self.font.render(self.text, True, self.text_color)
         self.text_rect = self.text_surface.get_rect()
@@ -150,7 +153,7 @@ class TextDisplay(UIElement):
         self._read_common_layout(layout_props)
 
         field_names = {f.name for f in fields(TextDisplayInfo)}
-        self.layout_props = TextDisplayInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        self.layout = TextDisplayInfo(**{k: v for k, v in layout_props.items() if k in field_names})
 
     def get_layout(self) -> TextDisplayInfo:
         """Serialize text display properties including border_radius (for future use)."""

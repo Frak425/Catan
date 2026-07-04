@@ -12,10 +12,15 @@ if TYPE_CHECKING:
 from src.ui.ui_element import UIElement, UIElementInfo
 
 class Tile(UIElement):
-    def __init__(self, game_manager: 'GameManager', props: dict, image: pygame.Surface | None = None, callback=None):
-        super().__init__(props, game_manager, callback, True)
+    def __init__(self, game_manager: 'GameManager', layout_props: dict, image: pygame.Surface | None = None, callback=None):
+        super().__init__(layout_props, game_manager, callback, True)
         self.image = image
         self.color = [255,255,255]
+
+        self.read_layout(layout_props)
+
+        for name, value in vars(self.layout).items():
+            setattr(self, name, value)
 
         self.create_draw_surface()
 
@@ -47,7 +52,7 @@ class Tile(UIElement):
         self._read_common_layout(layout_props)
 
         field_names = {f.name for f in fields(TileInfo)}
-        self.layout_props = TileInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        self.layout = TileInfo(**{k: v for k, v in layout_props.items() if k in field_names})
 
     def get_layout(self) -> TileInfo:
         return TileInfo(
