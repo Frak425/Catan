@@ -1,8 +1,10 @@
+from dataclasses import dataclass, fields, fields
+
 import pygame
 import math
 
 from typing import TYPE_CHECKING, Callable, Optional
-from src.ui.ui_element import UIElement
+from src.ui.ui_element import UIElement, UIElementInfo
 
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
@@ -146,36 +148,25 @@ class TextDisplay(UIElement):
         """Load text display properties from config dict."""
         # Schema reference: See [layout.json](./config/layout.json#L219-L239)
         self._read_common_layout(layout_props)
-        
-        color_data = layout_props.get("color", [self.color[0], self.color[1], self.color[2]])
-        self.color = (color_data[0], color_data[1], color_data[2])
-        self.text = layout_props.get("text", self.text)
-        text_color_data = layout_props.get("text_color", [self.text_color[0], self.text_color[1], self.text_color[2]])
-        self.text_color = (text_color_data[0], text_color_data[1], text_color_data[2])
-        self.padding = layout_props.get("padding", self.padding)
-        self.text_align = layout_props.get("text_align", self.text_align)
-        self.border_radius = layout_props.get("border_radius", self.border_radius)
-        self.border_top_right_radius = layout_props.get("border_top_right_radius", self.border_top_right_radius)
-        self.border_top_left_radius = layout_props.get("border_top_left_radius", self.border_top_left_radius)
-        self.border_bottom_right_radius = layout_props.get("border_bottom_right_radius", self.border_bottom_right_radius)
-        self.border_bottom_left_radius = layout_props.get("border_bottom_left_radius", self.border_bottom_left_radius)
 
-    def get_layout(self) -> dict:
+        field_names = {f.name for f in fields(TextDisplayInfo)}
+        self.layout_props = TextDisplayInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+
+    def get_layout(self) -> TextDisplayInfo:
         """Serialize text display properties including border_radius (for future use)."""
-        layout = self._get_common_layout()
-        layout.update({
-            "_type": "TextDisplay",
-            "color": [self.color[0], self.color[1], self.color[2]],
-            "text": self.text,
-            "text_color": [self.text_color[0], self.text_color[1], self.text_color[2]],
-            "padding": self.padding,
-            "text_align": self.text_align,
-            "border_radius": self.border_radius,
-            "border_top_right_radius": self.border_top_right_radius,
-            "border_top_left_radius": self.border_top_left_radius,
-            "border_bottom_right_radius": self.border_bottom_right_radius,
-            "border_bottom_left_radius": self.border_bottom_left_radius
-        })
+        layout = TextDisplayInfo(
+            common_layout=self._get_common_layout(),
+            color=[self.color[0], self.color[1], self.color[2]],
+            text=self.text,
+            text_color=[self.text_color[0], self.text_color[1], self.text_color[2]],
+            padding=self.padding,
+            text_align=self.text_align,
+            border_radius=self.border_radius,
+            border_top_right_radius=self.border_top_right_radius,
+            border_top_left_radius=self.border_top_left_radius,
+            border_bottom_right_radius=self.border_bottom_right_radius,
+            border_bottom_left_radius=self.border_bottom_left_radius
+        )
         return layout
     
     def print_info(self) -> None:
@@ -192,3 +183,17 @@ class TextDisplay(UIElement):
         print(f"border_top_left_radius: {self.border_top_left_radius}")
         print(f"border_bottom_right_radius: {self.border_bottom_right_radius}")
         print(f"border_bottom_left_radius: {self.border_bottom_left_radius}")
+
+@dataclass
+class TextDisplayInfo:
+    common_layout: UIElementInfo
+    color: list[int]
+    text: str
+    text_color: list[int]
+    padding: int
+    text_align: str
+    border_radius: int
+    border_top_right_radius: int
+    border_top_left_radius: int
+    border_bottom_right_radius: int
+    border_bottom_left_radius: int

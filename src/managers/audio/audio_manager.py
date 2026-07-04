@@ -23,7 +23,7 @@ class AudioManager(BaseManager):
         self.player_manager = self.get_dependency('player_manager')
         self.graphics_manager = self.get_dependency('graphics_manager')
         
-    def init(self):
+    def post_init(self):
         pygame.mixer.init()
 
         self.sound_effects: dict[str, pygame.mixer.Sound] = {}

@@ -1,6 +1,8 @@
+from attr import dataclass
+from attrs import fields
 import pygame
-from src.ui.elements.slider import Slider
-from src.ui.ui_element import UIElement
+from src.ui.elements.slider import Slider, SliderInfo
+from src.ui.ui_element import UIElement, UIElementInfo
 
 from typing import TYPE_CHECKING
 
@@ -523,20 +525,8 @@ class ScrollableArea(UIElement):
         """
         self._read_common_layout(layout_props)
 
-        self.slider_layout_props: dict = layout_props.get("slider_layout_props", {})
-
-        self.exterior_padding = layout_props.get("exterior_padding", self.exterior_padding)
-        self.interior_padding = layout_props.get("interior_padding", self.interior_padding)
-
-        background_color_data = layout_props.get("background_color", [self.background_color[0], self.background_color[1], self.background_color[2], self.background_color[3]])
-        self.background_color = (background_color_data[0], background_color_data[1], background_color_data[2], background_color_data[3])
-        
-        content_background_color_data = layout_props.get("content_background_color", [self.content_background_color[0], self.content_background_color[1], self.content_background_color[2], self.content_background_color[3]])
-        self.content_background_color = (content_background_color_data[0], content_background_color_data[1], content_background_color_data[2], content_background_color_data[3])
-                
-        self.slider_side = layout_props.get("slider_side", self.slider_side)
-        self.slider_handle_inset = layout_props.get("slider_handle_inset", self.slider_handle_inset)
-        self.content_width_percentage = layout_props.get("content_width_percentage", self.content_width_percentage)
+        field_names = {f.name for f in fields(ScrollableAreaInfo)}
+        self.layout_props = ScrollableAreaInfo(**{k: v for k, v in layout_props.items() if k in field_names})
         
         # Store pending content elements for deferred loading
         # (elements must be created separately before being added)
@@ -567,24 +557,23 @@ class ScrollableArea(UIElement):
             # Clear pending list
             delattr(self, '_pending_content_elements')
 
-    def get_layout(self) -> dict:
+    def get_layout(self) -> ScrollableAreaInfo:
         """Serialize scrollable area and all child elements to config dict."""
-        layout = self._get_common_layout()
-        layout.update({
-            "_type": "ScrollableArea",
-            "slider_layout_props": self.slider.get_layout(),
-            "exterior_padding": self.exterior_padding,
-            "interior_padding": self.interior_padding,
-            "viewable_content_height": self.viewable_content_height,
-            "viewable_content_width": self.viewable_content_width,
-            "background_color": [self.background_color[0], self.background_color[1], self.background_color[2], self.background_color[3]],
-            "content_background_color": [self.content_background_color[0], self.content_background_color[1], self.content_background_color[2], self.content_background_color[3]],
-            "slider_side": self.slider_side,
-            "slider_handle_inset": self.slider_handle_inset,
-            "content_width_percentage": self.content_width_percentage,
-            
-        })
-        
+        layout = ScrollableAreaInfo(
+            common_layout=self._get_common_layout(),
+            slider_layout=self.slider.get_layout(),
+            exterior_padding=self.exterior_padding,
+            interior_padding=self.interior_padding,
+            viewable_content_height=self.viewable_content_height,
+            viewable_content_width=self.viewable_content_width,
+            background_color=[self.background_color[0], self.background_color[1], self.background_color[2], self.background_color[3]],
+            content_background_color=[self.content_background_color[0], self.content_background_color[1], self.content_background_color[2], self.content_background_color[3]],
+            slider_side=self.slider_side,
+            slider_handle_inset=self.slider_handle_inset,
+            content_width_percentage=self.content_width_percentage
+        )
+        #TODO: Test functionality, delete if not needed
+        """
         # Serialize content_elements (child UI elements)
         if self.content_elements:
             content_element_layouts = []
@@ -593,6 +582,7 @@ class ScrollableArea(UIElement):
                 # Type should already be in layout from element's get_layout()
                 content_element_layouts.append(element_layout)
             layout["content_elements"] = content_element_layouts
+        """
         
         return layout
     
@@ -608,4 +598,16 @@ class ScrollableArea(UIElement):
         print(f"  Slider Info:")
         self.slider.print_info()
 
-        
+@dataclass
+class ScrollableAreaInfo:
+    common_layout: UIElementInfo
+    slider_layout: SliderInfo
+    exterior_padding: int
+    interior_padding: int
+    viewable_content_height: int
+    viewable_content_width: int
+    background_color: list[int]
+    content_background_color: list[int]
+    slider_side: str
+    slider_handle_inset: int
+    content_width_percentage: float

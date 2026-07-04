@@ -1,3 +1,4 @@
+from attr import dataclass, fields
 import pygame
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Callable, Optional, List
@@ -81,6 +82,7 @@ class UIElement(ABC):
         self.rect = pygame.Rect(0, 0, 0, 0)  # Position relative to parent
         self.offset = (0, 0)
         self.guiding_line_color = (100, 100, 200)
+        self.guiding_lines_on = False
         self.is_active = False
         self.active = True
         
@@ -774,18 +776,10 @@ class UIElement(ABC):
             self.my_property = layout_props.get('my_property', default)  # Then
         ```
         """
-        self.name = layout_props.get("name", self.name)
-        rect_data = layout_props.get("rect", [self.rect.x, self.rect.y, self.rect.width, self.rect.height])
-        self.rect = pygame.Rect(rect_data[0], rect_data[1], rect_data[2], rect_data[3])
-        guiding_line_color_data = layout_props.get("guiding_line_color", 
-                                                    [self.guiding_line_color[0], 
-                                                     self.guiding_line_color[1], 
-                                                     self.guiding_line_color[2]])
-        self.guiding_line_color = (guiding_line_color_data[0], 
-                                   guiding_line_color_data[1], 
-                                   guiding_line_color_data[2])
-        self.active = layout_props.get("active", self.active)
         
+        field_names = {f.name for f in fields(UIElementInfo)}
+        self.common_layout = UIElementInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+
         # Store pending children names for deferred loading
         # (children must be created before they can be added)
         if "children" in layout_props:
@@ -825,7 +819,7 @@ class UIElement(ABC):
             # Clear pending list after processing
             delattr(self, '_pending_children_names')
     
-    def _get_common_layout(self) -> dict:
+    def _get_common_layout(self) -> UIElementInfo:
         """
         Helper to get common layout properties. Call from subclass get_layout().
         
@@ -851,20 +845,30 @@ class UIElement(ABC):
             return layout
         ```
         """
-        layout = {
-            "name": self.name,
-            "rect": [self.rect.x, self.rect.y, self.rect.width, self.rect.height],
-            "guiding_line_color": [self.guiding_line_color[0], 
-                                  self.guiding_line_color[1], 
-                                  self.guiding_line_color[2]],
-            "active": self.active,
-            "shown": self.shown
-        }
+        common_layout = UIElementInfo(
+            name=self.name,
+            rect=[self.rect.x, self.rect.y, self.rect.width, self.rect.height],
+            guiding_line_color=(self.guiding_line_color[0], self.guiding_line_color[1], self.guiding_line_color[2]),
+            guiding_lines_on=self.guiding_lines_on,
+            active=self.active,
+            shown=self.shown,
+            children=None
+        )
         
         # Serialize children by name (if they have names)
         if self.children:
             children_names = [child.name for child in self.children if child.name]
             if children_names:
-                layout["children"] = children_names
+                common_layout.children = children_names
         
-        return layout
+        return common_layout
+
+@dataclass
+class UIElementInfo:
+    name: str
+    rect: list[int]
+    guiding_line_color: tuple[int, int, int]
+    guiding_lines_on: bool
+    active: bool
+    shown: bool
+    children: list[str] | None

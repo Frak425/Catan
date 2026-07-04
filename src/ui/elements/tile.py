@@ -1,3 +1,5 @@
+from dataclasses import dataclass, fields
+
 import pygame
 import math
 from typing import TYPE_CHECKING, Any
@@ -7,12 +9,13 @@ from pygame.event import Event
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
 
-from src.ui.ui_element import UIElement
+from src.ui.ui_element import UIElement, UIElementInfo
 
 class Tile(UIElement):
     def __init__(self, game_manager: 'GameManager', props: dict, image: pygame.Surface | None = None, callback=None):
         super().__init__(props, game_manager, callback, True)
         self.image = image
+        self.color = [255,255,255]
 
         self.create_draw_surface()
 
@@ -40,17 +43,23 @@ class Tile(UIElement):
         if self.is_active:
             self.draw_guiding_lines(surface)
 
-    def read_layout(self, layout: dict):
-        self._read_common_layout(layout)
-        self.color = tuple(layout.get("color", [255, 255, 255]))
+    def read_layout(self, layout_props: dict):
+        self._read_common_layout(layout_props)
 
-    def get_layout(self) -> dict:
-        layout = self._get_common_layout()
-        layout.update({
-            'type': '_Tile',
-            "color": [self.color[0], self.color[1], self.color[2]],
-        })
+        field_names = {f.name for f in fields(TileInfo)}
+        self.layout_props = TileInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+
+    def get_layout(self) -> TileInfo:
+        return TileInfo(
+            common_layout=self._get_common_layout(),
+            color=[self.color[0], self.color[1], self.color[2]]
+        )
         return layout
     
     def print_info(self):
         self.print_common_info()
+
+@dataclass
+class TileInfo:
+    common_layout: UIElementInfo
+    color: list[int]

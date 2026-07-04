@@ -11,7 +11,7 @@ class HelperManager(BaseManager):
         """Initialize manager after all dependencies are injected."""
         pass
         
-    def init(self):
+    def post_init(self):
         pass
 
     def midpoint(self, point1: tuple[int, int], point2: tuple[int, int]) -> tuple:

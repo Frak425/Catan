@@ -1,4 +1,7 @@
+import random
+
 from src.managers.base_manager import BaseManager
+from src.managers.game.game_manager import GameConfig
 from src.managers.player.player import Player
 
 from typing import TYPE_CHECKING, Any
@@ -39,27 +42,14 @@ class PlayerManager(BaseManager):
         self.current_turn = 0
         self.new_game_settings: dict[str, Any] = {}
 
-    def create_players(self, count: int | None = None, colors: list[str] | None = None, names: list[str] | None = None) -> list[Player]:
+    def create_players(self, player_configs: list[PlayerConfig]) -> list[Player]:
         """Create a fresh player list from setup values or provided overrides."""
-        if count is None:
-            count = int(getattr(self.game_manager, 'players_num', 2))
-        count = max(1, int(count))
-
-        if colors is None:
-            colors = list(getattr(self.game_manager, 'player_colors', ["red", "blue", "green", "yellow"]))
-
-        if names is None:
-            names = [f"Player {i + 1}" for i in range(count)]
-
         players: list[Player] = []
-        for i in range(count):
-            color = colors[i % len(colors)]
-            name = names[i] if i < len(names) else f"Player {i + 1}"
+        for i in range(len(player_configs)):
             players.append(
                 Player(
                     player_id=i + 1,
-                    name=name,
-                    color=color,
+                    player_configs[i]
                 )
             )
 
@@ -67,46 +57,93 @@ class PlayerManager(BaseManager):
         self.current_turn = 0
         return self.players
 
-    def configure_new_game(self, setup_settings: dict[str, Any] | None = None) -> dict[str, Any]:
-        """Capture and normalize setup settings for a new game."""
-        if setup_settings is None:
-            collector = getattr(self.game_manager, 'collect_setup_game_settings', None)
-            candidate = collector() if callable(collector) else {}
-            if isinstance(candidate, dict):
-                setup_settings = candidate
-            else:
-                setup_settings = {}
+    def create_random_names(self, num_players: int) -> list[str]:
+        ADJECTIVES = [
+    "Able", "Agile", "Amber", "Ancient", "Ardent",
+    "Balanced", "Bold", "Brave", "Bright", "Brisk",
+    "Calm", "Careful", "Cheerful", "Clever", "Coastal",
+    "Cordial", "Crafty", "Curious", "Daring", "Deep",
+    "Diligent", "Durable", "Earnest", "Easygoing", "Elegant",
+    "Emerald", "Faithful", "Fearless", "Festive", "Fierce",
+    "Friendly", "Gentle", "Golden", "Graceful", "Grand",
+    "Green", "Hardy", "Helpful", "Honest", "Hopeful",
+    "Humble", "Independent", "Ingenious", "Jolly", "Joyful",
+    "Kind", "Lively", "Loyal", "Lucky", "Majestic",
+    "Merry", "Mighty", "Misty", "Nimble", "Noble",
+    "Patient", "Peaceful", "Playful", "Pleasant", "Polished",
+    "Prosperous", "Prudent", "Quick", "Quiet", "Radiant",
+    "Reliable", "Resolute", "Resourceful", "Robust", "Rustic",
+    "Sandy", "Serene", "Sharp", "Shining", "Silent",
+    "Silver", "Skilled", "Solid", "Speedy", "Spry",
+    "Steady", "Stout", "Sturdy", "Sunny", "Swift",
+    "Thoughtful", "Thriving", "Timber", "Tranquil", "True",
+    "Valiant", "Vast", "Vibrant", "Vigorous", "Warm",
+    "Watchful", "Wholesome", "Wild", "Wise", "Zealous"
+]
+        ANIMALS = [
+    "Badger", "Bear", "Beaver", "Bison", "Boar",
+    "Buck", "Buffalo", "Cougar", "Crane", "Crow",
+    "Deer", "Dove", "Duck", "Eagle", "Falcon",
+    "Finch", "Fox", "Goat", "Goose", "Hare",
+    "Hawk", "Heron", "Horse", "Lark", "Lynx",
+    "Moose", "Otter", "Owl", "Pheasant", "Puma",
+    "Quail", "Rabbit", "Raven", "Robin", "Salmon",
+    "Seal", "Sheep", "Sparrow", "Squirrel", "Stag",
+    "Swan", "Thrush", "Trout", "Turtle", "Weasel",
+    "Whale", "Wildcat", "Wolf", "Wren", "Yak"
+]
+        PROFESSIONS = [
+    "Artisan", "Baker", "Blacksmith", "Builder", "Carpenter",
+    "Cartographer", "Craftsman", "Farmer", "Fisher",
+    "Forester", "Gardener", "Harbormaster", "Hunter",
+    "Innkeeper", "Mason", "Merchant", "Miller",
+    "Miner", "Navigator", "Pioneer", "Potter",
+    "Sailor", "Scout", "Settler", "Shepherd",
+    "Stonecutter", "Trader", "Wagoner", "Weaver",
+    "Woodworker"
+]
+        COLORS = [
+    "Amber", "Auburn", "Azure", "Beige", "Black",
+    "Blue", "Bronze", "Brown", "Burgundy", "Charcoal",
+    "Copper", "Coral", "Crimson", "Cream", "Emerald",
+    "Forest", "Gold", "Golden", "Gray", "Green",
+    "Honey", "Indigo", "Ivory", "Jade", "Lavender",
+    "Lilac", "Lime", "Mahogany", "Maroon", "Moss",
+    "Navy", "Oak", "Ochre", "Olive", "Pearl",
+    "Pine", "Plum", "Rose", "Ruby", "Rust",
+    "Saffron", "Sage", "Sand", "Scarlet", "Silver",
+    "Slate", "Snow", "Teal", "Umber", "Violet"
+]
+        PLANTS = [
+    "Ash", "Aspen", "Barley", "Beech", "Birch",
+    "Cedar", "Cherry", "Chestnut", "Clover", "Cypress",
+    "Daisy", "Elm", "Fern", "Fir", "Flax",
+    "Heather", "Hazel", "Holly", "Ivy", "Juniper",
+    "Laurel", "Lavender", "Lily", "Maple", "Moss",
+    "Oak", "Olive", "Orchid", "Pine", "Poppy",
+    "Reed", "Rose", "Rowan", "Rye", "Sage",
+    "Spruce", "Sunflower", "Sycamore", "Thistle", "Tulip",
+    "Violet", "Walnut", "Wheat", "Willow", "Yarrow",
+    "Yew", "Cattail", "Alder", "Bamboo", "Hemlock"
+]
 
-        settings: dict[str, Any] = {}
-        for key, value in setup_settings.items():
-            settings[str(key)] = value
-        settings.setdefault('players_num', int(getattr(self.game_manager, 'players_num', 2)))
-        settings.setdefault('difficulty', getattr(self.game_manager, 'game_difficulty', 'easy'))
-        settings.setdefault('points_to_win', int(getattr(self.game_manager, 'points_to_win', 10)))
-        settings.setdefault('turn_order', int(getattr(self.game_manager, 'turn_order', 1)))
+        names = []
+        #3 different name formats
+        name_format_1 = (ADJECTIVES, ANIMALS)
+        name_format_2 = (ADJECTIVES, PROFESSIONS)
+        name_format_3 = (COLORS, PLANTS)
 
-        self.new_game_settings = settings
-        return settings
+        for _ in range(num_players):
+            format = random.choice([name_format_1, name_format_2, name_format_3])
+            name = f"{random.choice(format[0])} {random.choice(format[1])}"
+            if name not in names:
+                names.append(name)
 
-    def begin_new_game(self, setup_settings: dict[str, Any] | None = None) -> list[Player]:
-        """Configure settings, create players, and position current turn."""
-        settings = self.configure_new_game(setup_settings)
+        return names
 
-        # Keep game_manager values in sync with collected setup values.
-        self.game_manager.players_num = int(settings.get('players_num', self.game_manager.players_num))
-        self.game_manager.game_difficulty = str(settings.get('difficulty', self.game_manager.game_difficulty))
-        self.game_manager.points_to_win = int(settings.get('points_to_win', self.game_manager.points_to_win))
-        self.game_manager.turn_order = int(settings.get('turn_order', self.game_manager.turn_order))
-
-        players = self.create_players(count=int(settings.get('players_num', self.game_manager.players_num)))
-
-        # Turn order is 1-based in setup UI.
-        if players:
-            self.current_turn = (self.game_manager.turn_order - 1) % len(players)
-        else:
-            self.current_turn = 0
-
-        return players
+    def get_available_colors(self, player_color: str) -> list[str]:
+        all_colors = ["red", "blue", "green", "yellow"]  # Example colors, replace with actual available colors
+        return [color for color in all_colors if color not in player_color]
 
     def next_turn(self) -> None:
         """Moves turn to the next player"""

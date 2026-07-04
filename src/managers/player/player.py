@@ -2,14 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from src.managers.dataclasses import PlayerConfig
+
 
 @dataclass
 class Player:
     """Represents a single player and their core game state."""
 
     player_id: int
-    name: str
-    color: str
+    player_config: PlayerConfig
     resources: dict[str, int] = field(default_factory=dict)
     victory_points: int = 0
     roads_built: int = 0
@@ -73,16 +74,29 @@ class Player:
         for resource, amount in payload.items():
             self.add_resource(resource, int(amount))
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> PlayerInfo:
         """Serialize to plain dictionary."""
-        return {
-            "player_id": self.player_id,
-            "name": self.name,
-            "color": self.color,
-            "resources": dict(self.resources),
-            "victory_points": self.victory_points,
-            "roads_built": self.roads_built,
-            "settlements_built": self.settlements_built,
-            "cities_built": self.cities_built,
-            "development_cards": self.development_cards,
-        }
+        return PlayerInfo(
+            player_id=self.player_id,
+            name=self.player_config.name,
+            color=self.player_config.color,
+            resources=dict(self.resources),
+            victory_points=self.victory_points,
+            roads_built=self.roads_built,
+            settlements_built=self.settlements_built,
+            cities_built=self.cities_built,
+            development_cards=self.development_cards,
+        )
+
+
+@dataclass
+class PlayerInfo:
+    player_id: int
+    name: str
+    color: str
+    resources: dict[str, int]
+    victory_points: int
+    roads_built: int
+    settlements_built: int
+    cities_built: int
+    development_cards: int

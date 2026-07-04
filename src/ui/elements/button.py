@@ -1,7 +1,10 @@
+from operator import call
+
+from attr import dataclass, fields
 import pygame
 
 from typing import TYPE_CHECKING, Callable, Optional
-from src.ui.ui_element import UIElement
+from src.ui.ui_element import UIElement, UIElementInfo
 
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
@@ -87,6 +90,10 @@ class Button(UIElement):
         # read layout after setting defaults
         self.read_layout(layout_props)
         self.update_text(self.text)
+
+        # assigns all values in the dataclass to the button class itself
+        for name, value in vars(self.layout).items():
+            setattr(self, name, value)
 
     ## --- TEXT MANAGEMENT --- ##
 
@@ -228,64 +235,41 @@ class Button(UIElement):
         Load button properties from config dict.
         
         Properties: color, text, text_color, padding, text_align
-        See layout.json for schema reference.
         """
-        # Schema reference: See [layout.json](./config/layout.json#L23-L41)
-        self._read_common_layout(layout)
-        
-        color_data = layout.get("color", [self.color[0], self.color[1], self.color[2]])
-        self.color = (color_data[0], color_data[1], color_data[2])
-        self.text = layout.get("text", self.text)
-        text_color_data = layout.get("text_color", [self.text_color[0], self.text_color[1], self.text_color[2]])
-        self.text_color = (text_color_data[0], text_color_data[1], text_color_data[2])
-        self.padding = layout.get("padding", self.padding)
-        self.text_align = layout.get("text_align", self.text_align)
-        self.disabled = layout.get("disabled", self.disabled)
-        self.border_radius = layout.get("border_radius", self.border_radius)
-        self.border_top_right_radius = layout.get("border_top_right_radius", self.border_top_right_radius)
-        self.border_top_left_radius = layout.get("border_top_left_radius", self.border_top_left_radius)
-        self.border_bottom_right_radius = layout.get("border_bottom_right_radius", self.border_bottom_right_radius)
-        self.border_bottom_left_radius = layout.get("border_bottom_left_radius", self.border_bottom_left_radius)
 
-    def get_layout(self) -> dict:
+        self._read_common_layout(layout)
+
+        field_names = {f.name for f in fields(ButtonInfo)}
+        self.layout = ButtonInfo(**{k: v for k, v in layout.items() if k in field_names})
+
+    def get_layout(self) -> ButtonInfo:
         """
         Serialize button properties to config dict.
         
         Includes reverse callback lookup to save callback name (if registered).
         Note: Nested loop for callback lookup - could be optimized with reverse registry.
         """
-        layout = self._get_common_layout()
-        layout.update({
-            "_type": "Button",
-            "color": [self.color[0], self.color[1], self.color[2]],
-            "text_align": self.text_align,
-            "text": self.text,
-            "padding": self.padding,
-            "disabled": self.disabled,
-            "text_color": [self.text_color[0], self.text_color[1], self.text_color[2]],
-            "border_radius": self.border_radius,
-            "border_top_right_radius": self.border_top_right_radius,
-            "border_top_left_radius": self.border_top_left_radius,
-            "border_bottom_right_radius": self.border_bottom_right_radius,
-            "border_bottom_left_radius": self.border_bottom_left_radius
-        })
-        
-        # Save callback name if it exists - do reverse lookup in callback registry
-        if hasattr(self, 'callback') and self.callback:
-            callback_name = None
-            for name, func in self.game_manager.input_manager.ui_factory.callback_registry.items():
+
+        for name, func in self.game_manager.input_manager.ui_factory.callback_registry.items():
                 if func == self.callback:
                     callback_name = name
                     break
-            
-                if callback_name:
-                    layout["callback"] = callback_name
-                    if func == self.callback:
-                        callback_name = name
-                        break
-            
-            if callback_name:
-                layout["callback"] = callback_name
+
+        layout = ButtonInfo(
+            common_layout=self._get_common_layout(),
+            callback = callback_name,
+            color=[self.color[0], self.color[1], self.color[2]],
+            text_align=self.text_align,
+            text=self.text,
+            padding=self.padding,
+            disabled=self.disabled,
+            text_color=[self.text_color[0], self.text_color[1], self.text_color[2]],
+            border_radius=self.border_radius,
+            border_top_right_radius=self.border_top_right_radius,
+            border_top_left_radius=self.border_top_left_radius,
+            border_bottom_right_radius=self.border_bottom_right_radius,
+            border_bottom_left_radius=self.border_bottom_left_radius
+        )
         
         return layout
     
@@ -307,3 +291,19 @@ class Button(UIElement):
         print(f"border_bottom_left_radius: {self.border_bottom_left_radius}")
         print(f"Shown: {self.shown}")
         print(f"")
+
+@dataclass
+class ButtonInfo:
+    common_layout: UIElementInfo
+    callback: str
+    color: list[int]
+    text_align: str
+    text: str
+    padding: int
+    disabled: bool
+    text_color: list[int]
+    border_radius: int
+    border_top_right_radius: int
+    border_top_left_radius: int
+    border_bottom_right_radius: int
+    border_bottom_left_radius: int

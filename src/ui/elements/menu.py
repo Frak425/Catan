@@ -1,12 +1,13 @@
+from attr import dataclass, fields
 import pygame
 from typing import Dict, TYPE_CHECKING
 from src.managers import *
-from src.ui.ui_element import UIElement
-from src.ui.elements.button import Button
-from src.ui.elements.toggle import Toggle
-from src.ui.elements.slider import Slider
-from src.ui.elements.image import Image
-from src.ui.elements.text_display import TextDisplay
+from src.ui.ui_element import UIElement, UIElementInfo
+from src.ui.elements.button import Button, ButtonInfo
+from src.ui.elements.toggle import Toggle, ToggleInfo
+from src.ui.elements.slider import Slider, SliderInfo
+from src.ui.elements.image import Image, ImageInfo
+from src.ui.elements.text_display import TextDisplay, TextDisplayInfo
 
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
@@ -83,7 +84,7 @@ class Menu(UIElement):
         self.name = "menu"
         self.rect = pygame.Rect(0, 0, 800, 600)
         self.backdrop = None
-        self.bckg_color = (200, 200, 200)
+        self.background_color = (200, 200, 200)
         self.game_font = game_manager.game_font
         
         self.init_location = (0, 0)
@@ -125,7 +126,7 @@ class Menu(UIElement):
         if self.backdrop:
             self.menu_surface.blit(pygame.transform.scale(self.backdrop, self.rect.size), (0, 0))
         else:
-            self.menu_surface.fill(self.bckg_color)
+            self.menu_surface.fill(self.background_color)
         
         # Add all UI elements to the hierarchy
         self._add_children_to_hierarchy()
@@ -248,7 +249,7 @@ class Menu(UIElement):
             self.menu_surface.fill((0, 0, 0, 0))  # Clear
             self.menu_surface.blit(pygame.transform.scale(self.backdrop, self.rect.size), (0, 0))
         else:
-            self.menu_surface.fill(self.bckg_color)
+            self.menu_surface.fill(self.background_color)
         
         # Draw menu surface at absolute position
         surface.blit(self.menu_surface, abs_rect.topleft)
@@ -297,32 +298,30 @@ class Menu(UIElement):
 
     ## --- SERIALIZATION --- ##
 
-    def get_layout(self) -> dict:
+    def get_layout(self) -> MenuInfo:
         """
         Serialize menu and all child elements to config dict.
         
         Includes complete nested serialization of all buttons, toggles, sliders,
         images, and text_displays organized by tab.
         """
-        layout = self._get_common_layout()
-        layout.update({
-            "_type": "Menu",
-            "bckg_color": [self.bckg_color[0], self.bckg_color[1], self.bckg_color[2]] if self.bckg_color else None,
-            "init_location": [self.init_location[0], self.init_location[1]] if self.init_location else None,
-            "final_location": [self.final_location[0], self.final_location[1]] if self.final_location else None,
-            "anim_length": self.anim_length,
-            "active_tab": self.active_tab,
-            "tabs": self.tabs,
-            "z_index": self.z_index,
-            "exclusive_with": self.exclusive_with,
-            "modal": self.modal,
-            "close_on_state_change": self.close_on_state_change,
-            "buttons": {tab: {name: button.get_layout() for name, button in buttons.items()} for tab, buttons in self.buttons.items()},
-            "toggles": {tab: {name: toggle.get_layout() for name, toggle in toggles.items()} for tab, toggles in self.toggles.items()},
-            "sliders": {tab: {name: slider.get_layout() for name, slider in sliders.items()} for tab, sliders in self.sliders.items()},
-            "images": {tab: {name: image.get_layout() for name, image in images.items()} for tab, images in self.images.items()},
-            "text_displays": {tab: {name: text_display.get_layout() for name, text_display in text_displays.items()} for tab, text_displays in self.text_displays.items()}
-        })
+        layout = MenuInfo(
+            common_layout=self._get_common_layout(),
+            background_color=[self.background_color[0], self.background_color[1], self.background_color[2]],
+            init_location=[self.init_location[0], self.init_location[1]],
+            final_location=[self.final_location[0], self.final_location[1]],
+            anim_length=self.anim_length,
+            tabs=self.tabs,
+            z_index=self.z_index,
+            exclusive_with=self.exclusive_with,
+            modal=self.modal,
+            close_on_state_change=self.close_on_state_change,
+            buttons={tab: {name: button.get_layout() for name, button in buttons.items()} for tab, buttons in self.buttons.items()},
+            toggles={tab: {name: toggle.get_layout() for name, toggle in toggles.items()} for tab, toggles in self.toggles.items()},
+            sliders={tab: {name: slider.get_layout() for name, slider in sliders.items()} for tab, sliders in self.sliders.items()},
+            images={tab: {name: image.get_layout() for name, image in images.items()} for tab, images in self.images.items()},
+            text_displays={tab: {name: text_display.get_layout() for name, text_display in text_displays.items()} for tab, text_displays in self.text_displays.items()}
+        )
         return layout
     
     def read_layout(self, layout_props: dict) -> None:
@@ -336,27 +335,12 @@ class Menu(UIElement):
         """
         # Read common properties first
         self._read_common_layout(layout_props)
+
+        field_names = {f.name for f in fields(MenuInfo)}
+        self.layout_props = MenuInfo(**{k: v for k, v in layout_props.items() if k in field_names})
         
-        bckg_color_data = layout_props.get("bckg_color", [self.bckg_color[0], self.bckg_color[1], self.bckg_color[2]]) if self.bckg_color else None
-        if bckg_color_data:
-            self.bckg_color = (bckg_color_data[0], bckg_color_data[1], bckg_color_data[2])
-
-        init_location_data = layout_props.get("init_location", [self.init_location[0], self.init_location[1]]) if self.init_location else None
-        if init_location_data:
-            self.init_location = (init_location_data[0], init_location_data[1])
-
-        final_location_data = layout_props.get("final_location", [self.final_location[0], self.final_location[1]]) if self.final_location else None
-        if final_location_data:
-            self.final_location = (final_location_data[0], final_location_data[1])
-
-        self.anim_length = layout_props.get("anim_length", self.anim_length)
-        
-        # Read multi-menu properties
-        self.z_index = layout_props.get("z_index", self.z_index)
-        self.exclusive_with = layout_props.get("exclusive_with", self.exclusive_with)
-        self.modal = layout_props.get("modal", self.modal)
-        self.close_on_state_change = layout_props.get("close_on_state_change", self.close_on_state_change)
-
+        #TODO: commented out because, at least for buttons, read_layout is being called twice, delete after testing
+        """
         # Read buttons
         buttons_layout = layout_props.get("buttons", {})
         for tab, buttons in buttons_layout.items():
@@ -391,7 +375,7 @@ class Menu(UIElement):
             for name, text_display_layout in text_displays.items():
                 if tab in self.text_displays and name in self.text_displays[tab]:
                     self.text_displays[tab][name].read_layout(text_display_layout)
-
+        """
     ## --- DEV MODE --- ##
 
     def dev_mode_drag(self, x: int, y: int) -> None:
@@ -417,7 +401,7 @@ class Menu(UIElement):
     def print_info(self) -> None:
         """Print menu properties and all child element info for debugging."""
         self.print_common_info()
-        print(f"Background Color: {self.bckg_color}")
+        print(f"Background Color: {self.background_color}")
         print(f"Initial Location: {self.init_location}")
         print(f"Final Location: {self.final_location}")
         print(f"Animation Length: {self.anim_length}")
@@ -441,3 +425,21 @@ class Menu(UIElement):
             for name, slider in sliders.items():
                 print(f"    Slider Name: {name}")
                 slider.print_info()
+
+@dataclass
+class MenuInfo:
+    common_layout: UIElementInfo
+    background_color: list[int]
+    init_location: list[int]
+    final_location: list[int]
+    anim_length: float
+    tabs: list[str]
+    z_index: int
+    exclusive_with: list[str]
+    modal: bool
+    close_on_state_change: bool
+    buttons: dict[str, dict[str, ButtonInfo]]
+    toggles: dict[str, dict[str, ToggleInfo]]
+    sliders: dict[str, dict[str, SliderInfo]]
+    images: dict[str, dict[str, ImageInfo]]
+    text_displays: dict[str, dict[str, TextDisplayInfo]]

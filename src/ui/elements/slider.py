@@ -1,7 +1,9 @@
+from dataclasses import dataclass, fields
+
 import pygame
 
 from typing import TYPE_CHECKING, Callable, Optional
-from src.ui.ui_element import UIElement
+from src.ui.ui_element import UIElement, UIElementInfo
 
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
@@ -332,7 +334,7 @@ class Slider(UIElement):
 
     ## --- SERIALIZATION --- ##
 
-    def read_layout(self, layout_props: dict):
+    def read_layout(self, layout_props: dict) -> None:
         """
         Load slider properties from config dict.
         
@@ -341,34 +343,24 @@ class Slider(UIElement):
         """
         # Schema ref: See [layout.json](./config/layout.json#L188-215)
         self._read_common_layout(layout_props)
-        
-        self.min_value: int = layout_props.get("min_value", self.min_value)
-        self.max_value: int = layout_props.get("max_value", self.max_value)
-        color_data = layout_props.get("color", [self.color[0], self.color[1], self.color[2]])
-        self.color: tuple[int, int, int] = (color_data[0], color_data[1], color_data[2])
-        handle_color_data = layout_props.get("handle_color", [self.handle_color[0], self.handle_color[1], self.handle_color[2]])
-        self.handle_color: tuple[int, int, int] = (handle_color_data[0], handle_color_data[1], handle_color_data[2])
-        self.handle_radius: int = layout_props.get("handle_radius", self.handle_radius)
-        self.direction: str = layout_props.get("direction", self.direction)
-        self.handle_shape: str = layout_props.get("handle_shape", self.handle_shape)
-        self.handle_length: int = layout_props.get("handle_length", self.handle_length)
 
-    def get_layout(self) -> dict:
+        field_names = {f.name for f in fields(SliderInfo)}
+        self.layout_props = SliderInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+    
+    def get_layout(self) -> SliderInfo:
         """Serialize slider properties to config dict."""
-        layout = self._get_common_layout()
-        layout.update({
-            "_type": "Slider",
-            "value": self.value,
-            "min_value": self.min_value,
-            "max_value": self.max_value,
-            "color": [self.color[0], self.color[1], self.color[2]],
-            "handle_color": [self.handle_color[0], self.handle_color[1], self.handle_color[2]],
-            "handle_radius": self.handle_radius,
-            "direction": self.direction,
-            "handle_shape": self.handle_shape,
-            "handle_length": self.handle_length,
+        layout = SliderInfo(
+            common_layout=self._get_common_layout(),
+            min_value=self.min_value,
+            max_value=self.max_value,
+            color=[self.color[0], self.color[1], self.color[2]],
+            handle_color=[self.handle_color[0], self.handle_color[1], self.handle_color[2]],
+            handle_radius=self.handle_radius,
+            direction=self.direction,
+            handle_shape=self.handle_shape,
+            handle_length=self.handle_length,
             
-        })
+        )
         return layout
     
     def print_info(self) -> None:
@@ -382,3 +374,15 @@ class Slider(UIElement):
         print(f"Direction: {self.direction}")
         print(f"Handle Shape: {self.handle_shape}")
         print(f"Handle Length: {self.handle_length}")
+
+@dataclass
+class SliderInfo:
+    common_layout: UIElementInfo
+    min_value: int
+    max_value: int
+    color: list[int]
+    handle_color: list[int]
+    handle_radius: int
+    direction: str
+    handle_shape: str
+    handle_length: int

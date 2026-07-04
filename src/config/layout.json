@@ -547,7 +547,7 @@
                 "brightness"
             ],
             "_type": "Menu",
-            "bckg_color": [
+            "background_color": [
                 100,
                 100,
                 100

@@ -1,8 +1,10 @@
+from dataclasses import dataclass, fields
+
 import pygame
 import pytweening as tween
 
 from typing import TYPE_CHECKING
-from src.ui.ui_element import UIElement
+from src.ui.ui_element import UIElement, UIElementInfo
 
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
@@ -237,36 +239,25 @@ class Toggle(UIElement):
         """
         # Schema reference: See [layout.json](./config/layout.json#L442-L465)
         self._read_common_layout(layout_props)
-        
-        self.guiding_lines = layout_props.get("guiding_lines", self.guiding_lines)
-        self.height = layout_props.get("height", self.height)
-        self.center_width = layout_props.get("center_width", self.center_width)
-        color_data = layout_props.get("color", [self.color[0], self.color[1], self.color[2]])
-        self.color = (color_data[0], color_data[1], color_data[2])
-        toggle_color_data = layout_props.get("handle_color", [self.handle_color[0], self.handle_color[1], self.handle_color[2]])
-        self.handle_color = (toggle_color_data[0], toggle_color_data[1], toggle_color_data[2]) 
-        self.toggle_gap = layout_props.get("toggle_gap", self.toggle_gap)
-        self.time_to_flip = layout_props.get("time_to_flip", self.time_to_flip)
+
+        field_names = {f.name for f in fields(ToggleInfo)}
+        self.layout_props = ToggleInfo(**{k: v for k, v in layout_props.items() if k in field_names})
 
         # Recalculate dependent properties
         self.radius = self.height / 2
         self.handle_radius = self.height / 2 - self.toggle_gap
         
-    def get_layout(self) -> dict:
+    def get_layout(self) -> ToggleInfo:
         """Serialize toggle properties including current state (on/off)."""
-        layout = self._get_common_layout()
-        layout.update({
-            "_type": "Toggle",
-            "on": self.on,
-            "guiding_lines": self.guiding_lines,
-            "height": self.height,
-            "center_width": self.center_width,
-            "color": [self.color[0], self.color[1], self.color[2]],
-            "handle_color": [self.handle_color[0], self.handle_color[1], self.handle_color[2]],
-            "toggle_gap": self.toggle_gap,
-            "time_to_flip": self.time_to_flip,
-            
-        })
+        layout = ToggleInfo(
+            common_layout=self._get_common_layout(),
+            height=self.height,
+            center_width=self.center_width,
+            color=[self.color[0], self.color[1], self.color[2]],
+            handle_color=[self.handle_color[0], self.handle_color[1], self.handle_color[2]],
+            toggle_gap=self.toggle_gap,
+            time_to_flip=self.time_to_flip
+        )
         return layout
     
     def print_info(self) -> None:
@@ -281,3 +272,13 @@ class Toggle(UIElement):
         print(f"Toggle Gap: {self.toggle_gap}")
         print(f"Time to Flip: {self.time_to_flip}")
         print(f"Rect: {self.rect}")
+
+@dataclass
+class ToggleInfo:
+    common_layout: UIElementInfo
+    height: int
+    center_width: int
+    color: list[int]
+    handle_color: list[int]
+    toggle_gap: int
+    time_to_flip: float

@@ -1,7 +1,9 @@
+from attr import dataclass
+from attrs import fields
 import pygame
 
 from typing import TYPE_CHECKING, Callable, Optional
-from src.ui.ui_element import UIElement
+from src.ui.ui_element import UIElement, UIElementInfo
 
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
@@ -114,25 +116,29 @@ class Image(UIElement):
         
         Note: Reloads image if surface already exists (for runtime updates).
         """
-        self._read_common_layout(layout)
-        self.image_path = layout.get("image_path", self.image_path)
-        default_color_data = layout.get("default_color", [self.default_color[0], self.default_color[1], self.default_color[2]])
-        self.default_color = (default_color_data[0], default_color_data[1], default_color_data[2])
+        field_names = {f.name for f in fields(ImageInfo)}
+        self.layout = ImageInfo(**{k: v for k, v in layout.items() if k in field_names})
         if hasattr(self, 'surface'):
             self._rebuild_surface()
 
-    def get_layout(self) -> dict:
+    def get_layout(self) -> ImageInfo:
         """Serialize image properties (path and visibility)."""
-        layout = self._get_common_layout()
-        layout.update({
-            "_type": "Image",
-            "image_path": self.image_path,
-            "default_color": [self.default_color[0], self.default_color[1], self.default_color[2]],
-            
-        })
+        layout = ImageInfo(
+            common_layout=self._get_common_layout(),
+            _type="Image",
+            image_path=self.image_path,
+            default_color=[self.default_color[0], self.default_color[1], self.default_color[2]]
+        )
         return layout
     
     def print_info(self) -> None:
         """Print image properties for debugging."""
         self.print_common_info()
         print(f"Image Path: {self.image_path}")
+
+@dataclass
+class ImageInfo:
+    common_layout: UIElementInfo
+    _type: str
+    image_path: str
+    default_color: list[int]

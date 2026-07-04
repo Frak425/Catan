@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import json
 from pathlib import Path
 import pygame
@@ -5,6 +6,7 @@ from typing import Any
 
 from src.managers.base_manager import BaseManager
 from src.managers.animation.animation_manager import AnimationManager
+from src.managers.dataclasses import GameConfig
 from src.ui.elements.button import Button
 from src.ui.elements.image import Image
 from src.ui.elements.slider import Slider
@@ -117,6 +119,7 @@ class GameManager(BaseManager):
         self.num_tiles = 19
         self.turn_order = 1
 
+    #TODO: Generalize because this essentially acts as "find selected from ui"
     def _selected_choice_from_setup_buttons(self, choices: dict[str, str], default: str) -> str:
         """
         Resolve the selected value from setup-page mutually exclusive buttons.
@@ -147,7 +150,7 @@ class GameManager(BaseManager):
 
         return default
 
-    def collect_setup_game_settings(self) -> dict[str, Any]:
+    def collect_setup_game_settings(self) -> GameConfig:
         """
         Collect current setup-page selections and return new game settings.
 
@@ -190,27 +193,24 @@ class GameManager(BaseManager):
         time_limit_slider = setup_sliders.get("time_limit_slider") if isinstance(setup_sliders, dict) else None
 
         time_limit_enabled = bool(getattr(time_limit_toggle, "on", False))
+
         time_limit_value = None
-        if time_limit_enabled and time_limit_slider is not None:
-            time_limit_value = int(round(getattr(time_limit_slider, "value", 0)))
+        time_limit_value = int(round(getattr(time_limit_slider, "value", 0)))
 
-        player_colors = list(getattr(self, "player_colors", []))
-        selected_color = None
-        if player_colors:
-            selected_color = player_colors[self.player_color_chosen_index % len(player_colors)]
+        if self.player_colors:
+            selected_color= self.player_colors[self.player_color_chosen_index % len(self.player_colors)]
 
-        settings = {
-            "players_num": int(self.players_num),
-            "player_color": selected_color,
-            "player_color_index": int(self.player_color_chosen_index),
-            "difficulty": difficulty,
-            "points_to_win": int(self.points_to_win),
-            "dice_mode": dice_mode,
-            "robber_mode": robber_mode,
-            "turn_order": int(self.turn_order),
-            "time_limit_enabled": time_limit_enabled,
-            "time_limit_seconds": time_limit_value,
-        }
+        settings = GameConfig(
+            players_num=int(self.players_num),
+            player_color=selected_color,
+            difficulty=difficulty,
+            points_to_win=int(self.points_to_win),
+            dice_mode=dice_mode,
+            robber_mode=robber_mode,
+            turn_order=int(self.turn_order),
+            time_limit_enabled=time_limit_enabled,
+            time_limit_seconds=time_limit_value,
+        )
 
         return settings
     
@@ -579,3 +579,4 @@ class GameManager(BaseManager):
         self.load_config(file, True)
 
         self.input_manager.reset_ui()
+

@@ -1,7 +1,11 @@
+from dataclasses import dataclass
+from tkinter.font import names
+
 import pygame
 from typing import Dict
 from typing import TYPE_CHECKING
 from src.managers.base_manager import BaseManager
+from src.managers.dataclasses import PlayerConfig
 from src.ui.ui_element import UIElement
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
@@ -53,7 +57,7 @@ class InputManager(BaseManager):
         self.audio_manager: AudioManager = self.get_dependency('audio_manager')
         self.player_manager: PlayerManager = self.get_dependency('player_manager')
         
-    def init(self):
+    def post_init(self):
         """
         Initialize input handling subsystems and create UI elements.
         
@@ -495,9 +499,20 @@ class InputManager(BaseManager):
         """Collect setup choices, initialize players, and transition to game initialization."""
         setup_settings = self.game_manager.collect_setup_game_settings()
 
-        # Initialize player roster and persist setup snapshot for the upcoming game.
-        if hasattr(self.player_manager, 'begin_new_game'):
-            self.player_manager.begin_new_game(setup_settings)
+        #TODO: add collecting colors and players, random names from ai/player class?
+        #TODO: currently no accounts, so name is randomized
+        #temp
+        names = self.player_manager.create_random_names(setup_settings.players_num)
+        colors = self.player_manager.get_available_colors(setup_settings.player_color)
+
+        if len(names) != len(colors):
+            raise ValueError("names and colors must have the same length")
+
+        player_configs = []
+        for name, color in zip(names, colors):
+            player_configs.append(PlayerConfig(name=name, color=color))
+
+        self.player_manager.create_players(player_configs)
 
         self.game_manager.game_state = "init"
 
