@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import math
 import pygame
 
@@ -21,8 +19,10 @@ directions = [(+1, -1, 0),
 tiles: list[Tile] = []
 verts: list[Vertex] = []
 edges: list[Edge] = []
+board_center: tuple[float, float] = (0.0, 0.0)
 
 def main():
+    global board_center
     pygame.init()
     screen_info = pygame.display.Info()
 
@@ -30,6 +30,7 @@ def main():
     screen_h = min(screen_info.current_h, screen_y)
 
     center = (screen_w // 2, screen_h // 2)
+    board_center = center
 
     seed_tile = Tile(0, center, global_radius, 0, "test", 0, 0, 0)
     tiles.append(seed_tile)
@@ -40,8 +41,8 @@ def main():
 
     create_tiles(seed_tile)
     print_items(tiles, edges, verts)
+    print(f"len(tiles): {len(tiles)}, len(edges): {len(edges)}, len(verts): {len(verts)}")
     visualize_graph(screen_w, screen_h)
-
 
 def create_tiles(center_tile: Tile):
     #first ring
@@ -49,9 +50,9 @@ def create_tiles(center_tile: Tile):
     create_ring_tiles(center_tile)
 
     #second ring
-    """first_ring: list[Tile] = tiles[1:7]
+    first_ring: list[Tile] = tiles[1:7]
     for tile in first_ring:
-        create_ring_tiles(tile)"""
+        create_ring_tiles(tile)
 
 
     #populate edge, vertex, and tile neighbors after all initialized
@@ -70,14 +71,18 @@ def create_ring_tiles(center_tile: Tile):
             if (direction[0] + center_tile.p, direction[1] + center_tile.q, direction[2] + center_tile.s) == (tile.p, tile.q, tile.s):
                 break
         else: # else create new tile in that direction
-            new_center_x = center_tile.center[0] + global_radius * math.sqrt(3) * (center_tile.p + direction[0] + (center_tile.q + direction[2]) / 2)
-            new_center_y = center_tile.center[1] + global_radius * 3/2 * (center_tile.p + direction[2])
-            new_tile = Tile(len(tiles), (new_center_x, new_center_y), global_radius, len(tiles), "test", center_tile.p + direction[0], center_tile.q + direction[1], center_tile.s + direction[2])
+            new_p = center_tile.p + direction[0]
+            new_q = center_tile.q + direction[1]
+            new_s = center_tile.s + direction[2]
+
+            new_center_x = board_center[0] + global_radius * math.sqrt(3) * (new_p + new_s / 2)
+            new_center_y = board_center[1] + global_radius * 3 / 2 * new_s
+
+            new_tile = Tile(len(tiles), (new_center_x, new_center_y), global_radius, len(tiles), "test", new_p, new_q, new_s)
             
             tiles.append(new_tile)
             new_tile.create_verts()
             new_tile.create_edges()
-
 
 def visualize_graph(screen_w: int, screen_h: int):
     screen = pygame.display.set_mode((screen_w, screen_h))
@@ -95,19 +100,25 @@ def visualize_graph(screen_w: int, screen_h: int):
         screen.fill((20, 20, 20))
 
         for tile in tiles:
-            pygame.draw.circle(screen, (255, 255, 255), (int(tile.center[0]), int(tile.center[1])), 2)
+            polygon_points = [tile._vertex_position(i) for i in range(6)]
+            pygame.draw.polygon(screen, (50, 50, 50), polygon_points)
+            pygame.draw.polygon(screen, (110, 110, 110), polygon_points, 1)
+
+            for i in range(6):
+                edge_start = tile._vertex_position(i)
+                edge_end = tile._vertex_position((i + 1) % 6)
+                pygame.draw.aaline(screen, (80, 80, 80), edge_start, edge_end)
 
         for edge in edges:
-            pygame.draw.circle(screen, (0, 255, 120), (int(edge.center[0]), int(edge.center[1])), 3)
+            pygame.draw.circle(screen, (0, 255, 120), (int(edge.center[0]), int(edge.center[1])), 4)
 
         for vertex in verts:
-            pygame.draw.circle(screen, (0, 120, 255), (int(vertex.center[0]), int(vertex.center[1])), 4)
+            pygame.draw.circle(screen, (0, 120, 255), (int(vertex.center[0]), int(vertex.center[1])), 5)
 
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
-
 
 def print_items(tiles_list: list[Tile], edges_list: list[Edge], verts_list: list[Vertex]):
     """for tile in tiles_list:
@@ -136,34 +147,26 @@ class Tile:
 
     def create_edges(self):
         for i in range(6):
-            edge_x = self.center[0] + math.cos(math.pi / 3 * (-i+2)) * self.radius
-            edge_y = self.center[1] + math.sin(math.pi / 3 * (-i+2)) * self.radius
-            edge_center = (edge_x, edge_y)
+            edge_center = self._edge_center(i)
 
-            id = f"({math.floor(edge_x)},{math.floor(edge_y)})"
+            id = f"({round(edge_center[0], 6)},{round(edge_center[1], 6)})"
 
-            if len(edges) == 0:
+            for edge in edges:
+                if edge.id == id:
+                    if self not in edge.adj_tiles:
+                        edge.add_tile(self)
+                    self.adj_edges.append(edge)
+                    break
+            else:
                 new_edge = Edge(id, edge_center, self)
                 self.adj_edges.append(new_edge)
                 edges.append(new_edge)
-                
-            else:
-                for edge in edges:
-                    if edge.id == id:
-                        self.adj_edges.append(edge)
-                        break
-                else:
-                    new_edge = Edge(id, edge_center, self)
-                    self.adj_edges.append(new_edge)
-                    edges.append(new_edge)
 
     def create_verts(self):
         for i in range(6):
-            vert_x = self.center[0] + math.cos(math.pi / 3 * (-i+2)) * self.radius
-            vert_y = self.center[1] + math.sin(math.pi / 3 * (-i+2)) * self.radius
-            vert_center = (vert_x, vert_y)
+            vert_center = self._vertex_position(i)
 
-            id = f"({math.floor(vert_x)},{math.floor(vert_y)})"
+            id = f"({round(vert_center[0], 6)},{round(vert_center[1], 6)})"
 
             for vertex in verts:
                 if vertex.id == id:
@@ -182,6 +185,22 @@ class Tile:
 
     def add_neighbor(self, neighbor):
         self.adj_tiles.append(neighbor)
+
+    def _vertex_position(self, idx: int) -> tuple[float, float]:
+        angle = math.pi / 3 * idx - math.pi / 2
+        return (
+            self.center[0] + math.cos(angle) * self.radius,
+            self.center[1] + math.sin(angle) * self.radius,
+        )
+
+    def _edge_center(self, idx: int) -> tuple[float, float]:
+        v1 = self._vertex_position(idx)
+        v2 = self._vertex_position((idx + 1) % 6)
+
+        return (
+            (v1[0] + v2[0]) / 2.0,
+            (v1[1] + v2[1]) / 2.0,
+        )
 
     def populate_edge_to_edge_neighbors(self):
         for i in range(6):
@@ -228,6 +247,10 @@ class Tile:
             if self not in edge.adj_tiles:
                 edge.adj_tiles.append(self)
 
+            for tile in edge.adj_tiles:
+                if tile is not self and tile not in self.adj_tiles:
+                    self.adj_tiles.append(tile)
+
     def populate_vert_to_tile_neighbors(self):
         for vertex in self.adj_verts:
             if self not in vertex.adj_tiles:
@@ -255,7 +278,7 @@ class Edge:
         self.adj_verts.append(vertex)
 
     def __str__(self) -> str:
-        return f"Edge(id={self.id}, num_adj_tiles={len(self.adj_tiles)}, num_adj_verts={len(self.adj_verts)}, num_adj_edges={len(self.adj_edges)}"
+        return f"Edge(id={self.id}, num_adj_tiles={len(self.adj_tiles)}, num_adj_verts={len(self.adj_verts)}, num_adj_edges={len(self.adj_edges)})"
 
 class Vertex:
     def __init__(self, id: str, center: tuple, tile: Tile) -> None:
@@ -276,7 +299,7 @@ class Vertex:
         self.adj_verts.append(vertex)
 
     def __str__(self) -> str:
-        return f"Vertex(id={self.id}, num_adj_tiles={len(self.adj_tiles)}, num_adj_verts={len(self.adj_verts)}, num_adj_edges={len(self.adj_edges)}"
+        return f"Vertex(id={self.id}, num_adj_tiles={len(self.adj_tiles)}, num_adj_verts={len(self.adj_verts)}, num_adj_edges={len(self.adj_edges)})"
 
 
 if __name__ == "__main__":
