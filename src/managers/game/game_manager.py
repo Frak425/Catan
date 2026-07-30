@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
 import pygame
@@ -6,7 +6,6 @@ from typing import Any
 
 from src.managers.base_manager import BaseManager
 from src.managers.animation.animation_manager import AnimationManager
-from src.managers.dataclasses import GameConfig
 from src.ui.elements.button import Button
 from src.ui.elements.image import Image
 from src.ui.elements.slider import Slider
@@ -175,7 +174,7 @@ class GameManager(BaseManager):
             dice_mode= self._selected_choice_from_setup_buttons({"set_dice_mode_random": "random", "set_dice_mode_balanced": "balanced",}, default="random"),
             robber_mode= self._selected_choice_from_setup_buttons({"set_robber_mode_friendly": "friendly", "set_robber_mode_standard": "standard",}, default="friendly"),
             turn_order= int(self.turn_order),
-            time_limit_enabled= bool(getattr(time_limit_toggle, "on", False))
+            time_limit_enabled= bool(getattr(time_limit_toggle, "on", False)),
             time_limit_seconds= int(round(getattr(time_limit_slider, "value", 0)))
         )
 
@@ -357,7 +356,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing button properties (name, rect, color, etc.)
         """
-        return [button.get_layout() for button in buttons.values()]
+        return [asdict(button.get_layout()) for button in buttons.values()]
 
     def convert_images_to_list(self, images: dict[str, Image]) -> list:
         """
@@ -369,7 +368,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing image properties (name, rect, file_path)
         """
-        return [image.get_layout() for image in images.values()]
+        return [asdict(image.get_layout()) for image in images.values()]
 
     def convert_sliders_to_list(self, sliders: dict[str, Slider]) -> list:
         """
@@ -381,7 +380,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing slider properties (name, rect, min/max values, colors)
         """
-        return [slider.get_layout() for slider in sliders.values()]
+        return [asdict(slider.get_layout()) for slider in sliders.values()]
 
     def convert_toggles_to_list(self, toggles: dict[str, Toggle]) -> list:
         """
@@ -393,7 +392,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing toggle properties (name, rect, animation settings)
         """
-        return [toggle.get_layout() for toggle in toggles.values()]
+        return [asdict(toggle.get_layout()) for toggle in toggles.values()]
 
     def convert_text_displays_to_list(self, text_displays: dict[str, TextDisplay]) -> list:
         """
@@ -405,14 +404,14 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing text display properties (name, rect, text, colors)
         """
-        return [text_display.get_layout() for text_display in text_displays.values()]
+        return [asdict(text_display.get_layout()) for text_display in text_displays.values()]
 
     def convert_scrollable_areas_to_list(self, scrollable_areas: dict) -> list:
         """Convert scrollable area dictionary to list format for JSON serialization."""
-        return [area.get_layout() for area in scrollable_areas.values()]
-
+        return [asdict(area.get_layout()) for area in scrollable_areas.values()]
+    
     def convert_tiles_to_list(self, tiles: dict) -> list:
-        return [tile.get_layout() for tile in tiles.values()]
+        return [asdict(tile.get_layout()) for tile in tiles.values()]
 
     #TODO: Implement after creating TextInput and MultiSelect classes
     def convert_text_inputs_to_list(self, text_inputs: list) -> list:

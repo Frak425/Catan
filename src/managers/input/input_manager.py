@@ -5,7 +5,7 @@ import pygame
 from typing import Dict
 from typing import TYPE_CHECKING
 from src.managers.base_manager import BaseManager
-from src.managers.dataclasses import PlayerConfig
+from src.managers.player.player import PlayerInfo
 from src.ui.ui_element import UIElement
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from src.managers.helper.helper_manager import HelperManager
     from src.managers.audio.audio_manager import AudioManager
     from src.managers.player.player_manager import PlayerManager
+    from src.managers.helper.constants import Constants
 
 # Import the new handler classes
 from src.ui.elements.menu import Menu
@@ -509,9 +510,19 @@ class InputManager(BaseManager):
             raise ValueError("names and colors must have the same length")
 
         player_configs = []
-        for name, color in zip(names, colors):
-            player_configs.append(PlayerConfig(name=name, color=color))
-
+        for i in range(len(min(names, colors))):
+            player_configs.append(PlayerInfo(
+                player_id=i,
+                name=names[i],
+                color=colors[i],
+                resources=Constants.default_player_resources.copy(),
+                victory_points=Constants.victory_points,
+                #TODO: change to be locations
+                roads_built=Constants.roads_built,
+                settlements_built=Constants.settlements_built,
+                cities_built=Constants.cities_built,
+                development_cards=[]
+            ))
         self.player_manager.create_players(player_configs)
 
         self.game_manager.game_state = "init"

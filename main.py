@@ -119,7 +119,7 @@ input_manager.post_init()  # Creates UI from game_manager.layout
 driver_manager.create_driver_registry()
 
 audio_manager.post_init()
-player_manager.init([])
+#player_manager.init([])
 helper_manager.post_init()
 
 frame_times = []

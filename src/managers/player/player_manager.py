@@ -32,7 +32,6 @@ class PlayerManager(BaseManager):
                 Player(
                     player_id=i + 1,
                     player_config=player_configs[i]
-                    resources
                 )
             )
 
@@ -144,14 +143,14 @@ class PlayerManager(BaseManager):
     def get_player(self, player_name: str) -> Player | None:
         """Get a player by exact name."""
         for player in self.players:
-            if player.name == player_name:
+            if player.config.name == player_name:
                 return player
         return None
 
     def get_player_resources(self, player_name: str) -> object:
         """Returns the specified player's resources"""
         player = self.get_player(player_name)
-        return dict(player.resources) if player else None
+        return dict(player.config.resources) if player else None
 
     def perform_action(self, action: str, *args) -> None:
         """Perform a basic player mutation action.
@@ -192,16 +191,16 @@ class PlayerManager(BaseManager):
 
         elif action == 'add_points':
             amount = int(args[1]) if len(args) > 1 else 1
-            player.points = player.points + amount
+            player.config.victory_points = player.config.victory_points + amount
 
         elif action == 'set_points':
-            value = int(args[1]) if len(args) > 1 else player.points
-            player.points = value
-
+            value = int(args[1]) if len(args) > 1 else player.config.victory_points
+            player.config.victory_points = value
+    
     def check_winner(self):
         points_to_win = int(getattr(self.game_manager, 'points_to_win', 10))
         for player in self.players:
-            if player.points >= points_to_win:
+            if player.config.victory_points >= points_to_win:
                 return player
 
         return None
