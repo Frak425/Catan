@@ -12,6 +12,14 @@ from src.managers.input.input_manager import InputManager
 from src.managers.player.player_manager import PlayerManager
 from src.managers.animation.driver_manager import DriverManager
 
+
+"""current issues: 
+1.) saving doesn't work, deletes everything when error so add default to layout.json
+ and strictly read from layout_state.json 
+
+2.) can't interact with UIElements on menu
+"""
+
 """
 Thinking about the game logic order
 -Setup:
@@ -127,6 +135,9 @@ event_times = []
 input_times = []
 draw_times = []
 update_times = []
+
+for button_name, button in input_manager.buttons["setup"].items():
+    print(f"Button '{button_name}': {button.rect.topleft}")
 
 while game_manager.running:
     frame_start = time.perf_counter()

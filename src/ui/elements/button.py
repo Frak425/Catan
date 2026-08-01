@@ -1,3 +1,4 @@
+from dataclasses import field
 from operator import call
 
 from attr import dataclass, fields
@@ -93,6 +94,8 @@ class Button(UIElement):
 
         # assigns all values in the dataclass to the button class itself
         for name, value in vars(self.layout).items():
+            if name == "callback":
+                continue
             setattr(self, name, value)
 
     ## --- TEXT MANAGEMENT --- ##
@@ -240,7 +243,10 @@ class Button(UIElement):
         self._read_common_layout(layout)
 
         field_names = {f.name for f in fields(ButtonInfo)}
-        self.layout = ButtonInfo(**{k: v for k, v in layout.items() if k in field_names})
+        self.layout = ButtonInfo(
+            common_layout=self.common_layout,
+            **{k: v for k, v in layout.items() if k in field_names and k != "common_layout"}
+        )
 
     def get_layout(self) -> ButtonInfo:
         """
@@ -295,15 +301,15 @@ class Button(UIElement):
 @dataclass
 class ButtonInfo:
     common_layout: UIElementInfo
-    callback: str
-    color: list[int]
-    text_align: str
-    text: str
-    padding: int
-    disabled: bool
-    text_color: list[int]
-    border_radius: int
-    border_top_right_radius: int
-    border_top_left_radius: int
-    border_bottom_right_radius: int
-    border_bottom_left_radius: int
+    callback: str = ""
+    color: list[int] = field(default_factory=lambda: [255, 255, 255])
+    text_align: str = "center"
+    text: str = ""
+    padding: int = 5
+    disabled: bool = False
+    text_color: list[int] = field(default_factory=lambda: [255, 255, 255])
+    border_radius: int = 0
+    border_top_right_radius: int = 0
+    border_top_left_radius: int = 0
+    border_bottom_right_radius: int = 0
+    border_bottom_left_radius: int = 0

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 
 import pygame
 
@@ -348,7 +348,10 @@ class Slider(UIElement):
         self._read_common_layout(layout_props)
 
         field_names = {f.name for f in fields(SliderInfo)}
-        self.layout = SliderInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        self.layout = SliderInfo(
+            common_layout=self._get_common_layout(),
+            **{k: v for k, v in layout_props.items() if k in field_names}
+        )
     
     def get_layout(self) -> SliderInfo:
         """Serialize slider properties to config dict."""
@@ -381,11 +384,11 @@ class Slider(UIElement):
 @dataclass
 class SliderInfo:
     common_layout: UIElementInfo
-    min_value: int
-    max_value: int
-    color: list[int]
-    handle_color: list[int]
-    handle_radius: int
-    direction: str
-    handle_shape: str
-    handle_length: int
+    min_value: int = 0
+    max_value: int = 100
+    color: list[int] = field(default_factory=lambda: [100, 200, 255, 255])
+    handle_color: list[int] = field(default_factory=lambda: [255, 255, 0, 255])
+    handle_radius: int = 10
+    direction: str = "horizontal"
+    handle_shape: str = "circle"
+    handle_length: int = 20

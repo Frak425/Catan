@@ -1,8 +1,6 @@
 import pygame
 from typing import Dict, TYPE_CHECKING
 
-from src.ui.elements.tile import Tile
-
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
     from input_manager import InputManager
@@ -145,18 +143,20 @@ class UIFactory:
                 elements_list = layout[state][element_type]
                 for element_props in elements_list:
                     name = element_props.get('name')
-                    element = factory_func(element_props, callbacks, state, None)
+                    element = factory_func(element_props, callbacks, state)
                     if element:
                         result[state][name] = element
         return result
 
-    def _resolve_menu_tabs(self, menu_config: dict, element_config, default_tabs: list[str]) -> list[str]:
+    def _resolve_menu_tabs(self, menu_config: dict, element_config) -> list[str]:
         """
         Resolve tab names for a menu from config.
         """
+        # getting the list of tab names (menus -> tabs)
         tabs_from_menu = menu_config.get("tabs", [])
         if not isinstance(tabs_from_menu, list):
             tabs_from_menu = []
+
 
         tabs = list(tabs_from_menu)
         if isinstance(element_config, dict):
@@ -165,40 +165,55 @@ class UIFactory:
                     tabs.append(tab_name)
 
         if not tabs:
-            tabs = list(element_config.keys()) if isinstance(element_config, dict) else default_tabs
+            tabs = list(element_config.keys()) if isinstance(element_config, dict) else []
 
         return tabs
 
-    def _create_menu_elements(self, layout: dict, element_type: str, factory_func, callbacks: dict) -> Dict[str, Dict]:
+    def _create_menu_elements(self, layout: dict, element_type: str, factory_func, callbacks: dict) -> Dict[str, Dict[str, Menu]]:
         """
-        Create elements for menu tabs (multi-menu support).
-        """
-        result = {"menus": {}}
-        default_tabs = ["tabs", "input", "accessibility", "graphics", "audio", "gameplay"]
+        Create menu instances for each game-state section.
 
-        menus = layout.get("menus", [])
-        if isinstance(menus, list):
-            for menu_config in menus:
+        The new layout structure stores menus inside the same state sections
+        as other UI elements (home/setup/game). For transition support, this
+        also accepts the legacy top-level `menus` array when state sections do
+        not contain menu objects yet.
+        """
+        result: Dict[str, Dict[str, Menu]] = {"home": {}, "setup": {}, "game": {}}
+
+        if not isinstance(layout, dict):
+            return result
+
+        legacy_menus = layout.get("menus", [])
+        legacy_menu_lookup = {}
+        if isinstance(legacy_menus, list):
+            for menu_config in legacy_menus:
+                if isinstance(menu_config, dict):
+                    menu_name = menu_config.get("name")
+                    if menu_name:
+                        legacy_menu_lookup[menu_name] = menu_config
+
+        for state in ["home", "setup", "game"]:
+            state_menu_configs = []
+            state_layout = layout.get(state, {})
+            if isinstance(state_layout, dict):
+                menus_from_state = state_layout.get("menus", [])
+                if isinstance(menus_from_state, list):
+                    for menu_config in menus_from_state:
+                        if isinstance(menu_config, dict):
+                            state_menu_configs.append(menu_config)
+                        elif isinstance(menu_config, str) and menu_config in legacy_menu_lookup:
+                            state_menu_configs.append(legacy_menu_lookup[menu_config])
+
+            # Backward compatibility: if the state has no embedded menus yet,
+            # fall back to any menu objects declared at the top level.
+            if not state_menu_configs and legacy_menu_lookup:
+                state_menu_configs = list(legacy_menu_lookup.values())
+
+            for menu_config in state_menu_configs:
                 menu_name = menu_config.get("name", "menu")
-                element_config = menu_config.get(element_type, {})
-                tabs = self._resolve_menu_tabs(menu_config, element_config, default_tabs)
-
-                result["menus"][menu_name] = {tab: {} for tab in tabs}
-
-                if isinstance(element_config, dict):
-                    for tab in tabs:
-                        tab_elements = element_config.get(tab, {})
-                        if isinstance(tab_elements, dict):
-                            for name, element_props in tab_elements.items():
-                                element = factory_func(element_props, callbacks, "menu", tab)
-                                if element:
-                                    result["menus"][menu_name][tab][name] = element
-                        elif isinstance(tab_elements, list):
-                            for element_props in tab_elements:
-                                name = element_props.get("name")
-                                element = factory_func(element_props, callbacks, "menu", tab)
-                                if element:
-                                    result["menus"][menu_name][tab][name] = element
+                menu = factory_func(menu_config, callbacks, state)
+                if menu:
+                    result[state][menu_name] = menu
 
         return result
 
@@ -209,7 +224,7 @@ class UIFactory:
         Args:
             element_type: Type of elements to create ('buttons', 'sliders', etc.)
             factory_func: Factory function that creates individual elements
-                         Signature: (props, callbacks, state, tab) -> UIElement
+                         Signature: (props, callbacks, state) -> UIElement
             callbacks: Dict of callback functions to pass to factory
         
         Returns:
@@ -234,19 +249,18 @@ class UIFactory:
         1. Return empty structure if no layout loaded
         2. Iterate through non-menu states (home, setup, game)
         3. For each state, extract element_type array and create elements
-        4. Iterate through menu tabs from layout.menus array
+          4. Menus are handled separately by create_all_menus() because they now
+              live inside each state section instead of a top-level bucket
         5. For each tab, extract elements dict and create elements
         
         Note: Non-menu states use arrays of elements, menu tabs use dicts keyed by name
         """
         layout = getattr(self.game_manager, 'layout', None)
         if not layout:
-            return {"home": {}, "setup": {}, "game": {}, "menus": {}}
+            return {"home": {}, "setup": {}, "game": {}}
 
         result = self._create_state_elements(layout, element_type, factory_func, callbacks)
-        menu_result = self._create_menu_elements(layout, element_type, factory_func, callbacks)
 
-        result.update(menu_result)
         return result
     
     def create_all_buttons(self, callbacks, animations: dict, drivers: dict):
@@ -270,9 +284,10 @@ class UIFactory:
         - First check element config for 'callback' property
         - If still no callback, button is created without callback (visual only)
         """
+        #TODO: move to appropiate init place
         self.register_callbacks(callbacks)
         
-        def button_factory(props, cbs, state, tab):
+        def button_factory(props, cbs, state):
             button_name = str(props.get('name', '')).strip()
             callback = self._resolve_callback(props)
 
@@ -285,22 +300,6 @@ class UIFactory:
             return button
         
         result = self._create_elements_from_layout('buttons', button_factory, callbacks)
-        
-        # Note: Tab buttons should always be loaded from layout.json
-        # If no tabs found in config, the layout.json is incomplete
-        menu_tabs = {}
-        menus_result = result.get("menus", {})
-        if isinstance(menus_result, dict):
-            settings_menu_tabs = menus_result.get("settings", {}).get("tabs", {})
-            if isinstance(settings_menu_tabs, dict):
-                menu_tabs = settings_menu_tabs
-            elif menus_result:
-                first_menu = next(iter(menus_result.values()))
-                if isinstance(first_menu, dict):
-                    menu_tabs = first_menu.get("tabs", {}) if isinstance(first_menu.get("tabs", {}), dict) else {}
-
-        if not menu_tabs:
-            print("Warning: No tab buttons found in layout.json. Menu tabs will not work.")
         
         return result
 
@@ -321,7 +320,7 @@ class UIFactory:
         
         Note: Player number slider gets lambda wrapper to convert float to int
         """
-        def slider_factory(props, cbs, state, tab):
+        def slider_factory(props, cbs, state):
             initial_value = props.get('initial_value', props.get('min_value', 0))
             
             slider = Slider(props, initial_value, self.game_manager, None)
@@ -359,7 +358,7 @@ class UIFactory:
         - callback: Function called when toggle is switched
         - Requires graphics_manager.time for animation timing
         """
-        def toggle_factory(props, cbs, state, tab):
+        def toggle_factory(props, cbs, state):
             initial_on = props.get('on', self.game_manager.default_on)
             callback = self._resolve_callback(props)
             toggle = Toggle(props, self.game_manager.graphics_manager.time, self.game_manager, on=initial_on, callback=callback)
@@ -386,7 +385,7 @@ class UIFactory:
         - callback: Optional function called when image is clicked (for clickable images)
         - Can be used for decorative images (no callback) or interactive images (with callback)
         """
-        def image_factory(props, cbs, state, tab):
+        def image_factory(props, cbs, state):
             callback = self._resolve_callback(props)
             image = Image(props, self.game_manager, callback=callback)
             
@@ -397,32 +396,6 @@ class UIFactory:
             return image
         
         return self._create_elements_from_layout('images', image_factory, callbacks)
-
-    def create_all_tiles(self, callbacks, animations: dict, drivers: dict) -> Dict[str, Dict]:
-        """
-        Create all tile elements dynamically from layout config.
-        
-        Args:
-            callbacks: Dict of callback functions from InputManager
-        
-        Returns:
-            Dict[str, Dict]: Tile instances organized by state and tab
-        
-        Tile Configuration:
-        - color: RGB color of the tile (default: white)
-        - callback: Optional function called when tile is clicked (for interactive tiles)
-        """
-        def tile_factory(props, cbs, state, tab):
-            callback = self._resolve_callback(props)
-            tile = Tile(self.game_manager, props, callback=callback)
-            
-            # Attach sprite animation and drivers
-            self._attach_sprite_animation(tile, props, animations)
-            self._attach_drivers(tile, props, drivers)
-            
-            return tile
-        
-        return self._create_elements_from_layout('tiles', tile_factory, callbacks)
 
     def create_all_text_displays(self, callbacks, animations: dict, drivers: dict) -> Dict[str, Dict]:
         """
@@ -439,7 +412,7 @@ class UIFactory:
         - Uses game_manager.font for rendering
         - Can display static text or dynamic text (updated via callback)
         """
-        def text_display_factory(props, cbs, state, tab):
+        def text_display_factory(props, cbs, state):
             callback = self._resolve_callback(props)
             text_display = TextDisplay(props, self.game_manager, self.game_manager.font, callback=callback)
             
@@ -495,7 +468,7 @@ class UIFactory:
         Note: Current implementation creates placeholder gradient surfaces.
               Production use requires updating content_surface after creation.
         """
-        def scrollable_area_factory(props, cbs, state, tab):
+        def scrollable_area_factory(props, cbs, state):
             content_height = props.get('content_height', 600)
             content_width = props.get('viewable_content_width', 200)
             content_surface = self._create_test_gradient_surface(content_width, content_height)
@@ -506,9 +479,9 @@ class UIFactory:
 
     ## --- MENU ASSEMBLY --- ##
     
-    def create_all_menus(self, buttons, toggles, sliders, images, text_displays) -> dict:
+    def create_all_menus(self, buttons, toggles, sliders, images, text_displays, callbacks, animations: dict, drivers: dict) -> dict[str, dict]:
         """
-        Create all menus from layout.menus array and assemble with UI elements.
+        Create all menus from state-level layout sections and assemble UI elements.
         
         Args:
             buttons: All created button instances (organized by state/tab)
@@ -518,62 +491,117 @@ class UIFactory:
             text_displays: All created text display instances (organized by state/tab)
         
         Returns:
-            dict: Menu instances keyed by name (e.g., {'settings': Menu})
+            dict[str, dict[str, Menu]]: Menu instances keyed by state then menu name
         
         Process:
-        1. Iterate through layout.menus array
-        2. For each menu config, create Menu instance with all element collections
-        3. Menu class handles filtering elements for its tabs
-        4. If no menus in config, create default 'settings' menu for compatibility
+        1. Read menus from each state section (home/setup/game)
+        2. Fall back to top-level menus for older layout files
+        3. For each menu config, create a Menu instance with all element collections
+        4. Menu class handles filtering elements for its tabs
         
         Menu Structure:
         - Each Menu contains tabs (input, accessibility, graphics, audio, gameplay)
         - Tabs contain filtered subsets of buttons, toggles, sliders, etc.
         - Menu handles rendering and tab switching logic
         """
+
+        def _build_collection(collection_config, element_factory):
+            result = {}
+            if not isinstance(collection_config, dict):
+                return result
+
+            for tab_name, tab_elements in collection_config.items():
+                tab_result = {}
+
+                if isinstance(tab_elements, dict):
+                    iterable = tab_elements.items()
+                elif isinstance(tab_elements, list):
+                    iterable = ((element_props.get("name"), element_props) for element_props in tab_elements if isinstance(element_props, dict))
+                else:
+                    iterable = []
+
+                for element_name, element_props in iterable:
+                    if not isinstance(element_props, dict):
+                        continue
+                    if not element_name:
+                        element_name = element_props.get("name")
+                    if not element_name:
+                        continue
+
+                    element = element_factory(element_props)
+                    if element:
+                        tab_result[element_name] = element
+
+                result[tab_name] = tab_result
+
+            return result
+
+        def menu_factory_func(props, cbs, state):
+            buttons_config = props.get("buttons", {})
+            toggles_config = props.get("toggles", {})
+            sliders_config = props.get("sliders", {})
+            images_config = props.get("images", {})
+            text_displays_config = props.get("text_displays", {})
+
+            def button_element_factory(element_props):
+                callback = self._resolve_callback(element_props)
+                button = Button(element_props, self.game_manager.font, self.game_manager, callback=callback)
+                self._attach_sprite_animation(button, element_props, animations)
+                self._attach_drivers(button, element_props, drivers)
+                return button
+
+            def toggle_element_factory(element_props):
+                initial_on = element_props.get('on', self.game_manager.default_on)
+                callback = self._resolve_callback(element_props)
+                toggle = Toggle(element_props, self.game_manager.graphics_manager.time, self.game_manager, on=initial_on, callback=callback)
+                self._attach_sprite_animation(toggle, element_props, animations)
+                self._attach_drivers(toggle, element_props, drivers)
+                return toggle
+
+            def slider_element_factory(element_props):
+                initial_value = element_props.get('initial_value', element_props.get('min_value', 0))
+                slider = Slider(element_props, initial_value, self.game_manager, None)
+
+                callback_name = element_props.get('callback')
+                callback_name = str(callback_name).strip() if callback_name else None
+                element_name = str(element_props.get('name', '')).strip()
+
+                if callback_name == 'set_player_num' or element_name == 'player_num_slider':
+                    slider.callback = lambda s=slider: cbs['set_player_num'](int(s.value))
+                else:
+                    slider.callback = self._resolve_callback(element_props)
+
+                self._attach_sprite_animation(slider, element_props, animations)
+                self._attach_drivers(slider, element_props, drivers)
+                return slider
+
+            def image_element_factory(element_props):
+                callback = self._resolve_callback(element_props)
+                image = Image(element_props, self.game_manager, callback=callback)
+                self._attach_sprite_animation(image, element_props, animations)
+                self._attach_drivers(image, element_props, drivers)
+                return image
+
+            def text_display_element_factory(element_props):
+                callback = self._resolve_callback(element_props)
+                text_display = TextDisplay(element_props, self.game_manager, self.game_manager.font, callback=callback)
+                self._attach_sprite_animation(text_display, element_props, animations)
+                self._attach_drivers(text_display, element_props, drivers)
+                return text_display
+
+            buttons_by_tab = _build_collection(buttons_config, button_element_factory)
+            toggles_by_tab = _build_collection(toggles_config, toggle_element_factory)
+            sliders_by_tab = _build_collection(sliders_config, slider_element_factory)
+            images_by_tab = _build_collection(images_config, image_element_factory)
+            text_displays_by_tab = _build_collection(text_displays_config, text_display_element_factory)
+
+            menu = Menu(props, self.game_manager, buttons_by_tab, toggles_by_tab, sliders_by_tab, images_by_tab, text_displays_by_tab)
+            self._attach_sprite_animation(menu, props, animations)
+            self._attach_drivers(menu, props, drivers)
+            return menu
+
         layout = getattr(self.game_manager, 'layout', None)
-        menus = {}
+        if not layout:
+            return {"home": {}, "setup": {}, "game": {}}
 
-        # Support both old (single menu) and new (multi-menu) element collections
-        buttons_by_menu = buttons.get("menus", {}) if isinstance(buttons, dict) else {}
-        toggles_by_menu = toggles.get("menus", {}) if isinstance(toggles, dict) else {}
-        sliders_by_menu = sliders.get("menus", {}) if isinstance(sliders, dict) else {}
-        images_by_menu = images.get("menus", {}) if isinstance(images, dict) else {}
-        text_displays_by_menu = text_displays.get("menus", {}) if isinstance(text_displays, dict) else {}
-
-        if layout and "menus" in layout and isinstance(layout["menus"], list):
-            for menu_config in layout["menus"]:
-                menu_name = menu_config.get("name", "menu")
-
-                menu_buttons = buttons_by_menu.get(menu_name, buttons)
-                menu_toggles = toggles_by_menu.get(menu_name, toggles)
-                menu_sliders = sliders_by_menu.get(menu_name, sliders)
-                menu_images = images_by_menu.get(menu_name, images)
-                menu_text_displays = text_displays_by_menu.get(menu_name, text_displays)
-
-                menu = Menu(
-                    layout_props=menu_config,
-                    game_manager=self.game_manager,
-                    buttons=menu_buttons,
-                    toggles=menu_toggles,
-                    sliders=menu_sliders,
-                    images=menu_images,
-                    text_displays=menu_text_displays
-                )
-                menus[menu_name] = menu
-        
-        # If no menus found in layout, create default settings menu for backwards compatibility
-        if not menus:
-            menu = Menu(
-                layout_props={},
-                game_manager=self.game_manager,
-                buttons=buttons,
-                toggles=toggles,
-                sliders=sliders,
-                images=images,
-                text_displays=text_displays
-            )
-            menus["settings"] = menu
-        
-        return menus
-
+        return self._create_menu_elements(layout, 'menus', menu_factory_func, callbacks)

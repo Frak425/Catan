@@ -1,4 +1,4 @@
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 
 import pygame
 import pytweening as tween
@@ -244,7 +244,9 @@ class Toggle(UIElement):
         self._read_common_layout(layout_props)
 
         field_names = {f.name for f in fields(ToggleInfo)}
-        self.layout = ToggleInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        self.layout = ToggleInfo(
+            common_layout=self._get_common_layout(),
+            **{k: v for k, v in layout_props.items() if k in field_names})
 
         # Recalculate dependent properties
         self.radius = self.height / 2
@@ -279,9 +281,9 @@ class Toggle(UIElement):
 @dataclass
 class ToggleInfo:
     common_layout: UIElementInfo
-    height: int
-    center_width: int
-    color: list[int]
-    handle_color: list[int]
-    toggle_gap: int
-    time_to_flip: float
+    height: int = 70
+    center_width: int = 100
+    color: list[int] = field(default_factory=lambda: [100, 100, 100, 255])
+    handle_color: list[int] = field(default_factory=lambda: [255, 255, 0, 255])
+    toggle_gap: int = 5
+    time_to_flip: float = 0.5

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, fields, fields
+from dataclasses import dataclass, field, fields, fields
 
 import pygame
 import math
@@ -153,7 +153,10 @@ class TextDisplay(UIElement):
         self._read_common_layout(layout_props)
 
         field_names = {f.name for f in fields(TextDisplayInfo)}
-        self.layout = TextDisplayInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        self.layout = TextDisplayInfo(
+            common_layout=self._get_common_layout(),
+            **{k: v for k, v in layout_props.items() if k in field_names}
+        )
 
     def get_layout(self) -> TextDisplayInfo:
         """Serialize text display properties including border_radius (for future use)."""
@@ -190,13 +193,13 @@ class TextDisplay(UIElement):
 @dataclass
 class TextDisplayInfo:
     common_layout: UIElementInfo
-    color: list[int]
-    text: str
-    text_color: list[int]
-    padding: int
-    text_align: str
-    border_radius: int
-    border_top_right_radius: int
-    border_top_left_radius: int
-    border_bottom_right_radius: int
-    border_bottom_left_radius: int
+    color: list[int] = field(default_factory=lambda: [50, 40, 100, 255])
+    text: str = "text"
+    text_color: list[int] = field(default_factory=lambda: [255, 255, 255, 255])
+    padding: int = 5
+    text_align: str = "center"
+    border_radius: int = 0
+    border_top_right_radius: int = 0
+    border_top_left_radius: int = 0
+    border_bottom_right_radius: int = 0
+    border_bottom_left_radius: int = 0

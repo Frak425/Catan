@@ -6,6 +6,8 @@ from typing import Dict
 from typing import TYPE_CHECKING
 from src.managers.base_manager import BaseManager
 from src.managers.player.player import PlayerInfo
+from src.ui.elements.image import Image
+from src.ui.elements.text_display import TextDisplay
 from src.ui.ui_element import UIElement
 if TYPE_CHECKING:
     from src.managers.game.game_manager import GameManager
@@ -92,7 +94,7 @@ class InputManager(BaseManager):
         Process:
         1. Create UIFactory with game_manager and callback registry
         2. Generate all UI elements (buttons, sliders, toggles, etc.) from layout
-        3. Create menus with their nested UI elements
+        3. Create menus from each state section with their nested UI elements
         4. Update references in graphics_manager and mouse_handler
         5. Initialize special UI elements (e.g., player number display)
         """
@@ -105,19 +107,13 @@ class InputManager(BaseManager):
         drivers = self.game_manager.driver_manager.drivers
         
         # Create all UI element collections from layout config
-        self.buttons = self.ui_factory.create_all_buttons(callbacks, animations, drivers)
-        self.toggles = self.ui_factory.create_all_toggles(callbacks, animations, drivers)
-        self.sliders = self.ui_factory.create_all_sliders(callbacks, animations, drivers)
-        self.images = self.ui_factory.create_all_images(callbacks, animations, drivers)
-        self.text_displays = self.ui_factory.create_all_text_displays(callbacks, animations, drivers)
-        self.scrollable_areas = self.ui_factory.create_all_scrollable_areas(callbacks, animations, drivers)
-        self.tiles = self.ui_factory.create_all_tiles(callbacks, animations, drivers)
-        self.menus = self.ui_factory.create_all_menus(
-            self.buttons,
-            self.toggles,
-            self.sliders,
-            self.images,
-            self.text_displays
+        self.buttons: dict[str, dict[str, Button]] = self.ui_factory.create_all_buttons(callbacks, animations, drivers)
+        self.toggles: dict[str, dict[str, Toggle]] = self.ui_factory.create_all_toggles(callbacks, animations, drivers)
+        self.sliders: dict[str, dict[str, Slider]] = self.ui_factory.create_all_sliders(callbacks, animations, drivers)
+        self.images: dict[str, dict[str, Image]] = self.ui_factory.create_all_images(callbacks, animations, drivers)
+        self.text_displays: dict[str, dict[str, TextDisplay]] = self.ui_factory.create_all_text_displays(callbacks, animations, drivers)
+        self.scrollable_areas: dict[str, dict[str, ScrollableArea]] = self.ui_factory.create_all_scrollable_areas(callbacks, animations, drivers)
+        self.menus: dict[str, dict[str, Menu]] = self.ui_factory.create_all_menus(self.buttons, self.toggles, self.sliders, self.images, self.text_displays, callbacks, animations, drivers
         )
         
         # Update graphics_manager's UI references for rendering
@@ -152,8 +148,7 @@ class InputManager(BaseManager):
             "text_displays": self.text_displays,
             "sliders": self.sliders,
             "toggles": self.toggles,
-            "scrollable_areas": self.scrollable_areas,
-            "tiles": self.tiles
+            "scrollable_areas": self.scrollable_areas
         }
 
     ## --- INPUT DELEGATION --- ##
@@ -547,7 +542,7 @@ class InputManager(BaseManager):
         """
         self.close_menu_by_name(name)
     
-    def get_menu(self, name: str):
+    def get_menu(self, name: str) -> Menu | None:
         """
         Retrieve menu by name.
         
@@ -557,7 +552,7 @@ class InputManager(BaseManager):
         Returns:
             Menu object or None if not found
         """
-        return self.menus.get(name)
+        return self.menus[self.game_manager.game_state].get(name)
     
     def open_menu_by_name(self, name: str) -> bool:
         """
@@ -608,14 +603,14 @@ class InputManager(BaseManager):
         
         return True
     
-    def get_open_menus(self):
+    def get_open_menus(self) -> list[Menu]:
         """
         Get list of all currently visible menus.
         
         Returns:
             list: Menu objects that have shown=True
         """
-        return [menu for menu in self.menus.values() if menu.shown]
+        return [menu for menu in self.menus[self.game_manager.game_state].values() if menu.shown]
     
     def get_menus_by_z_index(self, reverse=False) -> list[Menu]:
         """
@@ -632,7 +627,7 @@ class InputManager(BaseManager):
             
         Note: Use reverse=True for drawing (draw back-to-front)
         """
-        return sorted(self.menus.values(), key=lambda m: m.z_index, reverse=reverse)
+        return sorted(self.menus[self.game_manager.game_state].values(), key=lambda m: m.z_index, reverse=reverse)
     
     def close_menus_on_state_change(self):
         """
@@ -641,7 +636,7 @@ class InputManager(BaseManager):
         Iterates through all menus and closes those with close_on_state_change=True.
         Typically called before transitioning between game states (home/setup/game).
         """
-        for menu in self.menus.values():
+        for menu in self.menus[self.game_manager.game_state].values():
             if menu.close_on_state_change and menu.shown:
                 menu.close_menu()
 
@@ -656,49 +651,25 @@ class InputManager(BaseManager):
         """
         self.game_manager.game_state = state
 
-    def change_tab(self, new_tab):
+    def change_tab(self, menu_or_tab: Menu | str, new_tab: str | None = None):
+        """Change the active tab for a menu.
+
+        The existing callbacks pass only the tab name, so this method accepts
+        either a Menu instance plus tab name or just the tab name (defaults to
+        the settings menu).
         """
-        Change active tab across open menus that support the tab.
-        
-        Updates each matching menu's `active_tab` and highlights the corresponding
-        tab button for that specific menu.
-        
-        Args:
-            new_tab: Tab identifier ("input", "accessibility", "gameplay", "audio", "graphics")
-            
-        Note: This supports multi-menu layouts by iterating open menus.
-        """
-        open_menus = self.get_open_menus()
-        if not open_menus:
-            print("Warning: No open menus found")
+        if isinstance(menu_or_tab, Menu):
+            menu = menu_or_tab
+            tab_name = new_tab
+        else:
+            menu = self.get_menu("settings")
+            tab_name = menu_or_tab
+
+        if not menu or not tab_name:
             return
 
-        menus_collection = {}
-        if isinstance(self.buttons, dict):
-            possible_collection = self.buttons.get("menus", {})
-            if isinstance(possible_collection, dict):
-                menus_collection = possible_collection
-
-        updated_any = False
-        for menu in open_menus:
-            menu_button_tabs = {}
-            if isinstance(menus_collection, dict):
-                menu_button_tabs = menus_collection.get(menu.name, {}).get("tabs", {})
-
-            if not isinstance(menu_button_tabs, dict) or new_tab not in menu_button_tabs:
-                continue
-
-            menu.active_tab = new_tab
-            menu_button_tabs[new_tab].color = (0, 100, 0)  # Highlight active tab
-            for tab_name, button in menu_button_tabs.items():
-                if tab_name != new_tab:
-                    button.color = (100, 0, 0)
-
-            menu.update_menu(0)
-            updated_any = True
-
-        if not updated_any:
-            print(f"Warning: No open menu contains tab '{new_tab}'")
+        menu.active_tab = tab_name
+        menu.update_menu(0)
 
     def quit(self):
         """Signal the game to shut down by setting running flag to False."""
@@ -731,4 +702,4 @@ class InputManager(BaseManager):
         self._update_turn_order_ui()
         self._update_time_limit_ui()
 
-        self.change_tab("input")  # Set the initial active tab
+        self.change_tab("input")

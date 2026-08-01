@@ -776,9 +776,34 @@ class UIElement(ABC):
             self.my_property = layout_props.get('my_property', default)  # Then
         ```
         """
-        
-        field_names = {f.name for f in fields(UIElementInfo)}
-        self.common_layout = UIElementInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        rect_values = layout_props.get("rect", [self.rect.x, self.rect.y, self.rect.width, self.rect.height])
+        if isinstance(rect_values, (list, tuple)) and len(rect_values) == 4:
+            self.rect = pygame.Rect(*rect_values)
+
+        name_value = layout_props.get("name", self.name)
+        if isinstance(name_value, str):
+            self.name = name_value
+
+        line_color = layout_props.get(
+            "guiding_line_color",
+            [self.guiding_line_color[0], self.guiding_line_color[1], self.guiding_line_color[2]],
+        )
+        if isinstance(line_color, (list, tuple)) and len(line_color) >= 3:
+            self.guiding_line_color = (line_color[0], line_color[1], line_color[2])
+
+        self.guiding_lines_on = bool(layout_props.get("guiding_lines_on", self.guiding_lines_on))
+        self.active = bool(layout_props.get("active", self.active))
+        self.shown = bool(layout_props.get("shown", self.shown))
+
+        self.common_layout = UIElementInfo(
+            name=self.name,
+            rect=[self.rect.x, self.rect.y, self.rect.width, self.rect.height],
+            guiding_line_color=(self.guiding_line_color[0], self.guiding_line_color[1], self.guiding_line_color[2]),
+            guiding_lines_on=self.guiding_lines_on,
+            active=self.active,
+            shown=self.shown,
+            children=layout_props.get("children", None),
+        )
 
         # Store pending children names for deferred loading
         # (children must be created before they can be added)
@@ -865,10 +890,10 @@ class UIElement(ABC):
 
 @dataclass
 class UIElementInfo:
-    name: str
-    rect: list[int]
-    guiding_line_color: tuple[int, int, int]
-    guiding_lines_on: bool
-    active: bool
-    shown: bool
-    children: list[str] | None
+    name: str = ""
+    rect: list[int] = [0, 0, 100, 100]
+    guiding_line_color: tuple[int, int, int] | None = None
+    guiding_lines_on: bool | None = None
+    active: bool | None = None
+    shown: bool = True
+    children: list[str] | None = None

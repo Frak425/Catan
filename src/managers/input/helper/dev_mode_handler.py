@@ -962,12 +962,15 @@ class DevModeHandler:
         if not hasattr(self.input_manager, 'menus'):
             print("No menus found")
             return
-        
-        print(f"\n=== Available Menus ({len(self.input_manager.menus)}) ===")
-        for name, menu in self.input_manager.menus.items():
+        menus = self.input_manager.menus.get(self.game_manager.game_state, {})
+
+        for menu in menus.values():
+            name = menu.name
             status = "OPEN" if menu.shown else "closed"
-            print(f"  {name}: z_index={menu.z_index}, {status}, exclusive_with={menu.exclusive_with}")
-    
+            z = menu.z_index
+            ex = menu.exclusive_with
+            print(f"{name}: z_index={z}, {status}, exclusive_with={ex}")
+
     def _delete_menu(self, command: str) -> None:
         """
         Delete a menu by name. Usage: deletemenu <menu_name>
@@ -998,9 +1001,11 @@ class DevModeHandler:
         if menu_name not in self.input_manager.menus:
             print(f"Menu '{menu_name}' not found")
             return
-        
+
+        menus = self.input_manager.menus.get(self.game_manager.game_state, {})
+
         # Close the menu if it's open
-        if self.input_manager.menus[menu_name].shown:
+        if menus[menu_name].shown:
             self.input_manager.close_menu_by_name(menu_name)
         
         # Remove from menus dict

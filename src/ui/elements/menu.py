@@ -1,3 +1,5 @@
+from dataclasses import field
+
 from attr import dataclass, fields
 import pygame
 from typing import Dict, TYPE_CHECKING
@@ -118,7 +120,13 @@ class Menu(UIElement):
         self.read_layout(layout_props)
 
         for name, value in vars(self.layout).items():
+            if name in {"buttons", "toggles", "sliders", "images", "text_displays", "common_layout", "background_color"}:
+                continue
             setattr(self, name, value)
+
+        raw_background_color = layout_props.get("background_color")
+        if isinstance(raw_background_color, (list, tuple)) and len(raw_background_color) >= 3:
+            self.background_color = tuple(raw_background_color[:3])
         
         # Set initial location AFTER reading layout so init_location has the correct value
         self.location = self.init_location
@@ -129,7 +137,7 @@ class Menu(UIElement):
         if self.backdrop:
             self.menu_surface.blit(pygame.transform.scale(self.backdrop, self.rect.size), (0, 0))
         else:
-            self.menu_surface.fill(self.background_color)
+            self.menu_surface.fill(tuple(self.background_color))
         
         # Add all UI elements to the hierarchy
         self._add_children_to_hierarchy()
@@ -340,7 +348,10 @@ class Menu(UIElement):
         self._read_common_layout(layout_props)
 
         field_names = {f.name for f in fields(MenuInfo)}
-        self.layout = MenuInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        self.layout = MenuInfo(
+            common_layout=self._get_common_layout(),
+            **{k: v for k, v in layout_props.items() if k in field_names}
+        )
         
         #TODO: commented out because, at least for buttons, read_layout is being called twice, delete after testing
         """
@@ -432,17 +443,17 @@ class Menu(UIElement):
 @dataclass
 class MenuInfo:
     common_layout: UIElementInfo
-    background_color: list[int]
-    init_location: list[int]
-    final_location: list[int]
-    anim_length: float
-    tabs: list[str]
-    z_index: int
-    exclusive_with: list[str]
-    modal: bool
-    close_on_state_change: bool
-    buttons: dict[str, dict[str, ButtonInfo]]
-    toggles: dict[str, dict[str, ToggleInfo]]
-    sliders: dict[str, dict[str, SliderInfo]]
-    images: dict[str, dict[str, ImageInfo]]
-    text_displays: dict[str, dict[str, TextDisplayInfo]]
+    background_color: list[int] = field(default_factory=lambda: [255, 100, 255])
+    init_location: list[int] = field(default_factory=lambda: [0, 0])
+    final_location: list[int] = field(default_factory=lambda: [0, 0])
+    anim_length: float = 0
+    tabs: list[str] = field(default_factory=lambda: [])
+    z_index: int = 0
+    exclusive_with: list[str] = field(default_factory=lambda: [])
+    modal: bool = False
+    close_on_state_change: bool = True
+    buttons: dict[str, dict[str, ButtonInfo]] | None = None
+    toggles: dict[str, dict[str, ToggleInfo]] | None = None
+    sliders: dict[str, dict[str, SliderInfo]] | None = None
+    images: dict[str, dict[str, ImageInfo]] | None = None
+    text_displays: dict[str, dict[str, TextDisplayInfo]] | None = None

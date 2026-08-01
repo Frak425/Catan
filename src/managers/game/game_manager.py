@@ -1,6 +1,7 @@
 from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
+import attr
 import pygame
 from typing import Any
 
@@ -219,7 +220,7 @@ class GameManager(BaseManager):
         
         Returns:
             dict: Layout configuration with sections for each game state (home/setup/game)
-                  plus a menus array for all Menu configurations
+                  plus a top-level menus array for backward compatibility.
         """
         # Create base layout structure with empty arrays for all UI element types
         layout = self._create_empty_layout_structure()
@@ -228,9 +229,10 @@ class GameManager(BaseManager):
         layout["home"] = self.save_layout_by_section("home")
         layout["setup"] = self.save_layout_by_section("setup")
         layout["game"] = self.save_layout_by_section("game")
-        
-        # Save all menus at the top level
-        layout["menus"] = [menu.get_layout() for menu in self.input_manager.menus.values()]
+
+        # Save menus on each game-state section and keep a top-level mirror for
+        # older consumers during the transition.
+        layout["menus"] = self.convert_menus_to_list()
 
         return layout
     
@@ -313,10 +315,9 @@ class GameManager(BaseManager):
         section_data["scrollable_areas"] = self.convert_scrollable_areas_to_list(
             self.input_manager.scrollable_areas[section]
         )
-        
-        # Add references to which menus are available in this section
-        if section in ["home", "setup", "game"]:
-            section_data["menus"] = list(self.input_manager.menus.keys())
+
+        # Serialize menus as regular UI elements for this state.
+        section_data["menus"] = self.convert_menus_to_list(section)
 
         # TODO: Implement text_inputs and multi_selects converters
         
@@ -356,7 +357,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing button properties (name, rect, color, etc.)
         """
-        return [asdict(button.get_layout()) for button in buttons.values()]
+        return [attr.asdict(button.get_layout()) for button in buttons.values()]
 
     def convert_images_to_list(self, images: dict[str, Image]) -> list:
         """
@@ -368,7 +369,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing image properties (name, rect, file_path)
         """
-        return [asdict(image.get_layout()) for image in images.values()]
+        return [attr.asdict(image.get_layout()) for image in images.values()]
 
     def convert_sliders_to_list(self, sliders: dict[str, Slider]) -> list:
         """
@@ -380,7 +381,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing slider properties (name, rect, min/max values, colors)
         """
-        return [asdict(slider.get_layout()) for slider in sliders.values()]
+        return [attr.asdict(slider.get_layout()) for slider in sliders.values()]
 
     def convert_toggles_to_list(self, toggles: dict[str, Toggle]) -> list:
         """
@@ -392,7 +393,7 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing toggle properties (name, rect, animation settings)
         """
-        return [asdict(toggle.get_layout()) for toggle in toggles.values()]
+        return [attr.asdict(toggle.get_layout()) for toggle in toggles.values()]
 
     def convert_text_displays_to_list(self, text_displays: dict[str, TextDisplay]) -> list:
         """
@@ -404,11 +405,104 @@ class GameManager(BaseManager):
         Returns:
             list: List of dicts containing text display properties (name, rect, text, colors)
         """
-        return [asdict(text_display.get_layout()) for text_display in text_displays.values()]
+        return [attr.asdict(text_display.get_layout()) for text_display in text_displays.values()]
 
     def convert_scrollable_areas_to_list(self, scrollable_areas: dict) -> list:
         """Convert scrollable area dictionary to list format for JSON serialization."""
-        return [asdict(area.get_layout()) for area in scrollable_areas.values()]
+        return [attr.asdict(area.get_layout()) for area in scrollable_areas.values()]
+    def convert_menus_to_list(self, section: str | None = None) -> list:
+        """
+        Convert Menu objects to serializable dict format.
+
+        If `section` is provided, only serialize menus available to that
+        game-state section. Otherwise, serialize a deduplicated top-level list
+        for backward compatibility.
+        """
+        menus = getattr(self.input_manager, "menus", {})
+
+        if not isinstance(menus, dict):
+            return []
+
+        if section is not None:
+            section_menus = menus.get(section, {})
+            if isinstance(section_menus, dict):
+                return [asdict(menu.get_layout()) for menu in section_menus.values()]
+            return []
+
+        serialized_menus = []
+        seen_names = set()
+
+        for state_name in ["home", "setup", "game"]:
+            state_menus = menus.get(state_name, {})
+            if not isinstance(state_menus, dict):
+                continue
+
+            for menu_name, menu in state_menus.items():
+                if menu_name in seen_names:
+                    continue
+                seen_names.add(menu_name)
+                serialized_menus.append(asdict(menu.get_layout()))
+
+        return serialized_menus
+
+    def _normalize_loaded_layout(self, layout: dict) -> dict:
+        """
+        Normalize layout data loaded from disk.
+
+        Supports both the legacy structure (top-level menus plus state menu
+        name lists) and the newer structure where menus live inside each
+        state section alongside buttons/toggles/sliders/etc.
+        """
+        if not isinstance(layout, dict):
+            return layout
+
+        menus = layout.get("menus", [])
+        if not isinstance(menus, list):
+            menus = []
+
+        menu_lookup = {}
+        for menu in menus:
+            if isinstance(menu, dict):
+                menu_name = menu.get("name")
+                if menu_name:
+                    menu_lookup[menu_name] = menu
+
+        for state in ["home", "setup", "game"]:
+            section = layout.get(state)
+            if not isinstance(section, dict):
+                continue
+
+            section_menus = section.get("menus", [])
+            if isinstance(section_menus, list) and section_menus and all(isinstance(menu, dict) for menu in section_menus):
+                continue
+
+            normalized_menus = []
+            if isinstance(section_menus, list):
+                for menu_ref in section_menus:
+                    if isinstance(menu_ref, dict):
+                        normalized_menus.append(menu_ref)
+                    elif isinstance(menu_ref, str) and menu_ref in menu_lookup:
+                        normalized_menus.append(menu_lookup[menu_ref])
+
+            section["menus"] = normalized_menus
+
+        if not menus:
+            collected = []
+            seen_names = set()
+            for state in ["home", "setup", "game"]:
+                section = layout.get(state)
+                if not isinstance(section, dict):
+                    continue
+                for menu in section.get("menus", []):
+                    if not isinstance(menu, dict):
+                        continue
+                    menu_name = menu.get("name")
+                    if menu_name and menu_name not in seen_names:
+                        seen_names.add(menu_name)
+                        collected.append(menu)
+            layout["menus"] = collected
+
+        return layout
     
     def convert_tiles_to_list(self, tiles: dict) -> list:
         return [asdict(tile.get_layout()) for tile in tiles.values()]
@@ -445,6 +539,9 @@ class GameManager(BaseManager):
             data = self.get_layout() if file == "layout" else self.get_settings()
             with open(CONFIG_PATH, "w") as f:
                 json.dump(data, f, indent=4)
+
+        if file == "layout":
+            data = self._normalize_loaded_layout(data)
 
         # Assign loaded data to the correct attribute
         if file == "layout":

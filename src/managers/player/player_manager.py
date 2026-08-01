@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import random
 
 from src.managers.base_manager import BaseManager
-from src.managers.game.game_manager import GameConfig
 from src.managers.player.player import Player, PlayerInfo
 
 from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
+    from src.managers.game.game_manager import GameConfig
     from src.managers.game.game_manager import GameManager
     from src.managers.input.input_manager import InputManager
     from src.managers.helper.helper_manager import HelperManager

@@ -1,3 +1,5 @@
+from dataclasses import field
+
 from attr import dataclass
 from attrs import fields
 import pygame
@@ -120,7 +122,10 @@ class Image(UIElement):
         Note: Reloads image if surface already exists (for runtime updates).
         """
         field_names = {f.name for f in fields(ImageInfo)}
-        self.layout = ImageInfo(**{k: v for k, v in layout.items() if k in field_names})
+        self.layout = ImageInfo(
+            common_layout=self._get_common_layout(),
+            **{k: v for k, v in layout.items() if k in field_names}
+        )
         if hasattr(self, 'surface'):
             self._rebuild_surface()
 
@@ -128,7 +133,6 @@ class Image(UIElement):
         """Serialize image properties (path and visibility)."""
         layout = ImageInfo(
             common_layout=self._get_common_layout(),
-            _type="Image",
             image_path=self.image_path,
             default_color=[self.default_color[0], self.default_color[1], self.default_color[2]]
         )
@@ -142,6 +146,5 @@ class Image(UIElement):
 @dataclass
 class ImageInfo:
     common_layout: UIElementInfo
-    _type: str
-    image_path: str
-    default_color: list[int]
+    image_path: str = ""
+    default_color: list[int] = field(default_factory=lambda: [255, 255, 255])

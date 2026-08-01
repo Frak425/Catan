@@ -1,3 +1,5 @@
+from dataclasses import field
+
 from attr import dataclass
 from attrs import fields
 import pygame
@@ -529,7 +531,10 @@ class ScrollableArea(UIElement):
         self._read_common_layout(layout_props)
 
         field_names = {f.name for f in fields(ScrollableAreaInfo)}
-        self.layout = ScrollableAreaInfo(**{k: v for k, v in layout_props.items() if k in field_names})
+        self.layout = ScrollableAreaInfo(
+            common_layout=self._get_common_layout(),
+            **{k: v for k, v in layout_props.items() if k in field_names}
+        )
         
         # Store pending content elements for deferred loading
         # (elements must be created separately before being added)
@@ -605,12 +610,12 @@ class ScrollableArea(UIElement):
 class ScrollableAreaInfo:
     common_layout: UIElementInfo
     slider_layout: SliderInfo
-    exterior_padding: int
-    interior_padding: int
-    viewable_content_height: int
-    viewable_content_width: int
-    background_color: list[int]
-    content_background_color: list[int]
-    slider_side: str
-    slider_handle_inset: int
-    content_width_percentage: float
+    exterior_padding: int = 5
+    interior_padding: int = 5
+    viewable_content_height: int = 100
+    viewable_content_width: int = 100
+    background_color: list[int] = field(default_factory=lambda: [0, 0, 0, 255])
+    content_background_color: list[int] = field(default_factory=lambda: [200, 200, 200, 255])
+    slider_side: str = "right"
+    slider_handle_inset: int = 5
+    content_width_percentage: float = .90
